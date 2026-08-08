@@ -1,2 +1,37 @@
-import{CertificateCard}from"@/components/Assets";import{PageHead}from"@/components/Shell";import{certificates}from"@/lib/data";
-export default function Page(){return <><PageHead eyebrow="Portafolio ambiental" title="Certificados ESG" description="Explora y verifica las credenciales emitidas por tus compras de material reciclado." action={<button className="btn">Exportar portafolio ↓</button>}/><div className="toolbar"><div className="search"><input placeholder="Buscar por material, fecha o identificador..."/></div><select><option>Todos los materiales</option><option>PET</option><option>ALUMINIO</option></select><select><option>Más recientes</option><option>Mayor impacto</option></select></div><p className="muted" style={{fontSize:12}}>{certificates.length} activos ambientales</p><div className="grid collection-grid">{certificates.map(c=><CertificateCard certificate={c} key={c.id}/>)}</div></>}
+import { CertificateCard } from "@/components/Assets";
+import { PageHead } from "@/components/Shell";
+import { certificates } from "@/lib/data";
+export default function Page() {
+  return (
+    <>
+      <PageHead
+        eyebrow="Portafolio ambiental"
+        title="Certificados ESG"
+        description="Explora y verifica las credenciales emitidas por tus compras de material reciclado."
+        action={<button className="btn">Exportar portafolio ↓</button>}
+      />
+      <div className="toolbar">
+        <div className="search">
+          <input placeholder="Buscar por material, fecha o identificador..." />
+        </div>
+        <select>
+          <option>Todos los materiales</option>
+          <option>PET</option>
+          <option>ALUMINIO</option>
+        </select>
+        <select>
+          <option>Más recientes</option>
+          <option>Mayor impacto</option>
+        </select>
+      </div>
+      <p className="muted" style={{ fontSize: 12 }}>
+        {certificates.length} activos ambientales
+      </p>
+      <div className="grid collection-grid">
+        {certificates.map((c) => (
+          <CertificateCard certificate={c} key={c.id} />
+        ))}
+      </div>
+    </>
+  );
+}

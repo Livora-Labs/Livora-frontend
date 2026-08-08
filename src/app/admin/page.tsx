@@ -1,2 +1,162 @@
-import Link from"next/link";import{Kpi,PageHead,Status}from"@/components/Shell";import{batches,date,inventory,kg,kycApplications}from"@/lib/data";
-export default function AdminHome(){return <><PageHead eyebrow="Vista general" title="Buenos días, Lucía" description="Este es el pulso de la cadena de reciclaje hoy, 8 de agosto." action={<button className="btn">Descargar reporte ↓</button>}/><div className="grid kpis"><Kpi label="MATERIAL RECUPERADO" value="12,480 kg" trend="↑ 12.4% vs. mes anterior"/><Kpi label="LOTES TRAZADOS" value="284" trend="↑ 18 nuevos este mes" accent="var(--blue)"/><Kpi label="RECICLADORES ACTIVOS" value="156" trend="↑ 8 incorporados" accent="var(--amber)"/><Kpi label="CERTIFICADOS ESG" value="47" trend="1,976 kg CO₂ evitado"/></div><div className="grid split"><section className="card"><div className="section-title"><h2>Material recuperado</h2><span className="muted" style={{fontSize:11}}>Últimos 6 meses</span></div><div className="bar-chart">{[{m:"Mar",v:35},{m:"Abr",v:48},{m:"May",v:44},{m:"Jun",v:63},{m:"Jul",v:76},{m:"Ago",v:91}].map(x=><div className="bar-col" key={x.m}><div className="bar" style={{height:`${x.v}%`}}/><span>{x.m}</span></div>)}</div></section><section className="card"><div className="section-title"><h2>Por material</h2></div><div className="donut"/><div className="legend"><span><i className="dot" style={{background:"var(--green)"}}/>PET 48%</span><span><i className="dot" style={{background:"var(--blue)"}}/>Papel 24%</span><span><i className="dot" style={{background:"var(--amber)"}}/>HDPE 16%</span><span><i className="dot" style={{background:"#9b7bff"}}/>Otros 12%</span></div></section></div><div className="grid split"><section className="card"><div className="section-title"><h2>Actividad reciente</h2><Link href="/admin/batches">Ver lotes →</Link></div><div className="table-wrap"><table className="table"><thead><tr><th>LOTE</th><th>CENTRO</th><th>PESO</th><th>ESTADO</th><th>FECHA</th></tr></thead><tbody>{batches.slice(0,3).map(b=><tr key={b.id}><td className="mono">#{b.id.slice(0,8)}</td><td>{b.destinationCenter?.email.split("@")[0]}</td><td>{kg(Object.values(b.materialsActual||{}).reduce((a,c)=>a+c,0))}</td><td><Status value={b.status}/></td><td>{date(b.updatedAt)}</td></tr>)}</tbody></table></div></section><aside><div className="card" style={{marginBottom:16}}><div className="section-title"><h2>Requiere atención</h2><span className="status PENDING">3</span></div><div className="alert">! {kycApplications.filter(x=>x.status==="PENDING").length} solicitudes KYC por revisar</div><div className="alert">! {inventory.filter(x=>x.quantityKg<100).length} material con stock bajo</div></div><div className="card"><div className="section-title"><h2>Red blockchain</h2><span className="live">Estable</span></div><div className="data-row"><span>Red</span><strong>Arbitrum Sepolia</strong></div><div className="data-row"><span>Latencia</span><strong>45 ms</strong></div><div className="data-row"><span>Último bloque</span><strong className="mono">12,894,501</strong></div></div></aside></div></>}
+import Link from "next/link";
+import { CopyValue } from "@/components/CopyValue";
+import { Kpi, PageHead, Status } from "@/components/Shell";
+import { batches, date, inventory, kg, kycApplications } from "@/lib/data";
+export default function AdminHome() {
+  return (
+    <>
+      <PageHead
+        eyebrow="Vista general"
+        title="Buenos días, Lucía"
+        description="Este es el pulso de la cadena de reciclaje hoy, 8 de agosto."
+        action={<button className="btn">Descargar reporte ↓</button>}
+      />
+      <div className="grid kpis">
+        <Kpi
+          label="MATERIAL RECUPERADO"
+          value="12,480 kg"
+          trend="↑ 12.4% vs. mes anterior"
+        />
+        <Kpi
+          label="LOTES TRAZADOS"
+          value="284"
+          trend="↑ 18 nuevos este mes"
+          accent="var(--blue)"
+        />
+        <Kpi
+          label="RECICLADORES ACTIVOS"
+          value="156"
+          trend="↑ 8 incorporados"
+          accent="var(--amber)"
+        />
+        <Kpi label="CERTIFICADOS ESG" value="47" trend="1,976 kg CO₂ evitado" />
+      </div>
+      <div className="grid split">
+        <section className="card">
+          <div className="section-title">
+            <h2>Material recuperado</h2>
+            <span className="muted" style={{ fontSize: 11 }}>
+              Últimos 6 meses
+            </span>
+          </div>
+          <div className="bar-chart">
+            {[
+              { m: "Mar", v: 35 },
+              { m: "Abr", v: 48 },
+              { m: "May", v: 44 },
+              { m: "Jun", v: 63 },
+              { m: "Jul", v: 76 },
+              { m: "Ago", v: 91 },
+            ].map((x) => (
+              <div className="bar-col" key={x.m}>
+                <div className="bar" style={{ height: `${x.v}%` }} />
+                <span>{x.m}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="card">
+          <div className="section-title">
+            <h2>Por material</h2>
+          </div>
+          <div className="donut" />
+          <div className="legend">
+            <span>
+              <i className="dot" style={{ background: "var(--green)" }} />
+              PET 48%
+            </span>
+            <span>
+              <i className="dot" style={{ background: "var(--blue)" }} />
+              Papel 24%
+            </span>
+            <span>
+              <i className="dot" style={{ background: "var(--amber)" }} />
+              HDPE 16%
+            </span>
+            <span>
+              <i className="dot" style={{ background: "#9b7bff" }} />
+              Otros 12%
+            </span>
+          </div>
+        </section>
+      </div>
+      <div className="grid split">
+        <section className="card">
+          <div className="section-title">
+            <h2>Actividad reciente</h2>
+            <Link href="/admin/batches">Ver lotes →</Link>
+          </div>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>LOTE</th>
+                  <th>CENTRO</th>
+                  <th>PESO</th>
+                  <th>ESTADO</th>
+                  <th>FECHA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {batches.slice(0, 3).map((b) => (
+                  <tr key={b.id}>
+                    <td>
+                      <CopyValue value={b.id} prefix="#" />
+                    </td>
+                    <td>{b.destinationCenter?.email.split("@")[0]}</td>
+                    <td>
+                      {kg(
+                        Object.values(b.materialsActual || {}).reduce(
+                          (a, c) => a + c,
+                          0,
+                        ),
+                      )}
+                    </td>
+                    <td>
+                      <Status value={b.status} />
+                    </td>
+                    <td>{date(b.updatedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <aside>
+          <div className="card" style={{ marginBottom: 16 }}>
+            <div className="section-title">
+              <h2>Requiere atención</h2>
+              <span className="status PENDING">3</span>
+            </div>
+            <div className="alert">
+              ! {kycApplications.filter((x) => x.status === "PENDING").length}{" "}
+              solicitudes KYC por revisar
+            </div>
+            <div className="alert">
+              ! {inventory.filter((x) => x.quantityKg < 100).length} material
+              con stock bajo
+            </div>
+          </div>
+          <div className="card">
+            <div className="section-title">
+              <h2>Red blockchain</h2>
+              <span className="live">Estable</span>
+            </div>
+            <div className="data-row">
+              <span>Red</span>
+              <strong>Arbitrum Sepolia</strong>
+            </div>
+            <div className="data-row">
+              <span>Latencia</span>
+              <strong>45 ms</strong>
+            </div>
+            <div className="data-row">
+              <span>Último bloque</span>
+              <strong className="mono">12,894,501</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}

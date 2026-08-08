@@ -1,2 +1,121 @@
-import Link from"next/link";import{Kpi,PageHead,Status}from"@/components/Shell";import{certificates,date,kg,monthlyImpact,sales}from"@/lib/data";
-export default function Page(){return <><PageHead eyebrow="Resumen corporativo" title="Tu impacto, respaldado por datos" description="Resultados ambientales acumulados de Coca-Cola Perú en la red Livora." action={<button className="btn primary">Descargar reporte ESG ↓</button>}/><div className="grid kpis"><Kpi label="MATERIAL RECUPERADO" value="890.5 kg" trend="↑ 170 kg este mes"/><Kpi label="CO₂ EVITADO" value="2,226 kg" trend="Equivale a 9,200 km" accent="var(--blue)"/><Kpi label="AGUA AHORRADA" value="8,905 L" trend="Impacto acumulado" accent="var(--blue)"/><Kpi label="CERTIFICADOS ACTIVOS" value={String(certificates.length)} trend="100% verificables"/></div><div className="grid split"><section className="card"><div className="section-title"><h2>Evolución del material recuperado</h2><span className="muted">kg por mes</span></div><div className="bar-chart">{monthlyImpact.map(x=><div className="bar-col" key={x.month}><div className="bar" style={{height:`${x.kg/10}%`}}/><span>{x.month}</span></div>)}</div></section><aside className="card"><span className="eyebrow">Meta anual 2026</span><div className="kpi-value">8.9 / 12 t</div><div className="progress" style={{height:10}}><i style={{width:"74%"}}/></div><p className="muted" style={{fontSize:12,lineHeight:1.5}}>Faltan 3.1 toneladas para alcanzar la meta anual de recuperación.</p><div className="data-row"><span>Avance</span><strong style={{color:"var(--green)"}}>74%</strong></div><div className="data-row"><span>Proyección</span><strong>13.4 t</strong></div></aside></div><div className="grid split"><section className="card"><div className="section-title"><h2>Certificados recientes</h2><Link href="/company/certificates">Explorar todos →</Link></div>{certificates.slice(0,3).map(c=><Link className="network-row" href={`/company/certificates/${c.id}`} key={c.id}><div><strong>{c.esgImpact.recycledMaterial} · {kg(c.esgImpact.recycledKg)}</strong><div className="muted" style={{fontSize:11,marginTop:5}}>Emitido {date(c.createdAt)} · #{c.id.slice(0,8)}</div></div><Status value={c.status}/></Link>)}</section><aside className="card"><div className="section-title"><h2>Última compra</h2><Link href="/company/purchases">Ver historial →</Link></div><span className="eyebrow">{sales[0].materialType}</span><div className="kpi-value">{kg(sales[0].weightKg)}</div><p className="muted" style={{fontSize:12}}>{sales[0].center.email}</p><div className="data-row"><span>Estado</span><span style={{color:"var(--green)"}}>✓ Certificada</span></div><div className="data-row"><span>Fecha</span><strong>{date(sales[0].createdAt)}</strong></div></aside></div></>}
+import Link from "next/link";
+import { CopyValue } from "@/components/CopyValue";
+import { Kpi, PageHead, Status } from "@/components/Shell";
+import { certificates, date, kg, monthlyImpact, sales } from "@/lib/data";
+export default function Page() {
+  return (
+    <>
+      <PageHead
+        eyebrow="Resumen corporativo"
+        title="Tu impacto, respaldado por datos"
+        description="Resultados ambientales acumulados de Coca-Cola Perú en la red Livora."
+        action={
+          <button className="btn primary">Descargar reporte ESG ↓</button>
+        }
+      />
+      <div className="grid kpis">
+        <Kpi
+          label="MATERIAL RECUPERADO"
+          value="890.5 kg"
+          trend="↑ 170 kg este mes"
+        />
+        <Kpi
+          label="CO₂ EVITADO"
+          value="2,226 kg"
+          trend="Equivale a 9,200 km"
+          accent="var(--blue)"
+        />
+        <Kpi
+          label="AGUA AHORRADA"
+          value="8,905 L"
+          trend="Impacto acumulado"
+          accent="var(--blue)"
+        />
+        <Kpi
+          label="CERTIFICADOS ACTIVOS"
+          value={String(certificates.length)}
+          trend="100% verificables"
+        />
+      </div>
+      <div className="grid split">
+        <section className="card">
+          <div className="section-title">
+            <h2>Evolución del material recuperado</h2>
+            <span className="muted">kg por mes</span>
+          </div>
+          <div className="bar-chart">
+            {monthlyImpact.map((x) => (
+              <div className="bar-col" key={x.month}>
+                <div className="bar" style={{ height: `${x.kg / 10}%` }} />
+                <span>{x.month}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+        <aside className="card">
+          <span className="eyebrow">Meta anual 2026</span>
+          <div className="kpi-value">8.9 / 12 t</div>
+          <div className="progress" style={{ height: 10 }}>
+            <i style={{ width: "74%" }} />
+          </div>
+          <p className="muted" style={{ fontSize: 12, lineHeight: 1.5 }}>
+            Faltan 3.1 toneladas para alcanzar la meta anual de recuperación.
+          </p>
+          <div className="data-row">
+            <span>Avance</span>
+            <strong style={{ color: "var(--green)" }}>74%</strong>
+          </div>
+          <div className="data-row">
+            <span>Proyección</span>
+            <strong>13.4 t</strong>
+          </div>
+        </aside>
+      </div>
+      <div className="grid split">
+        <section className="card">
+          <div className="section-title">
+            <h2>Certificados recientes</h2>
+            <Link href="/company/certificates">Explorar todos →</Link>
+          </div>
+          {certificates.slice(0, 3).map((c) => (
+            <Link
+              className="network-row"
+              href={`/company/certificates/${c.id}`}
+              key={c.id}
+            >
+              <div>
+                <strong>
+                  {c.esgImpact.recycledMaterial} · {kg(c.esgImpact.recycledKg)}
+                </strong>
+                <div className="muted" style={{ fontSize: 11, marginTop: 5 }}>
+                  Emitido {date(c.createdAt)} ·{" "}
+                  <CopyValue value={c.id} prefix="#" />
+                </div>
+              </div>
+              <Status value={c.status} />
+            </Link>
+          ))}
+        </section>
+        <aside className="card">
+          <div className="section-title">
+            <h2>Última compra</h2>
+            <Link href="/company/purchases">Ver historial →</Link>
+          </div>
+          <span className="eyebrow">{sales[0].materialType}</span>
+          <div className="kpi-value">{kg(sales[0].weightKg)}</div>
+          <p className="muted" style={{ fontSize: 12 }}>
+            {sales[0].center.email}
+          </p>
+          <div className="data-row">
+            <span>Estado</span>
+            <span style={{ color: "var(--green)" }}>✓ Certificada</span>
+          </div>
+          <div className="data-row">
+            <span>Fecha</span>
+            <strong>{date(sales[0].createdAt)}</strong>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
