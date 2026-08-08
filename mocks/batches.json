@@ -1,0 +1,22 @@
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "status": "RECEIVED",
+    "collector": { "id": "u1", "email": "collector1@example.com" },
+    "destinationCenter": { "id": "c1", "email": "center1@example.com" },
+    "requests": [
+      {
+        "id": "r1",
+        "householdId": "h1",
+        "photoUrl": "https://via.placeholder.com/400x300.png?text=photo1",
+        "latitude": -12.0464,
+        "longitude": -77.0428
+      }
+    ],
+    "materialsActual": { "PLASTIC": 120.5, "PAPER": 50 },
+    "createdAt": "2026-07-01T12:00:00.000Z",
+    "updatedAt": "2026-07-02T12:00:00.000Z",
+    "ipfsCid": "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+    "txHash": "0xmocktxhash1234"
+  }
+]
