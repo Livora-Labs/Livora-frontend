@@ -1,31 +1,30 @@
-export type Role = "ADMIN" | "EMPRESA_B2B";
-export type BatchStatus =
-  "OPEN" | "IN_TRANSIT" | "PROCESSING" | "RECEIVED" | "CONSOLIDATED";
+export type Role = "HOGAR" | "RECOLECTOR" | "CENTRO_ACOPIO" | "TIENDA" | "EMPRESA_B2B" | "ADMIN" | "ALMACEN";
+export type BatchStatus = "OPEN" | "IN_TRANSIT" | "PROCESSING" | "RECEIVED" | "CONSOLIDATED";
 export type CertificateStatus = "ACTIVE" | "REVOKED";
 
 export interface User {
   id: string;
   email: string;
-  role:
-    | "HOGAR"
-    | "RECOLECTOR"
-    | "CENTRO_ACOPIO"
-    | "EMPRESA_B2B"
-    | "ALMACEN"
-    | "ADMIN";
+  role: Role;
   walletAddress?: string;
+  receptionPin?: string;
 }
+
 export interface CollectionRequest {
   id: string;
-  status: "PENDING" | "ACCEPTED" | "COMPLETED" | "CANCELLED";
+  status: "PENDING" | "ACCEPTED" | "COLLECTED" | "COMPLETED" | "CANCELLED";
   itemsEstimated: Record<string, number>;
   photoUrl?: string;
   description?: string;
+  verificationPin?: string;
   latitude: number;
   longitude: number;
   householdId: string;
+  collectorId?: string;
   createdAt: string;
+  household?: { id: string; email: string };
 }
+
 export interface Batch {
   id: string;
   status: BatchStatus;
@@ -33,18 +32,17 @@ export interface Batch {
   destinationCenterId?: string;
   materialsActual?: Record<string, number>;
   consolidatedBatchId?: string;
+  ipfsCid?: string;
+  txHash?: string;
   createdAt: string;
   updatedAt: string;
   collector: Pick<User, "id" | "email">;
   destinationCenter?: Pick<User, "id" | "email">;
   requests: CollectionRequest[];
-  trace?: {
-    ipfsCid: string;
-    txHash: string;
-    jobId: string;
-    processedAt: string;
-  };
+  /** Legacy local-only field kept for backward compat with WebSocket patching */
+  trace?: { ipfsCid: string; txHash: string; jobId: string; processedAt: string };
 }
+
 export interface ConsolidatedBatch {
   id: string;
   centerId: string;
@@ -53,6 +51,36 @@ export interface ConsolidatedBatch {
   createdAt: string;
   batchIds: string[];
 }
+
+export interface StoreProfile {
+  id: string;
+  userId: string;
+  businessName: string;
+  ruc: string;
+  address: string;
+  bankAccount: string;
+  balanceEcoTokens?: number;
+  createdAt: string;
+}
+
+export interface QrRedemption {
+  qrCodeRef: string;
+  amountEcoTokens: number;
+  storeId: string;
+  status: "PENDING" | "COMPLETED" | "EXPIRED";
+  expiresAt: string;
+}
+
+export interface SettlementRequest {
+  id: string;
+  storeId: string;
+  tokenAmount: number;
+  fiatAmount: number;
+  status: "PENDING" | "PAID" | "REJECTED";
+  bankAccount: string;
+  createdAt: string;
+}
+
 export interface Sale {
   id: string;
   weightKg: number;
@@ -64,6 +92,7 @@ export interface Sale {
   materialType: string;
   center: Pick<User, "id" | "email">;
 }
+
 export interface Certificate {
   id: string;
   status: CertificateStatus;
@@ -79,6 +108,7 @@ export interface Certificate {
   saleId: string;
   txHash: string;
 }
+
 export interface InventoryItem {
   id: string;
   materialType: string;
@@ -87,6 +117,7 @@ export interface InventoryItem {
   updatedAt: string;
   center: Pick<User, "id" | "email">;
 }
+
 export interface KycApplication {
   id: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
