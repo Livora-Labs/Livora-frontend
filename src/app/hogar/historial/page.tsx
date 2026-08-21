@@ -279,7 +279,7 @@ export default function HogarHistorialPage() {
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Explorador Blockchain</span>
                         <a
-                          href={`https://sepolia.arbiscan.io/tx/${(selectedReq as any).batch?.trace?.txHash}`}
+                          href={`https://stellar.expert/explorer/testnet/tx/${(selectedReq as any).batch?.trace?.txHash}`}
                           target="_blank"
                           rel="noreferrer"
                           style={{
@@ -291,7 +291,7 @@ export default function HogarHistorialPage() {
                             fontWeight: 600,
                           }}
                         >
-                          <span>Arbiscan Sepolia</span>
+                          <span>Stellar Expert</span>
                           <ExternalLink size={12} />
                         </a>
                       </div>

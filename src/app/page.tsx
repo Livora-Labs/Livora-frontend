@@ -29,8 +29,8 @@ export default function LoginPage() {
     try {
       if (isRegister) {
         await register(email.trim(), password, selectedRole);
-        showToast("¡Registro exitoso!", "success", "Ahora puedes iniciar sesión con tus credenciales.");
-        setIsRegister(false);
+        showToast("Código enviado", "success", "Por favor introduce el código OTP enviado a tu correo.");
+        router.push(`/verificar-cuenta?email=${encodeURIComponent(email.trim())}`);
       } else {
         const loggedUser = await login(email.trim(), password);
         showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);

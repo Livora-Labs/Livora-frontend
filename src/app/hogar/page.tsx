@@ -880,7 +880,7 @@ export default function HogarPage() {
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <span>Explorador Blockchain</span>
                                 <a
-                                  href={`https://sepolia.arbiscan.io/tx/${txHash}`}
+                                  href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   style={{
@@ -892,7 +892,7 @@ export default function HogarPage() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  <span>Arbiscan Sepolia</span>
+                                  <span>Stellar Expert</span>
                                   <ArrowUpRight size={12} />
                                 </a>
                               </div>

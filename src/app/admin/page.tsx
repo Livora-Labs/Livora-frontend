@@ -105,7 +105,7 @@ export default function AdminPage() {
                   <th>CENTRO</th>
                   <th>MATERIALES</th>
                   <th>IPFS</th>
-                  <th>ARBITRUM TX</th>
+                  <th>STELLAR TX</th>
                   <th>ESTADO</th>
                   <th>DETALLE</th>
                 </tr>
@@ -113,7 +113,7 @@ export default function AdminPage() {
               <tbody>
                 {receivedBatches.map((b: any) => {
                   const ipfsUrl = b.ipfsCid ? ipfsLink(b.ipfsCid) : null;
-                  const arbiscanUrl = b.txHash ? `https://sepolia.arbiscan.io/tx/${b.txHash}` : null;
+                  const stellarExplorerUrl = b.txHash ? `https://stellar.expert/explorer/testnet/tx/${b.txHash}` : null;
                   const totalBatchKg = Object.values(b.materialsActual || {}).reduce((s: number, v: any) => s + Number(v), 0);
 
                   return (
@@ -146,8 +146,8 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td>
-                        {arbiscanUrl ? (
-                          <a href={arbiscanUrl} target="_blank" rel="noreferrer"
+                        {stellarExplorerUrl ? (
+                          <a href={stellarExplorerUrl} target="_blank" rel="noreferrer"
                             style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#3B82F6", fontSize: 11, fontFamily: "monospace", textDecoration: "none" }}
                             title={b.txHash}>
                             {b.txHash.slice(0, 12)}...
@@ -311,19 +311,19 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Arbitrum */}
+              {/* Stellar */}
               <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
                 <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-                  ⬡ ARBITRUM SEPOLIA — TX HASH
+                  ⬡ STELLAR TESTNET — TX HASH
                 </div>
                 {selectedBatch.txHash ? (
                   <>
                     <div style={{ fontFamily: "monospace", fontSize: 11, color: "#3B82F6", wordBreak: "break-all", marginBottom: 10 }}>
                       {selectedBatch.txHash}
                     </div>
-                    <a href={`https://sepolia.arbiscan.io/tx/${selectedBatch.txHash}`} target="_blank" rel="noreferrer"
+                    <a href={`https://stellar.expert/explorer/testnet/tx/${selectedBatch.txHash}`} target="_blank" rel="noreferrer"
                       className="btn" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, padding: "8px 14px", background: "rgba(59,130,246,0.1)", border: "1px solid #3B82F6", color: "#3B82F6", borderRadius: 8, textDecoration: "none" }}>
-                      <ExternalLink size={12} /> Ver en Arbiscan Sepolia
+                      <ExternalLink size={12} /> Ver en Stellar Expert
                     </a>
                   </>
                 ) : (

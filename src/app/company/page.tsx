@@ -335,15 +335,15 @@ export default function B2bCompanyPage() {
                 )}
               </div>
 
-              {/* Arbitrum — los certificados ESG no tienen txHash propio, pero se puede navegar */}
+              {/* Stellar — los certificados ESG no tienen txHash propio, pero se puede navegar */}
               <div style={{ background: "#0A192F", borderRadius: 12, padding: 14 }}>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8 }}>⬡ RED ARBITRUM SEPOLIA</div>
+                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8 }}>⬡ RED STELLAR TESTNET</div>
                 <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 10 }}>
-                  Este certificado está anclado en la red Arbitrum Sepolia. Puedes verificar la actividad del contrato o buscar el hash en el explorador.
+                  Este certificado está anclado en la red Stellar Testnet. Puedes verificar la actividad del contrato o buscar el hash en el explorador.
                 </div>
-                <a href="https://sepolia.arbiscan.io/" target="_blank" rel="noreferrer"
+                <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noreferrer"
                   className="btn" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, padding: "8px 14px", background: "rgba(59,130,246,0.1)", border: "1px solid #3B82F6", color: "#3B82F6", borderRadius: 8, textDecoration: "none" }}>
-                  <ExternalLink size={12} /> Abrir Arbiscan Sepolia
+                  <ExternalLink size={12} /> Abrir Stellar Expert
                 </a>
               </div>
             </div>

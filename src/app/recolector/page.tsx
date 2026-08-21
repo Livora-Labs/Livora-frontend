@@ -928,14 +928,14 @@ export default function RecolectorPage() {
                         )}
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>Transacción Arbitrum</span>
+                        <span>Transacción Stellar</span>
                         <a
-                          href={`https://sepolia.arbiscan.io/tx/${selectedBatch.txHash}`}
+                          href={`https://stellar.expert/explorer/testnet/tx/${selectedBatch.txHash}`}
                           target="_blank"
                           rel="noreferrer"
                           style={{ color: "#10B981", display: "inline-flex", alignItems: "center", gap: 4, textDecoration: "underline", fontWeight: 600 }}
                         >
-                          <span>Ver en Arbiscan</span>
+                          <span>Ver en Stellar Expert</span>
                           <ArrowUpRight size={12} />
                         </a>
                       </div>

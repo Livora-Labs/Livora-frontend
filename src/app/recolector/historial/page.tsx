@@ -306,9 +306,9 @@ export default function RecolectorHistorialPage() {
                         </span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>Transacción Arbitrum</span>
+                        <span>Transacción Stellar</span>
                         <a
-                          href={`https://sepolia.arbiscan.io/tx/${selectedBatch.trace.txHash}`}
+                          href={`https://stellar.expert/explorer/testnet/tx/${selectedBatch.trace.txHash}`}
                           target="_blank"
                           rel="noreferrer"
                           style={{
@@ -320,7 +320,7 @@ export default function RecolectorHistorialPage() {
                             fontWeight: 600,
                           }}
                         >
-                          <span>Ver en Arbiscan</span>
+                          <span>Ver en Stellar Expert</span>
                           <ExternalLink size={12} />
                         </a>
                       </div>

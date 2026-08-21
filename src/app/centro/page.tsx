@@ -7,7 +7,8 @@ import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { receiveBatch, fetchReceptionPin, refreshReceptionPin, fetchIncomingBatches, fetchProcessingBatches, fetchReceivedBatches, fetchInventory, fetchB2bCompanies, createB2bTransfer } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { Batch } from "@/lib/types";
-import { Scale, Truck, Cpu, RefreshCw, Factory, ShieldCheck, ArrowUpRight, ListFilter, Eye, Plus, Trash2, Package, ExternalLink, Users, Clock, Hash } from "lucide-react";
+import { Scale, Truck, Cpu, RefreshCw, Factory, ShieldCheck, ArrowUpRight, ListFilter, Eye, Plus, Trash2, Package, ExternalLink, Users, Clock, Hash, Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 interface MaterialLine { material: string; weightKg: number; }
 
@@ -20,7 +21,7 @@ function ipfsLink(cid: string): string {
 }
 
 export default function CentroAcopioPage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [transitBatches, setTransitBatches] = useState<Batch[]>([]);
   const [processingBatches, setProcessingBatches] = useState<Batch[]>([]);
@@ -210,6 +211,10 @@ export default function CentroAcopioPage() {
         description="Pesa los materiales recibidos por los recolectores y liquida las transacciones en blockchain."
         action={
           <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={() => window.print()} className="btn" style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(59, 130, 246, 0.1)", border: "1px solid #3B82F6", color: "#3B82F6" }}>
+              <Printer size={14} />
+              <span>Imprimir QR del Centro</span>
+            </button>
             <button onClick={handleRefreshPin} disabled={refreshingPin} className="btn" style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16, 185, 129, 0.1)", border: "1px solid #10B981", color: "#10B981" }}>
               <RefreshCw size={14} />
               <span>PIN Báscula: {pin || "..."}</span>
@@ -481,7 +486,7 @@ export default function CentroAcopioPage() {
                           <div>
                             <div style={{ fontSize: 10, color: "#64748B", marginBottom: 2 }}>TX HASH</div>
                             <a
-                              href={`https://sepolia.arbiscan.io/tx/${b.txHash}`}
+                              href={`https://stellar.expert/explorer/testnet/tx/${b.txHash}`}
                               target="_blank"
                               rel="noreferrer"
                               style={{ fontFamily: "monospace", fontSize: 11, color: "#3B82F6", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, wordBreak: "break-all" }}
@@ -495,13 +500,13 @@ export default function CentroAcopioPage() {
                         )}
                         {hasTx && (
                           <a
-                            href={`https://sepolia.arbiscan.io/tx/${b.txHash}`}
+                            href={`https://stellar.expert/explorer/testnet/tx/${b.txHash}`}
                             target="_blank"
                             rel="noreferrer"
                             className="btn"
                             style={{ fontSize: 11, padding: "6px 10px", display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(59,130,246,0.1)", border: "1px solid #3B82F6", color: "#3B82F6", borderRadius: 8, textDecoration: "none" }}
                           >
-                            <ExternalLink size={11} /> Ver en Arbiscan
+                            <ExternalLink size={11} /> Ver en Stellar Expert
                           </a>
                         )}
                       </div>
@@ -728,9 +733,9 @@ export default function CentroAcopioPage() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
                         <strong style={{ color: "#10B981" }}>+{Number(weight).toFixed(1)} kg</strong>
                         {b.txHash && (
-                          <a href={`https://sepolia.arbiscan.io/tx/${b.txHash}`} target="_blank" rel="noreferrer"
+                          <a href={`https://stellar.expert/explorer/testnet/tx/${b.txHash}`} target="_blank" rel="noreferrer"
                             style={{ fontSize: 10, color: "#3B82F6", display: "inline-flex", alignItems: "center", gap: 2 }}>
-                            <span>Arbitrum</span><ArrowUpRight size={10} />
+                            <span>Stellar</span><ArrowUpRight size={10} />
                           </a>
                         )}
                       </div>
@@ -805,11 +810,11 @@ export default function CentroAcopioPage() {
               )}
               {selectedBatchDetail.txHash && (
                 <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
-                  <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700, marginBottom: 8 }}>TX HASH ARBITRUM</div>
+                  <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700, marginBottom: 8 }}>TX HASH STELLAR</div>
                   <div style={{ fontFamily: "monospace", fontSize: 11, color: "#3B82F6", wordBreak: "break-all", marginBottom: 8 }}>{selectedBatchDetail.txHash}</div>
-                  <a href={`https://sepolia.arbiscan.io/tx/${selectedBatchDetail.txHash}`} target="_blank" rel="noreferrer"
+                  <a href={`https://stellar.expert/explorer/testnet/tx/${selectedBatchDetail.txHash}`} target="_blank" rel="noreferrer"
                     className="btn" style={{ fontSize: 12, padding: "8px 14px", display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(59,130,246,0.1)", border: "1px solid #3B82F6", color: "#3B82F6", borderRadius: 8, textDecoration: "none" }}>
-                    <ExternalLink size={12} /> Ver en Arbiscan Sepolia
+                    <ExternalLink size={12} /> Ver en Stellar Expert
                   </a>
                 </div>
               )}
@@ -825,6 +830,49 @@ export default function CentroAcopioPage() {
           </div>
         </div>
       )}
+      {/* Printable QR Section (hidden on screen, visible on print) */}
+      <div className="printable-qr-code hidden print:flex fixed inset-0 bg-white text-black z-[99999] flex-col items-center justify-center text-center p-12">
+        <div className="border-4 border-[#2E7D32] p-8 rounded-3xl max-w-sm mx-auto flex flex-col items-center">
+          <div className="text-3xl font-extrabold text-[#2E7D32] mb-2 flex items-center gap-2">
+            <span>♻️</span>
+            <span>LIBORA</span>
+          </div>
+          <p className="text-gray-600 text-xs mb-6 font-semibold tracking-wide">CENTRO DE ACOPIO OFICIAL</p>
+          
+          <div className="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-md mb-6 flex justify-center">
+            {user?.id && (
+              <QRCodeSVG
+                value={user.id}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            )}
+          </div>
+
+          <h2 className="text-lg font-bold text-gray-900 mb-1">{user?.email?.split('@')[0]?.toUpperCase() || "CENTRO DE ACOPIO"}</h2>
+          <p className="text-xs text-gray-500 font-mono select-all bg-gray-100 px-3 py-1 rounded-md mb-4">{user?.id || "UUID"}</p>
+          
+          <div className="text-[10px] text-gray-400 max-w-xs leading-relaxed">
+            Escanea este código QR desde la aplicación móvil de recolectores para registrar y asociar la entrega de tus lotes.
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          #__next, main, header, nav, footer, .no-print, div:not(.printable-qr-code):not(.printable-qr-code *) {
+            display: none !important;
+          }
+          .printable-qr-code {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </Shell>
   );
 }

@@ -13,6 +13,8 @@ interface AuthContextType {
   receptionPin: string;
   login: (email: string, password: string) => Promise<User>;
   register: (email: string, password: string, selectedRole: Role) => Promise<void>;
+  verifyEmail: (email: string, code: string) => Promise<User>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => void;
   refreshBalance: () => Promise<void>;
   updateReceptionPin: (pin: string) => void;
@@ -95,6 +97,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const verifyEmail = async (email: string, code: string): Promise<User> => {
+    const res = await api.post("/auth/verify-email", { email, code });
+    if (res.data && res.data.accessToken) {
+      const authToken = res.data.accessToken;
+      const loggedUser: User = {
+        id: res.data.user.id,
+        email: res.data.user.email,
+        role: res.data.user.role,
+        walletAddress: res.data.user.walletAddress,
+        receptionPin: res.data.user.receptionPin,
+      };
+
+      setToken(authToken);
+      setUser(loggedUser);
+      setRole(loggedUser.role);
+      if (loggedUser.receptionPin) {
+        setReceptionPin(loggedUser.receptionPin);
+      }
+
+      localStorage.setItem("livora_token", authToken);
+      localStorage.setItem("livora_role", loggedUser.role);
+      localStorage.setItem("livora_user", JSON.stringify(loggedUser));
+
+      getSocket(authToken);
+      await refreshBalance();
+      return loggedUser;
+    }
+    throw new Error("No se pudo verificar el correo");
+  };
+
+  const resendOtp = async (email: string): Promise<void> => {
+    await api.post("/auth/resend-otp", { email });
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -126,6 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         receptionPin,
         login,
         register,
+        verifyEmail,
+        resendOtp,
         logout,
         refreshBalance,
         updateReceptionPin,

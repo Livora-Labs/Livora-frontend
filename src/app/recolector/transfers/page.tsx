@@ -65,7 +65,7 @@ export default function RecolectorTransfersPage() {
       />
 
       <div className="grid kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 24 }}>
-        <Kpi label="SALDO DISPONIBLE" value={`${balance} ECO`} trend="Billetera Arbitrum Sepolia" accent="var(--green)" />
+        <Kpi label="SALDO DISPONIBLE" value={`${balance} ECO`} trend="Billetera Stellar Testnet" accent="var(--green)" />
         <Kpi label="RECOMPENSAS RECIBIDAS" value={`${incomingCount}`} trend="Ingresos por recolección" accent="var(--blue)" />
         <Kpi label="PAGOS REALIZADOS" value={`${outgoingCount}`} trend="Pagos en comercios" accent="var(--amber)" />
       </div>
@@ -92,13 +92,13 @@ export default function RecolectorTransfersPage() {
                   <th>DESTINATARIO / EMISOR</th>
                   <th>CLAVE PÚBLICA</th>
                   <th>CANTIDAD</th>
-                  <th>ARBSCAN TX</th>
+                  <th>STELLAR TX</th>
                   <th>METADATA IPFS</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((t: any) => {
-                  const arbiscanUrl = t.txHash ? `https://sepolia.arbiscan.io/tx/${t.txHash}` : null;
+                  const stellarExplorerUrl = t.txHash ? `https://stellar.expert/explorer/testnet/tx/${t.txHash}` : null;
                   const ipfsUrl = t.ipfsCid ? ipfsLink(t.ipfsCid) : null;
                   const isIncoming = t.direction === "IN";
 
@@ -147,9 +147,9 @@ export default function RecolectorTransfersPage() {
                         </strong>
                       </td>
                       <td>
-                        {arbiscanUrl ? (
+                        {stellarExplorerUrl ? (
                           <a
-                            href={arbiscanUrl}
+                            href={stellarExplorerUrl}
                             target="_blank"
                             rel="noreferrer"
                             style={{
