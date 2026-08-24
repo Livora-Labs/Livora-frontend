@@ -66,7 +66,7 @@ function formatCorrelative(raw: string): string {
   return cleaned;
 }
 
-export default function SeguimientoPage() {
+function SeguimientoPageContent() {
   const searchParams = useSearchParams();
   const [input, setInput] = useState(searchParams.get("n") ?? "");
   const [loading, setLoading] = useState(false);
@@ -480,5 +480,17 @@ export default function SeguimientoPage() {
         <Footer />
       </div>
     </main>
+  );
+}
+
+export default function SeguimientoPage() {
+  return (
+    <React.Suspense fallback={
+      <main style={{ minHeight: "100vh", background: "#060d0b", color: "#eaf4f0", padding: "40px 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "#55e6a5", fontSize: 16, fontFamily: "sans-serif" }}>Cargando consulta...</div>
+      </main>
+    }>
+      <SeguimientoPageContent />
+    </React.Suspense>
   );
 }
