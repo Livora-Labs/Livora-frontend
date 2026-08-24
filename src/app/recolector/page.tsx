@@ -53,6 +53,9 @@ export default function RecolectorPage() {
   const [redemptionDetails, setRedemptionDetails] = useState<any | null>(null);
   const [checkoutStep, setCheckoutStep] = useState<"INPUT" | "CONFIRM">("INPUT");
   const [qrMethod, setQrMethod] = useState<"CAMERA" | "MANUAL">("MANUAL");
+  const [checkoutTermsAccepted, setCheckoutTermsAccepted] = useState(false);
+  const [donationOptIn, setDonationOptIn] = useState(false);
+  const [insuranceOptIn, setInsuranceOptIn] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -103,16 +106,24 @@ export default function RecolectorPage() {
 
   const handleConfirmStorePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!qrRefInput.trim()) return;
+    if (!qrRefInput.trim() || !redemptionDetails || !checkoutTermsAccepted) return;
 
     setConfirmingQr(true);
     try {
-      await confirmRedemption(qrRefInput.trim());
-      showToast("¡Pago en Tienda Confirmado!", "success", `Has pagado ${redemptionDetails?.tokenAmount} EcoTokens a ${redemptionDetails?.businessName}.`);
+      const paidAmount = (redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0);
+      await confirmRedemption(qrRefInput.trim(), {
+        termsAccepted: checkoutTermsAccepted,
+        donationOptIn,
+        insuranceOptIn,
+      });
+      showToast("¡Pago en Tienda Confirmado!", "success", `Has pagado ${paidAmount.toFixed(2)} EcoTokens a ${redemptionDetails?.businessName}.`);
       setIsQrModalOpen(false);
       setQrRefInput("");
       setRedemptionDetails(null);
       setCheckoutStep("INPUT");
+      setCheckoutTermsAccepted(false);
+      setDonationOptIn(false);
+      setInsuranceOptIn(false);
       refreshBalance();
     } catch (err: any) {
       showToast("Error en Canje QR", "error", err.response?.data?.message || err.message);
@@ -1170,9 +1181,39 @@ export default function RecolectorPage() {
                     </h4>
                   </div>
 
+                  {/* DESGLOSE DE COSTOS */}
+                  <div style={{ display: "grid", gap: 6, fontSize: 12, borderBottom: "1px solid #1E293B", paddingBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Precio Base Canje:</span>
+                      <span style={{ color: "#F8FAFC" }}>{((redemptionDetails?.tokenAmount || 0) * 0.8475).toFixed(2)} ECO</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Impuestos (IGV 18%):</span>
+                      <span style={{ color: "#F8FAFC" }}>{((redemptionDetails?.tokenAmount || 0) * 0.1525).toFixed(2)} ECO</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Costo de Despacho/Envío:</span>
+                      <span style={{ color: "#F8FAFC" }}>0.00 ECO</span>
+                    </div>
+                    {donationOptIn && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#94A3B8" }}>Donación Ecológica:</span>
+                        <span style={{ color: "#10B981" }}>+1.00 ECO</span>
+                      </div>
+                    )}
+                    {insuranceOptIn && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#94A3B8" }}>Seguro de Envío:</span>
+                        <span style={{ color: "#10B981" }}>+0.50 ECO</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 12, color: "#94A3B8" }}>Monto a Transferir</span>
-                    <strong style={{ fontSize: 18, color: "#10B981" }}>{redemptionDetails?.tokenAmount} ECO</strong>
+                    <span style={{ fontSize: 12, color: "#94A3B8" }}>Monto Total a Transferir</span>
+                    <strong style={{ fontSize: 18, color: "#10B981" }}>
+                      {((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0)).toFixed(2)} ECO
+                    </strong>
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1181,12 +1222,69 @@ export default function RecolectorPage() {
                   </div>
                 </div>
 
+                {/* ANTI-DARK PATTERNS: CARGOS OPCIONALES */}
+                <div style={{ background: "#0A192F", borderRadius: 12, padding: 14, border: "1px solid #1E293B", display: "grid", gap: 10 }}>
+                  <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700 }}>SERVICIOS ADICIONALES (OPCIONALES)</span>
+                  
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={donationOptIn}
+                      onChange={(e) => setDonationOptIn(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                    />
+                    <span>Donación Voluntaria para Proyectos de Reforestación (+1.00 ECO)</span>
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={insuranceOptIn}
+                      onChange={(e) => setInsuranceOptIn(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                    />
+                    <span>Seguro de Envío Opcional contra pérdida o daño (+0.50 ECO)</span>
+                  </label>
+                </div>
+
+                {/* CHECKBOX LEGAL T&C MANDATORIO */}
+                <div style={{ background: "#0A192F", borderRadius: 12, padding: 14, border: "1px solid #1E293B", display: "grid", gap: 8 }}>
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={checkoutTermsAccepted}
+                      onChange={(e) => setCheckoutTermsAccepted(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                      required
+                    />
+                    <span>
+                      He leído y acepto el contrato principal de consumo, las políticas de despacho, garantías y el derecho legal de arrepentimiento.
+                    </span>
+                  </label>
+                  <div style={{ display: "flex", gap: 12, paddingLeft: 22, marginTop: 4 }}>
+                    <Link href="/terminos" target="_blank" style={{ color: "#10B981", fontSize: 11, textDecoration: "underline", fontWeight: 600 }}>
+                      📖 Ver Términos y Condiciones
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/terminos", "_blank")}
+                      style={{ background: "none", border: "none", color: "#06B6D4", textDecoration: "underline", cursor: "pointer", fontSize: 11, fontWeight: 600, padding: 0 }}
+                    >
+                      🖨️ Descargar/Imprimir Contrato
+                    </button>
+                  </div>
+                </div>
+
+                {/* BOTONES DE ACCIÓN */}
                 <div style={{ display: "flex", gap: 10 }}>
                   <button
                     type="button"
                     onClick={() => {
                       setCheckoutStep("INPUT");
                       setRedemptionDetails(null);
+                      setCheckoutTermsAccepted(false);
+                      setDonationOptIn(false);
+                      setInsuranceOptIn(false);
                     }}
                     style={{ flex: 1, background: "#1E293B", border: "none", color: "#F8FAFC", padding: 12, borderRadius: 12, cursor: "pointer", fontSize: 13 }}
                   >
@@ -1194,7 +1292,12 @@ export default function RecolectorPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={confirmingQr || (parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0)}
+                    disabled={
+                      confirmingQr ||
+                      !checkoutTermsAccepted ||
+                      (parseFloat(balance) || 0) <
+                        ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                    }
                     style={{
                       flex: 1,
                       background: "linear-gradient(135deg, #10B981, #059669)",
@@ -1202,16 +1305,29 @@ export default function RecolectorPage() {
                       color: "#0A192F",
                       padding: 12,
                       borderRadius: 12,
-                      cursor: confirmingQr ? "not-allowed" : "pointer",
+                      cursor:
+                        confirmingQr ||
+                        !checkoutTermsAccepted ||
+                        (parseFloat(balance) || 0) <
+                          ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                          ? "not-allowed"
+                          : "pointer",
                       fontSize: 13,
                       fontWeight: 800,
-                      opacity: (confirmingQr || (parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0)) ? 0.5 : 1,
+                      opacity:
+                        confirmingQr ||
+                        !checkoutTermsAccepted ||
+                        (parseFloat(balance) || 0) <
+                          ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                          ? 0.5
+                          : 1,
                     }}
                   >
                     {confirmingQr ? "Pagando..." : "Confirmar y Pagar"}
                   </button>
                 </div>
-                {(parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0) && (
+                {(parseFloat(balance) || 0) <
+                  ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0)) && (
                   <small style={{ color: "#EF4444", fontSize: 11, textAlign: "center", display: "block" }}>
                     Saldo insuficiente para completar este canje.
                   </small>

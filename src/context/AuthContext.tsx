@@ -12,7 +12,12 @@ interface AuthContextType {
   balance: string;
   receptionPin: string;
   login: (email: string, password: string) => Promise<User>;
-  register: (email: string, password: string, selectedRole: Role) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    selectedRole: Role,
+    options?: { termsVersion?: string; privacyVersion?: string; marketingAccepted?: boolean }
+  ) => Promise<void>;
   verifyEmail: (email: string, code: string) => Promise<User>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => void;
@@ -89,11 +94,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     throw new Error("No se pudo iniciar sesión");
   };
 
-  const register = async (email: string, password: string, selectedRole: Role): Promise<void> => {
+  const register = async (
+    email: string,
+    password: string,
+    selectedRole: Role,
+    options?: { termsVersion?: string; privacyVersion?: string; marketingAccepted?: boolean }
+  ): Promise<void> => {
     await api.post("/auth/register", {
       email,
       password,
       role: selectedRole,
+      termsVersion: options?.termsVersion ?? "2.0.0",
+      privacyVersion: options?.privacyVersion ?? "2.0.0",
+      marketingAccepted: options?.marketingAccepted ?? false,
     });
   };
 

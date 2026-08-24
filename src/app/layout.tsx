@@ -1,5 +1,6 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { CookieBanner } from "@/components/CookieBanner";
 
 export const metadata = {
   title: "Livora — Trazabilidad que transforma",
@@ -10,7 +11,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <CookieBanner />
+        </AuthProvider>
       </body>
     </html>
   );

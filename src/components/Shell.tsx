@@ -56,6 +56,8 @@ const EYEBROWS: Record<string, string> = {
   tienda: "Punto de Venta POS",
 };
 
+import { Footer } from "@/components/Footer";
+
 export function Shell({
   role,
   children,
@@ -136,7 +138,7 @@ export function Shell({
         </div>
       </aside>
 
-      <main className="main">
+      <main className="main" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <header className="topbar">
           <span className="eyebrow">{eyebrowText}</span>
           <div className="top-actions" style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -149,7 +151,8 @@ export function Shell({
             </button>
           </div>
         </header>
-        <div className="content">{children}</div>
+        <div className="content" style={{ flex: "1 0 auto" }}>{children}</div>
+        <Footer />
       </main>
 
       <nav className="mobile-nav">

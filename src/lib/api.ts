@@ -104,8 +104,27 @@ export async function generateQrRedemption(tokenAmount: number) {
   return res.data;
 }
 
-export async function confirmRedemption(qrCodeRef: string, householdUserId?: string) {
-  const res = await api.post(`/stores/redemptions/confirm/${qrCodeRef}`, { householdUserId });
+export async function confirmRedemption(
+  qrCodeRef: string,
+  options?: {
+    termsAccepted?: boolean;
+    donationOptIn?: boolean;
+    insuranceOptIn?: boolean;
+    householdUserId?: string;
+  } | string
+) {
+  let body: any = {};
+  if (typeof options === "string") {
+    body = { householdUserId: options, termsAccepted: true };
+  } else if (options) {
+    body = {
+      termsAccepted: options.termsAccepted,
+      donationOptIn: options.donationOptIn,
+      insuranceOptIn: options.insuranceOptIn,
+      householdUserId: options.householdUserId,
+    };
+  }
+  const res = await api.post(`/stores/redemptions/confirm/${qrCodeRef}`, body);
   return res.data;
 }
 

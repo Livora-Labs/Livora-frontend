@@ -7,6 +7,7 @@ import { Shell, PageHead, Kpi } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { createCollectionRequest, fetchCollectionRequests, updateCollectionStatus, confirmRedemption, fetchRedemptionDetails } from "@/lib/api";
 import { CollectionRequest } from "@/lib/types";
+import { Web3ConfirmModal } from "@/components/Web3ConfirmModal";
 import { MapPin, Upload, KeyRound, QrCode, Sparkles, CheckCircle2, Trash2, ArrowUpRight, Leaf, Recycle, Keyboard, ShoppingBag, ExternalLink } from "lucide-react";
 
 const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
@@ -40,12 +41,16 @@ export default function HogarPage() {
 
   // Store QR Redemption Modal State
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isWeb3ConfirmOpen, setIsWeb3ConfirmOpen] = useState(false);
   const [qrRefInput, setQrRefInput] = useState("");
   const [confirmingQr, setConfirmingQr] = useState(false);
   const [fetchingDetails, setFetchingDetails] = useState(false);
   const [redemptionDetails, setRedemptionDetails] = useState<any | null>(null);
   const [checkoutStep, setCheckoutStep] = useState<"INPUT" | "CONFIRM">("INPUT");
   const [qrMethod, setQrMethod] = useState<"CAMERA" | "MANUAL">("MANUAL");
+  const [checkoutTermsAccepted, setCheckoutTermsAccepted] = useState(false);
+  const [donationOptIn, setDonationOptIn] = useState(false);
+  const [insuranceOptIn, setInsuranceOptIn] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -170,18 +175,32 @@ export default function HogarPage() {
     }
   };
 
-  const handleConfirmStorePayment = async (e: React.FormEvent) => {
+  const handleRequestStorePayment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!qrRefInput.trim() || !redemptionDetails || !checkoutTermsAccepted) return;
+    setIsWeb3ConfirmOpen(true);
+  };
+
+  const handleExecuteWeb3Payment = async () => {
     if (!qrRefInput.trim()) return;
 
     setConfirmingQr(true);
     try {
-      await confirmRedemption(qrRefInput.trim());
-      showToast("¡Pago en Tienda Confirmado!", "success", `Has pagado ${redemptionDetails?.tokenAmount} EcoTokens a ${redemptionDetails?.businessName}.`);
+      const paidAmount = (redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0);
+      await confirmRedemption(qrRefInput.trim(), {
+        termsAccepted: checkoutTermsAccepted,
+        donationOptIn,
+        insuranceOptIn,
+      });
+      showToast("¡Pago en Tienda Confirmado!", "success", `Has pagado ${paidAmount.toFixed(2)} EcoTokens a ${redemptionDetails?.businessName}.`);
+      setIsWeb3ConfirmOpen(false);
       setIsQrModalOpen(false);
       setQrRefInput("");
       setRedemptionDetails(null);
       setCheckoutStep("INPUT");
+      setCheckoutTermsAccepted(false);
+      setDonationOptIn(false);
+      setInsuranceOptIn(false);
       refreshBalance();
     } catch (err: any) {
       showToast("Error en Canje QR", "error", err.response?.data?.message || err.message);
@@ -216,7 +235,7 @@ export default function HogarPage() {
 
       {/* KPI Cards */}
       <div className="grid kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 24 }}>
-        <Kpi label="SALDO ECOTOKENS" value={`${balance} ECO`} trend="Billetera Arbitrum Sepolia" accent="var(--green)" />
+        <Kpi label="SALDO ECOTOKENS" value={`${balance} ECO`} trend="Billetera Stellar Testnet (Soroban)" accent="var(--green)" />
         <Kpi
           label="PIN DE VERIFICACIÓN"
           value={receptionPin || "1234"}
@@ -712,7 +731,7 @@ export default function HogarPage() {
                 )}
               </div>
             ) : (
-              <form onSubmit={handleConfirmStorePayment} style={{ display: "grid", gap: 16 }}>
+              <form onSubmit={handleRequestStorePayment} style={{ display: "grid", gap: 16 }}>
                 <div style={{ background: "#0A192F", borderRadius: 16, padding: 18, border: "1px solid #1E293B", display: "grid", gap: 12 }}>
                   <div style={{ textAlign: "center", borderBottom: "1px solid #1E293B", paddingBottom: 12 }}>
                     <span style={{ fontSize: 11, color: "#94A3B8" }}>TIENDA DESTINO</span>
@@ -721,9 +740,39 @@ export default function HogarPage() {
                     </h4>
                   </div>
 
+                  {/* DESGLOSE DE COSTOS */}
+                  <div style={{ display: "grid", gap: 6, fontSize: 12, borderBottom: "1px solid #1E293B", paddingBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Precio Base Canje:</span>
+                      <span style={{ color: "#F8FAFC" }}>{((redemptionDetails?.tokenAmount || 0) * 0.8475).toFixed(2)} ECO</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Impuestos (IGV 18%):</span>
+                      <span style={{ color: "#F8FAFC" }}>{((redemptionDetails?.tokenAmount || 0) * 0.1525).toFixed(2)} ECO</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#94A3B8" }}>Costo de Despacho/Envío:</span>
+                      <span style={{ color: "#F8FAFC" }}>0.00 ECO</span>
+                    </div>
+                    {donationOptIn && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#94A3B8" }}>Donación Ecológica:</span>
+                        <span style={{ color: "#10B981" }}>+1.00 ECO</span>
+                      </div>
+                    )}
+                    {insuranceOptIn && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#94A3B8" }}>Seguro de Envío:</span>
+                        <span style={{ color: "#10B981" }}>+0.50 ECO</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 12, color: "#94A3B8" }}>Monto a Transferir</span>
-                    <strong style={{ fontSize: 18, color: "#10B981" }}>{redemptionDetails?.tokenAmount} ECO</strong>
+                    <span style={{ fontSize: 12, color: "#94A3B8" }}>Monto Total a Transferir</span>
+                    <strong style={{ fontSize: 18, color: "#10B981" }}>
+                      {((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0)).toFixed(2)} ECO
+                    </strong>
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -732,12 +781,69 @@ export default function HogarPage() {
                   </div>
                 </div>
 
+                {/* ANTI-DARK PATTERNS: CARGOS OPCIONALES */}
+                <div style={{ background: "#0A192F", borderRadius: 12, padding: 14, border: "1px solid #1E293B", display: "grid", gap: 10 }}>
+                  <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700 }}>SERVICIOS ADICIONALES (OPCIONALES)</span>
+                  
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={donationOptIn}
+                      onChange={(e) => setDonationOptIn(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                    />
+                    <span>Donación Voluntaria para Proyectos de Reforestación (+1.00 ECO)</span>
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={insuranceOptIn}
+                      onChange={(e) => setInsuranceOptIn(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                    />
+                    <span>Seguro de Envío Opcional contra pérdida o daño (+0.50 ECO)</span>
+                  </label>
+                </div>
+
+                {/* CHECKBOX LEGAL T&C MANDATORIO */}
+                <div style={{ background: "#0A192F", borderRadius: 12, padding: 14, border: "1px solid #1E293B", display: "grid", gap: 8 }}>
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 12, color: "#F8FAFC" }}>
+                    <input
+                      type="checkbox"
+                      checked={checkoutTermsAccepted}
+                      onChange={(e) => setCheckoutTermsAccepted(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: "#10B981" }}
+                      required
+                    />
+                    <span>
+                      He leído y acepto el contrato principal de consumo, las políticas de despacho, garantías y el derecho legal de arrepentimiento.
+                    </span>
+                  </label>
+                  <div style={{ display: "flex", gap: 12, paddingLeft: 22, marginTop: 4 }}>
+                    <Link href="/terminos" target="_blank" style={{ color: "#10B981", fontSize: 11, textDecoration: "underline", fontWeight: 600 }}>
+                      📖 Ver Términos y Condiciones
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/terminos", "_blank")}
+                      style={{ background: "none", border: "none", color: "#06B6D4", textDecoration: "underline", cursor: "pointer", fontSize: 11, fontWeight: 600, padding: 0 }}
+                    >
+                      🖨️ Descargar/Imprimir Contrato
+                    </button>
+                  </div>
+                </div>
+
+                {/* BOTONES DE ACCIÓN */}
                 <div style={{ display: "flex", gap: 10 }}>
                   <button
                     type="button"
                     onClick={() => {
                       setCheckoutStep("INPUT");
                       setRedemptionDetails(null);
+                      setCheckoutTermsAccepted(false);
+                      setDonationOptIn(false);
+                      setInsuranceOptIn(false);
                     }}
                     style={{ flex: 1, background: "#1E293B", border: "none", color: "#F8FAFC", padding: 12, borderRadius: 12, cursor: "pointer", fontSize: 13 }}
                   >
@@ -745,7 +851,12 @@ export default function HogarPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={confirmingQr || (parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0)}
+                    disabled={
+                      confirmingQr ||
+                      !checkoutTermsAccepted ||
+                      (parseFloat(balance) || 0) <
+                        ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                    }
                     style={{
                       flex: 1,
                       background: "linear-gradient(135deg, #10B981, #059669)",
@@ -753,16 +864,29 @@ export default function HogarPage() {
                       color: "#0A192F",
                       padding: 12,
                       borderRadius: 12,
-                      cursor: confirmingQr ? "not-allowed" : "pointer",
+                      cursor:
+                        confirmingQr ||
+                        !checkoutTermsAccepted ||
+                        (parseFloat(balance) || 0) <
+                          ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                          ? "not-allowed"
+                          : "pointer",
                       fontSize: 13,
                       fontWeight: 800,
-                      opacity: (confirmingQr || (parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0)) ? 0.5 : 1,
+                      opacity:
+                        confirmingQr ||
+                        !checkoutTermsAccepted ||
+                        (parseFloat(balance) || 0) <
+                          ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0))
+                          ? 0.5
+                          : 1,
                     }}
                   >
                     {confirmingQr ? "Pagando..." : "Confirmar y Pagar"}
                   </button>
                 </div>
-                {(parseFloat(balance) || 0) < (redemptionDetails?.tokenAmount || 0) && (
+                {(parseFloat(balance) || 0) <
+                  ((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0)) && (
                   <small style={{ color: "#EF4444", fontSize: 11, textAlign: "center", display: "block" }}>
                     Saldo insuficiente para completar este canje.
                   </small>
@@ -772,6 +896,20 @@ export default function HogarPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Confirmación Firma Delegada Web3 */}
+      <Web3ConfirmModal
+        isOpen={isWeb3ConfirmOpen}
+        tokenAmount={((redemptionDetails?.tokenAmount || 0) + (donationOptIn ? 1.0 : 0) + (insuranceOptIn ? 0.5 : 0)).toFixed(2)}
+        destinationName={redemptionDetails?.businessName || "Tienda Aliada"}
+        destinationAddress={redemptionDetails?.store?.walletAddress || redemptionDetails?.walletAddress}
+        actionDescription="Canje de EcoTokens por productos en Tienda Aliada"
+        concept={redemptionDetails?.concept || redemptionDetails?.productName || "Compra / Canje en Tienda"}
+        warningText="Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar. Esta acción es irreversible."
+        isLoading={confirmingQr}
+        onConfirm={handleExecuteWeb3Payment}
+        onCancel={() => setIsWeb3ConfirmOpen(false)}
+      />
       {/* Modal de Trazabilidad */}
       {selectedReq && (
         <div

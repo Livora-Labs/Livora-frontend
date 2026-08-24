@@ -12,10 +12,11 @@ export default function LoginPage() {
   const { login, register } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
 
-  // Form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role>("HOGAR");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [marketingAccepted, setMarketingAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,10 +26,19 @@ export default function LoginPage() {
       return;
     }
 
+    if (isRegister && !acceptedTerms) {
+      showToast("Consentimiento requerido", "error", "Debes aceptar los Términos y Condiciones y la Política de Privacidad para registrarte.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (isRegister) {
-        await register(email.trim(), password, selectedRole);
+        await register(email.trim(), password, selectedRole, {
+          termsVersion: "2.0.0",
+          privacyVersion: "2.0.0",
+          marketingAccepted,
+        });
         showToast("Código enviado", "success", "Por favor introduce el código OTP enviado a tu correo.");
         router.push(`/verificar-cuenta?email=${encodeURIComponent(email.trim())}`);
       } else {
@@ -84,7 +94,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <small className="muted" style={{ color: "#94A3B8" }}>Arbitrum Sepolia · IPFS · WebSockets · NestJS DB</small>
+        <small className="muted" style={{ color: "#94A3B8" }}>Stellar Testnet (Soroban) · IPFS · WebSockets · NestJS DB</small>
       </section>
 
       <section className="login-form" style={{ background: "#0D1117" }}>
@@ -135,33 +145,144 @@ export default function LoginPage() {
                 }}
                 required
               />
+              {!isRegister && (
+                <div style={{ textAlign: "right", marginTop: 6 }}>
+                  <a
+                    href="/recuperar-contrasena"
+                    style={{
+                      fontSize: 12,
+                      color: "#06B6D4",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+              )}
             </div>
 
             {isRegister && (
-              <div className="field" style={{ marginBottom: 20 }}>
-                <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Rol en el ecosistema</label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as Role)}
-                  style={{
-                    width: "100%",
-                    padding: 12,
-                    background: "#0A192F",
-                    border: "1px solid #1E293B",
-                    borderRadius: 10,
-                    color: "#F8FAFC",
-                    fontSize: 13,
-                    outline: "none",
-                  }}
-                >
-                  <option value="HOGAR">Hogar / Ciudadano</option>
-                  <option value="RECOLECTOR">Recolector Urbano</option>
-                  <option value="CENTRO_ACOPIO">Centro de Acopio</option>
-                  <option value="ALMACEN">Operador de Almacén</option>
-                  <option value="TIENDA">Tienda / Comercio Aliado</option>
-                  <option value="EMPRESA_B2B">Empresa B2B / Compradora</option>
-                </select>
-              </div>
+              <>
+                <div className="field" style={{ marginBottom: 16 }}>
+                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Rol en el ecosistema</label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value as Role)}
+                    style={{
+                      width: "100%",
+                      padding: 12,
+                      background: "#0A192F",
+                      border: "1px solid #1E293B",
+                      borderRadius: 10,
+                      color: "#F8FAFC",
+                      fontSize: 13,
+                      outline: "none",
+                    }}
+                  >
+                    <option value="HOGAR">Hogar / Ciudadano</option>
+                    <option value="RECOLECTOR">Recolector Urbano</option>
+                    <option value="CENTRO_ACOPIO">Centro de Acopio</option>
+                    <option value="ALMACEN">Operador de Almacén</option>
+                    <option value="TIENDA">Tienda / Comercio Aliado</option>
+                    <option value="EMPRESA_B2B">Empresa B2B / Compradora</option>
+                  </select>
+                </div>
+
+                {/* Consent Checkboxes */}
+                <div style={{ marginBottom: 12 }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      fontSize: 12.5,
+                      color: "#CBD5E1",
+                      cursor: "pointer",
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      style={{
+                        marginTop: 2,
+                        accentColor: "#10B981",
+                        width: 16,
+                        height: 16,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                      }}
+                      required
+                    />
+                    <span>
+                      Acepto los{" "}
+                      <a
+                        href="/terminos"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#10B981", textDecoration: "underline", fontWeight: 700 }}
+                      >
+                        Términos y Condiciones
+                      </a>{" "}
+                      y la{" "}
+                      <a
+                        href="/privacidad"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#10B981", textDecoration: "underline", fontWeight: 700 }}
+                      >
+                        Política de Privacidad
+                      </a>{" "}
+                      de Livora.
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginBottom: 18 }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      fontSize: 12,
+                      color: "#94A3B8",
+                      cursor: "pointer",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={marketingAccepted}
+                      onChange={(e) => setMarketingAccepted(e.target.checked)}
+                      style={{
+                        marginTop: 2,
+                        accentColor: "#10B981",
+                        width: 16,
+                        height: 16,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span>
+                      Autorizo el envío de publicidad y promociones sobre tiendas asociadas y beneficios comerciales (Opcional).
+                    </span>
+                  </label>
+                </div>
+
+                <p style={{ fontSize: 12, color: "#94A3B8", marginBottom: 16, lineHeight: 1.45 }}>
+                  Tus datos serán recopilados por Livora para gestionar tu cuenta y monedero. Conoce más en nuestra{" "}
+                  <a
+                    href="/privacidad"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#10B981", textDecoration: "underline", fontWeight: 700 }}
+                  >
+                    Política de Privacidad
+                  </a>.
+                </p>
+              </>
             )}
 
             <button
