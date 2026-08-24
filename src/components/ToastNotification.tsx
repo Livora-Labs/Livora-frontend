@@ -12,13 +12,81 @@ export interface ToastMessage {
 
 let toastListener: ((toast: ToastMessage) => void) | null = null;
 
+function sanitizeErrorDescription(description?: string): string | undefined {
+  if (!description) return undefined;
+
+  const descLower = description.toLowerCase();
+
+  // 401 Unauthorized
+  if (descLower.includes("401") || descLower.includes("unauthorized")) {
+    return "Credenciales incorrectas o sesión expirada. Por favor, inicia sesión de nuevo.";
+  }
+
+  // 403 Forbidden
+  if (descLower.includes("403") || descLower.includes("forbidden")) {
+    return "No tienes permisos para realizar esta acción.";
+  }
+
+  // 404 Not Found
+  if (descLower.includes("404") || descLower.includes("not found")) {
+    return "El recurso solicitado no fue encontrado o la ruta es inválida.";
+  }
+
+  // 400 Bad Request
+  if (descLower.includes("400") || descLower.includes("bad request")) {
+    return "Los datos de la solicitud son incorrectos. Por favor, verifica la información ingresada.";
+  }
+
+  // 500 / 502 / 503 / 504 Server Error
+  if (
+    descLower.includes("500") ||
+    descLower.includes("502") ||
+    descLower.includes("503") ||
+    descLower.includes("504") ||
+    descLower.includes("internal server error")
+  ) {
+    return "Error interno en el servidor. Por favor, inténtalo de nuevo más tarde.";
+  }
+
+  // Network Error / Connection refused
+  if (descLower.includes("network error") || descLower.includes("enotfound") || descLower.includes("econnrefused")) {
+    return "No se pudo conectar con el servidor. Verifica tu conexión a internet o la disponibilidad del servicio.";
+  }
+
+  // Timeout
+  if (descLower.includes("timeout") || descLower.includes("exceeded")) {
+    return "La solicitud tardó demasiado tiempo en responder. Inténtalo de nuevo.";
+  }
+
+  // Axios default "Request failed with status code XYZ"
+  const match = description.match(/Request failed with status code (\d+)/i);
+  if (match) {
+    const statusCode = parseInt(match[1], 10);
+    switch (statusCode) {
+      case 400:
+        return "Los datos proporcionados no son válidos. Por favor, verifica la información.";
+      case 401:
+        return "Acceso denegado. Credenciales incorrectas o sesión expirada.";
+      case 403:
+        return "No tienes autorización para acceder a este recurso.";
+      case 404:
+        return "El servicio solicitado no existe.";
+      default:
+        return `El servidor respondió con un error (código ${statusCode}).`;
+    }
+  }
+
+  return description;
+}
+
 export function showToast(title: string, type: "success" | "error" | "info" = "info", description?: string) {
   if (toastListener) {
+    const finalDescription = type === "error" ? sanitizeErrorDescription(description) : description;
     toastListener({
       id: Math.random().toString(36).substr(2, 9),
       type,
       title,
-      description,
+      description: finalDescription,
     });
   }
 }
