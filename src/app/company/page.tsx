@@ -76,8 +76,31 @@ export default function B2bCompanyPage() {
   };
 
   const totalKg = certificates.reduce((sum, c) => sum + (c.esgImpact?.recycledKg || 0), 0);
-  const totalCo2 = totalKg * 2.5;
-  const totalWater = totalKg * 10;
+  
+  let totalCo2 = 0;
+  let totalWater = 0;
+
+  certificates.forEach((c) => {
+    const kg = c.esgImpact?.recycledKg || 0;
+    const material = (c.esgImpact?.recycledMaterial || "").toUpperCase();
+    
+    let co2Factor = 1.5; // PET factor
+    let waterFactor = 10; // PET factor
+    
+    if (material.includes("ALUMINIO")) {
+      co2Factor = 9.0;
+      waterFactor = 50;
+    } else if (material.includes("VIDRIO")) {
+      co2Factor = 0.3;
+      waterFactor = 5;
+    } else if (material.includes("PAPEL") || material.includes("CARTON")) {
+      co2Factor = 0.9;
+      waterFactor = 15;
+    }
+    
+    totalCo2 += kg * co2Factor;
+    totalWater += kg * waterFactor;
+  });
 
   return (
     <>
@@ -85,7 +108,7 @@ export default function B2bCompanyPage() {
       <PageHead
         eyebrow="Resumen corporativo"
         title="Tu impacto, respaldado por datos"
-        description="Resultados ambientales y trazabilidad verificados en Arbitrum Sepolia e IPFS."
+        description="Resultados ambientales y trazabilidad verificados on-chain e IPFS."
         action={
           <button onClick={loadData} className="btn secondary" style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <RefreshCw size={16} />

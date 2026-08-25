@@ -47,7 +47,7 @@ export default function CookiesPage() {
               1. ¿Qué son las Cookies y Almacenamiento Local?
             </h2>
             <p style={{ margin: 0 }}>
-              Las cookies y tecnologías de almacenamiento local (como <code>localStorage</code> y <code>sessionStorage</code>) son pequeños archivos de datos o variables de estado que se almacenan en su navegador web cuando visita o interactúa con la Plataforma <strong>Livora</strong>. Estas tecnologías nos permiten recordar sus accesos, mantener la seguridad de sus transacciones, almacenar sus preferencias y optimizar el rendimiento técnico de nuestros servicios de reciclaje y recompensas Web3 en la red Stellar.
+              Las cookies y tecnologías de almacenamiento local (como <code>localStorage</code> y <code>sessionStorage</code>) son pequeños archivos de datos o variables de estado que se almacenan en su navegador web cuando visita o interactúa con la Plataforma <strong>Livora</strong>. Estas tecnologías nos permiten recordar sus accesos, mantener la seguridad de sus transacciones, almacenar sus preferencias y optimizar el rendimiento técnico de nuestros servicios de reciclaje y recompensas de tokens ecológicos.
             </p>
           </section>
 

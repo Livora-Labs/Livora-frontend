@@ -588,7 +588,7 @@ export default function CentroAcopioPage() {
             </div>
             <span style={{ fontSize: 11, background: "rgba(16,185,129,0.2)", color: "#10B981", padding: "4px 12px", borderRadius: 20, fontWeight: 700 }}>HTTP 202 ACCEPTED</span>
             <h2 style={{ fontSize: 22, fontWeight: 800, margin: "12px 0 6px" }}>Procesando en Blockchain</h2>
-            <p style={{ fontSize: 13, color: "#94A3B8", lineHeight: 1.6 }}>Generando hash IPFS, enviando transacción a Arbitrum Sepolia y liquidando EcoTokens...</p>
+            <p style={{ fontSize: 13, color: "#94A3B8", lineHeight: 1.6 }}>Generando manifiesto IPFS, registrando transacción en blockchain y liquidando EcoTokens...</p>
             <div style={{ fontSize: 11, color: "#06B6D4", fontFamily: "monospace", marginTop: 10 }}>Job ID: {processingJobId}</div>
           </div>
         </div>

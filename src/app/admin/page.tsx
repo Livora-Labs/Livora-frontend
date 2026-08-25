@@ -63,7 +63,7 @@ export default function AdminPage() {
       <PageHead
         eyebrow="Vista general del sistema"
         title="Panel de Administración"
-        description="Auditoría completa de la cadena de reciclaje con evidencias verificadas en Arbitrum Sepolia e IPFS."
+        description="Auditoría completa de la cadena de reciclaje con evidencias digitales verificadas on-chain e IPFS."
         action={
           <button onClick={loadData} disabled={loading} className="btn ghost" style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <RefreshCw size={16} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />

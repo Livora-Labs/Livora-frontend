@@ -218,7 +218,7 @@ export function Footer() {
             &copy; 2026 Livora S.A.C. — RUC: 20608912345. Todos los derechos reservados.
           </div>
           <div style={{ display: "flex", gap: 18 }}>
-            <span>Stellar Network / Soroban</span>
+            <span>Infraestructura Blockchain Livora</span>
             <span>Ley N° 29571 & Ley N° 32495 (Indecopi)</span>
             <span>Ley N° 29733 (ANPD)</span>
           </div>

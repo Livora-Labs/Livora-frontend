@@ -223,6 +223,48 @@ export async function fetchWalletTransactions() {
   return res.data;
 }
 
+export async function fetchDashboardMetrics() {
+  const res = await api.get("/users/me/dashboard");
+  return res.data;
+}
+
+export async function updateProfile(data: {
+  name?: string;
+  phone?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  marketingAccepted?: boolean;
+}) {
+  const res = await api.patch("/users/me", data);
+  return res.data;
+}
+
+export async function changePassword(data: { newPassword: string }) {
+  const res = await api.patch("/users/me/password", data);
+  return res.data;
+}
+
+export async function fetchBatchById(id: string) {
+  const res = await api.get(`/batches/${id}`);
+  return res.data;
+}
+
+export async function fetchKycApplications() {
+  const res = await api.get("/admin/kyc-applications");
+  return res.data;
+}
+
+export async function updateKycStatus(userId: string, status: "APPROVED" | "REJECTED") {
+  const res = await api.patch(`/users/${userId}/kyc-status`, { status });
+  return res.data;
+}
+
+export async function fetchBlockchainHealth() {
+  const res = await api.get("/admin/blockchain/health");
+  return res.data;
+}
+
 
 
 

@@ -15,26 +15,32 @@ const MENUS: Record<string, Item[]> = {
     { href: "/admin/inventory", label: "▤  Inventario" },
     { href: "/admin/users-kyc", label: "♙  Usuarios y KYC" },
     { href: "/admin/blockchain", label: "⌁  Blockchain" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
   company: [
     { href: "/company", label: "⌂  Resumen ESG" },
     { href: "/company/certificates", label: "▣  Certificados" },
     { href: "/company/purchases", label: "⇄  Compras" },
     { href: "/company/traceability", label: "⌁  Trazabilidad" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
   hogar: [
     { href: "/hogar", label: "⌂  Mi Hogar" },
     { href: "/hogar/transfers", label: "⇄  Historial ECO" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
   recolector: [
     { href: "/recolector", label: "⌂  Mi Ruta" },
     { href: "/recolector/transfers", label: "⇄  Historial ECO" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
   centro: [
     { href: "/centro", label: "⌂  Recepción Lotes" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
   tienda: [
     { href: "/tienda", label: "⌂  POS & Cobros" },
+    { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
 };
 
@@ -112,13 +118,13 @@ export function Shell({
           ))}
         </nav>
         <div className="sidebar-foot">
-          <div className="user">
+          <Link className="user hover-glow" href="/perfil" style={{ display: "flex", gap: 10, textDecoration: "none", color: "inherit" }}>
             <span className="avatar">{initials}</span>
             <div>
               <strong>{email.split("@")[0]}</strong>
               <small>{user?.role || role.toUpperCase()}</small>
             </div>
-          </div>
+          </Link>
           <button
             onClick={handleLogout}
             className="muted"

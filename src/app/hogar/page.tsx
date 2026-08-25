@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Shell, PageHead, Kpi } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { createCollectionRequest, fetchCollectionRequests, updateCollectionStatus, confirmRedemption, fetchRedemptionDetails } from "@/lib/api";
+import { createCollectionRequest, fetchCollectionRequests, updateCollectionStatus, confirmRedemption, fetchRedemptionDetails, fetchDashboardMetrics } from "@/lib/api";
 import { CollectionRequest } from "@/lib/types";
 import { Web3ConfirmModal } from "@/components/Web3ConfirmModal";
 import { MapPin, Upload, KeyRound, QrCode, Sparkles, CheckCircle2, Trash2, ArrowUpRight, Leaf, Recycle, Keyboard, ShoppingBag, ExternalLink } from "lucide-react";
@@ -52,10 +52,26 @@ export default function HogarPage() {
   const [donationOptIn, setDonationOptIn] = useState(false);
   const [insuranceOptIn, setInsuranceOptIn] = useState(false);
 
+  const [dashboardMetrics, setDashboardMetrics] = useState<any>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(true);
+
   useEffect(() => {
     if (!token) return;
     loadRequests();
+    loadDashboardMetrics();
   }, [token]);
+
+  const loadDashboardMetrics = async () => {
+    setLoadingMetrics(true);
+    try {
+      const data = await fetchDashboardMetrics();
+      setDashboardMetrics(data);
+    } catch (err: any) {
+      showToast("Error al cargar métricas", "error", err?.response?.data?.message || err.message);
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
 
   const loadRequests = async () => {
     if (!token) return;
@@ -139,6 +155,7 @@ export default function HogarPage() {
       setPhotoFile(null);
       setPhotoUrl("");
       refreshBalance();
+      loadDashboardMetrics();
     } catch (err: any) {
       const message = err.response?.data?.message || err.message;
       showToast("Error de Creación", "error", Array.isArray(message) ? message.join(", ") : message);
@@ -154,6 +171,7 @@ export default function HogarPage() {
         prev.map((r) => (r.id === id ? { ...r, status: "CANCELLED" } : r))
       );
       showToast("Solicitud cancelada", "info", `ID: ${id}`);
+      loadDashboardMetrics();
     } catch (err: any) {
       showToast("Error al cancelar", "error", err.message);
     }
@@ -202,6 +220,7 @@ export default function HogarPage() {
       setDonationOptIn(false);
       setInsuranceOptIn(false);
       refreshBalance();
+      loadDashboardMetrics();
     } catch (err: any) {
       showToast("Error en Canje QR", "error", err.response?.data?.message || err.message);
     } finally {
@@ -235,14 +254,24 @@ export default function HogarPage() {
 
       {/* KPI Cards */}
       <div className="grid kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 24 }}>
-        <Kpi label="SALDO ECOTOKENS" value={`${balance} ECO`} trend="Billetera Stellar Testnet (Soroban)" accent="var(--green)" />
+        <Kpi
+          label="SALDO ECOTOKENS"
+          value={loadingMetrics ? "..." : `${dashboardMetrics?.wallet?.balance || "0.00"} ECO`}
+          trend={loadingMetrics ? "Cargando balance..." : `Stellar: ${dashboardMetrics?.wallet?.publicKey ? dashboardMetrics.wallet.publicKey.substring(0, 6) + "..." + dashboardMetrics.wallet.publicKey.substring(50) : "Sin billetera"}`}
+          accent="var(--green)"
+        />
         <Kpi
           label="PIN DE VERIFICACIÓN"
-          value={receptionPin || "1234"}
-          trend="Dictar al recolector al entregar"
+          value={loadingMetrics ? "..." : (dashboardMetrics?.activeRequest?.pin || "---")}
+          trend={loadingMetrics ? "Cargando PIN..." : (dashboardMetrics?.activeRequest ? "Dictar al recolector al entregar" : "Sin recolección activa (Se generará al solicitar un recojo)")}
           accent="var(--blue)"
         />
-        <Kpi label="IMPACTO ESG ESTIMADO" value="18.5 kg CO₂" trend="Trazabilidad verde verificada" accent="var(--amber)" />
+        <Kpi
+          label="IMPACTO ESG ESTIMADO"
+          value={loadingMetrics ? "..." : `${dashboardMetrics?.esgMetrics?.co2SavedKg !== undefined ? dashboardMetrics.esgMetrics.co2SavedKg.toFixed(1) : "0.0"} kg CO₂`}
+          trend={loadingMetrics ? "Cargando impacto..." : (!dashboardMetrics?.esgMetrics?.co2SavedKg || dashboardMetrics.esgMetrics.co2SavedKg === 0 ? "Aún no has generado impacto. ¡Crea tu primer recojo!" : "Trazabilidad verde verificada")}
+          accent="var(--amber)"
+        />
       </div>
 
       <div className="grid split">
@@ -467,7 +496,7 @@ export default function HogarPage() {
                       {(req.status === "PENDING" || req.status === "ACCEPTED") && (
                         <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(6, 182, 212, 0.1)", border: "1px solid rgba(6, 182, 212, 0.3)", padding: "4px 8px", borderRadius: 8, fontSize: 11, color: "#06B6D4" }}>
                           <KeyRound size={12} />
-                          <span>Dicta tu PIN al Recolector: <strong style={{ color: "#F8FAFC", letterSpacing: 1 }}>{req.verificationPin || receptionPin}</strong></span>
+                          <span>Dicta tu PIN al Recolector: <strong style={{ color: "#F8FAFC", letterSpacing: 1 }}>{req.verificationPin || "---"}</strong></span>
                         </div>
                       )}
                     </div>

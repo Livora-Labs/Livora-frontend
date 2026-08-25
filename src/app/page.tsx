@@ -94,7 +94,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <small className="muted" style={{ color: "#94A3B8" }}>Stellar Testnet (Soroban) · IPFS · WebSockets · NestJS DB</small>
+        <small className="muted" style={{ color: "#94A3B8" }}>Ecosistema de Reciclaje y Recompensas Circulares Livora</small>
       </section>
 
       <section className="login-form" style={{ background: "#0D1117" }}>
@@ -145,6 +145,12 @@ export default function LoginPage() {
                 }}
                 required
               />
+              {isRegister && (
+                <p style={{ fontSize: 11, color: "#64748B", marginTop: 6, lineHeight: 1.5 }}>
+                  Mínimo 8 caracteres · una mayúscula · una minúscula · un número · un símbolo{" "}
+                  <span style={{ color: "#94A3B8" }}>(ej: Ejemplo1!)</span>
+                </p>
+              )}
               {!isRegister && (
                 <div style={{ textAlign: "right", marginTop: 6 }}>
                   <a

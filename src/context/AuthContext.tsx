@@ -48,10 +48,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setReceptionPin(parsedUser.receptionPin);
       }
       getSocket(savedToken);
-      // Fetch fresh balance from the DB
+      // Fetch fresh balance from the DB; if 401 the token expired → clear session
       fetchBalance()
         .then((data) => setBalance(String(data.balance)))
-        .catch(() => {});
+        .catch((err) => {
+          if (err?.response?.status === 401) {
+            // Token expirado: limpiar sesión para evitar estado inconsistente
+            setUser(null);
+            setToken(null);
+            setRole(null);
+            localStorage.removeItem("livora_token");
+            localStorage.removeItem("livora_role");
+            localStorage.removeItem("livora_user");
+          }
+        });
     }
   }, []);
 
