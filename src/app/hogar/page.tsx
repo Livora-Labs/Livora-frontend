@@ -13,7 +13,9 @@ import { MapPin, Upload, KeyRound, QrCode, Sparkles, CheckCircle2, Trash2, Arrow
 const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 function ipfsLink(cid: string): string {
   if (!cid) return "#";
-  if (cid.startsWith("http://") || cid.startsWith("https://")) return cid;
+  if (cid.startsWith("http://") || cid.startsWith("https://")) {
+    return cid.replace("https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/");
+  }
   const hash = cid.startsWith("ipfs://") ? cid.replace("ipfs://", "") : cid;
   return `${IPFS_GATEWAY}${hash}`;
 }
