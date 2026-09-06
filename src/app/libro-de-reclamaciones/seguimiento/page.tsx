@@ -418,7 +418,7 @@ function SeguimientoPageContent() {
             {/* Actions */}
             <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
               <Link
-                href={`/api-proxy/complaints/correlative/${complaint.correlativeNumber}/pdf`}
+                href={`/complaints/correlative/${complaint.correlativeNumber}/pdf`}
                 target="_blank"
                 className="btn"
                 style={{

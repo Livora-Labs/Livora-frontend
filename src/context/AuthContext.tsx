@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Role, User } from "@/lib/types";
 import { api, fetchBalance } from "@/lib/api";
 import { disconnectSocket, getSocket } from "@/lib/socket";
+import { queryClient } from "@/lib/queryClient";
+import { getSecureCookie, setSecureCookie, deleteSecureCookie } from "@/lib/cookies";
 
 interface AuthContextType {
   user: User | null;
@@ -35,32 +37,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [receptionPin, setReceptionPin] = useState<string>("");
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("livora_token");
+    const savedToken =
+      getSecureCookie("livora_token") || localStorage.getItem("livora_token");
     const savedRole = localStorage.getItem("livora_role") as Role;
     const savedUser = localStorage.getItem("livora_user");
 
     if (savedToken && savedRole && savedUser) {
       setToken(savedToken);
       setRole(savedRole);
-      const parsedUser = JSON.parse(savedUser) as User;
-      setUser(parsedUser);
-      if (parsedUser.receptionPin) {
-        setReceptionPin(parsedUser.receptionPin);
+      try {
+        const parsedUser = JSON.parse(savedUser) as User;
+        setUser(parsedUser);
+        if (parsedUser.receptionPin) {
+          setReceptionPin(parsedUser.receptionPin);
+        }
+      } catch {
+        // Ignorar error de parseo
       }
+
       getSocket(savedToken);
-      // Fetch fresh balance from the DB; if 401 the token expired → clear session
+
+      // Fetch fresh balance from the DB; if 401 the interceptor will attempt silent refresh
       fetchBalance()
-        .then((data) => setBalance(String(data.balance)))
-        .catch((err) => {
-          if (err?.response?.status === 401) {
-            // Token expirado: limpiar sesión para evitar estado inconsistente
-            setUser(null);
-            setToken(null);
-            setRole(null);
-            localStorage.removeItem("livora_token");
-            localStorage.removeItem("livora_role");
-            localStorage.removeItem("livora_user");
-          }
+        .then((data) => {
+          setBalance(String(data.balance));
+          queryClient.setQueryData(["balance"], String(data.balance));
+        })
+        .catch(() => {
+          // El interceptor de Axios gestiona el refresco silencioso o deslogueo
         });
     }
   }, []);
@@ -69,7 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await fetchBalance();
       setBalance(String(data.balance));
-    } catch (err) {
+      queryClient.setQueryData(["balance"], String(data.balance));
+    } catch {
       setBalance("0.00");
     }
   };
@@ -78,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post("/auth/login", { email, password });
     if (res.data && res.data.accessToken) {
       const authToken = res.data.accessToken;
+      const refreshToken = res.data.refreshToken;
       const loggedUser: User = {
         id: res.data.user.id,
         email: res.data.user.email,
@@ -93,7 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setReceptionPin(loggedUser.receptionPin);
       }
 
-      localStorage.setItem("livora_token", authToken);
+      setSecureCookie("livora_token", authToken, 7);
+      if (refreshToken) {
+        setSecureCookie("livora_refresh_token", refreshToken, 30);
+      }
+      localStorage.removeItem("livora_token");
+      localStorage.removeItem("livora_refresh_token");
       localStorage.setItem("livora_role", loggedUser.role);
       localStorage.setItem("livora_user", JSON.stringify(loggedUser));
 
@@ -124,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post("/auth/verify-email", { email, code });
     if (res.data && res.data.accessToken) {
       const authToken = res.data.accessToken;
+      const refreshToken = res.data.refreshToken;
       const loggedUser: User = {
         id: res.data.user.id,
         email: res.data.user.email,
@@ -139,7 +151,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setReceptionPin(loggedUser.receptionPin);
       }
 
-      localStorage.setItem("livora_token", authToken);
+      setSecureCookie("livora_token", authToken, 7);
+      if (refreshToken) {
+        setSecureCookie("livora_refresh_token", refreshToken, 30);
+      }
+      localStorage.removeItem("livora_token");
+      localStorage.removeItem("livora_refresh_token");
       localStorage.setItem("livora_role", loggedUser.role);
       localStorage.setItem("livora_user", JSON.stringify(loggedUser));
 
@@ -160,10 +177,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(null);
     setBalance("0.00");
     setReceptionPin("");
+    deleteSecureCookie("livora_token");
+    deleteSecureCookie("livora_refresh_token");
     localStorage.removeItem("livora_token");
+    localStorage.removeItem("livora_refresh_token");
     localStorage.removeItem("livora_role");
     localStorage.removeItem("livora_user");
     disconnectSocket();
+    queryClient.clear();
   };
 
   const updateReceptionPin = (newPin: string) => {

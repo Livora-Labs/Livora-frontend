@@ -35,13 +35,17 @@ export default function PerfilPage() {
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
 
-  const [resolvedRole, setResolvedRole] = useState<"admin" | "company" | "hogar" | "recolector" | "centro" | "tienda">("hogar");
+  const [resolvedRole, setResolvedRole] = useState<"admin" | "company" | "centro">("centro");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const dbRole = user?.role?.toLowerCase() || localStorage.getItem("livora_role")?.toLowerCase();
-      if (dbRole) {
-        setResolvedRole(dbRole as any);
+      const rawRole = user?.role?.toUpperCase() || localStorage.getItem("livora_role")?.toUpperCase();
+      if (rawRole === "ADMIN") {
+        setResolvedRole("admin");
+      } else if (rawRole === "EMPRESA_B2B") {
+        setResolvedRole("company");
+      } else if (rawRole === "CENTRO_ACOPIO") {
+        setResolvedRole("centro");
       }
     }
   }, [user]);
@@ -94,9 +98,7 @@ export default function PerfilPage() {
       await updateProfile({
         name,
         phone,
-        address: resolvedRole === "hogar" ? address : undefined,
-        latitude: resolvedRole === "hogar" && lat !== null ? Number(lat) : undefined,
-        longitude: resolvedRole === "hogar" && lng !== null ? Number(lng) : undefined,
+        address: address || undefined,
         marketingAccepted,
       });
       showToast("Perfil actualizado", "success", "Tus datos personales fueron guardados con éxito.");
@@ -220,45 +222,16 @@ export default function PerfilPage() {
                   />
                 </div>
 
-                {resolvedRole === "hogar" && (
-                  <div>
-                    <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Dirección de Recojo</label>
-                    <input
-                      type="text"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Calle, Número, Distrito"
-                      style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14, marginBottom: 10 }}
-                    />
-                    <div style={{ display: "flex", gap: 12 }}>
-                      <button
-                        type="button"
-                        onClick={handleGetLocation}
-                        style={{
-                          background: "rgba(59, 130, 246, 0.1)",
-                          border: "1px solid rgba(59, 130, 246, 0.3)",
-                          color: "#3B82F6",
-                          padding: "8px 12px",
-                          borderRadius: 8,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6
-                        }}
-                      >
-                        <MapPin size={14} />
-                        <span>Geolocalizar Dirección</span>
-                      </button>
-                      {lat !== null && lat !== undefined && lng !== null && lng !== undefined && (
-                        <span style={{ fontSize: 11, color: "#94A3B8", alignSelf: "center" }}>
-                          GPS: {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Dirección Fiscal / Operativa</label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Calle, Número, Distrito, Ciudad"
+                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                  />
+                </div>
 
                 <button type="submit" disabled={updatingProfile} className="btn primary" style={{ width: "100%", marginTop: 10, padding: 12 }}>
                   {updatingProfile ? "Guardando..." : "Guardar Cambios"}

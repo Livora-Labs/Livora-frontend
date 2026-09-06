@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Search, CheckCircle2, Mail, Scale, Printer, AlertTriangle } from "lucide-react";
 import { Footer, IndecopiBookLogo } from "@/components/Footer";
 import { api } from "@/lib/api";
-
-type DocumentType = "DNI" | "CE" | "PASAPORTE" | "RUC";
-type GoodType = "PRODUCTO" | "SERVICIO";
-type ClaimType = "RECLAMO" | "QUEJA";
+import { complaintSchema, ComplaintFormData } from "@/lib/schemas/complaint";
 
 interface ComplaintResponse {
   id: string;
@@ -18,97 +17,64 @@ interface ComplaintResponse {
 }
 
 export default function LibroDeReclamacionesPage() {
-  const [formData, setFormData] = useState({
-    documentType: "DNI" as DocumentType,
-    documentNumber: "",
-    fullName: "",
-    address: "",
-    phone: "",
-    email: "",
-    isMinor: false,
-    representativeName: "",
-    representativeDoc: "",
-    goodType: "SERVICIO" as GoodType,
-    goodDescription: "",
-    amount: "",
-    claimType: "RECLAMO" as ClaimType,
-    claimDetail: "",
-    consumerRequest: "",
-    affidavitConsent: false,
-  });
-
-  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<ComplaintResponse | null>(null);
+  const [submittedValues, setSubmittedValues] = useState<ComplaintFormData | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<ComplaintFormData>({
+    resolver: zodResolver(complaintSchema),
+    defaultValues: {
+      documentType: "DNI",
+      documentNumber: "",
+      fullName: "",
+      address: "",
+      phone: "",
+      email: "",
+      isMinor: false,
+      representativeName: "",
+      representativeDoc: "",
+      goodType: "SERVICIO",
+      goodDescription: "",
+      amount: "",
+      claimType: "RECLAMO",
+      claimDetail: "",
+      consumerRequest: "",
+      affidavitConsent: false as unknown as true,
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isMinor = watch("isMinor");
+  const claimType = watch("claimType");
+
+  const onSubmit = async (data: ComplaintFormData) => {
     setErrorMessage(null);
-
-    // Form Validations
-    if (!formData.documentNumber.trim() || !formData.fullName.trim()) {
-      setErrorMessage("Por favor, ingrese su documento de identidad y nombre completo.");
-      return;
-    }
-
-    if (!formData.address.trim() || !formData.phone.trim() || !formData.email.trim()) {
-      setErrorMessage("Por favor, complete su dirección, teléfono y correo electrónico.");
-      return;
-    }
-
-    if (!formData.goodDescription.trim()) {
-      setErrorMessage("Por favor, detalle el producto o servicio contratado.");
-      return;
-    }
-
-    if (!formData.claimDetail.trim() || !formData.consumerRequest.trim()) {
-      setErrorMessage("Por favor, complete el detalle de los hechos y su pedido concreto.");
-      return;
-    }
-
-    if (formData.isMinor && !formData.representativeName.trim()) {
-      setErrorMessage("Por favor, ingrese el nombre del padre, madre o apoderado.");
-      return;
-    }
-
-    if (!formData.affidavitConsent) {
-      setErrorMessage("Debe aceptar la declaración jurada de veracidad para enviar el reclamo.");
-      return;
-    }
-
-    setLoading(true);
 
     try {
       const payload = {
-        documentType: formData.documentType,
-        documentNumber: formData.documentNumber.trim(),
-        fullName: formData.fullName.trim(),
-        address: formData.address.trim(),
-        phone: formData.phone.trim(),
-        email: formData.email.trim().toLowerCase(),
-        isMinor: formData.isMinor,
-        representativeName: formData.isMinor ? formData.representativeName.trim() : undefined,
-        representativeDoc: formData.isMinor && formData.representativeDoc.trim() ? formData.representativeDoc.trim() : undefined,
-        goodType: formData.goodType,
-        goodDescription: formData.goodDescription.trim(),
-        amount: formData.amount ? parseFloat(formData.amount) : undefined,
-        claimType: formData.claimType,
-        claimDetail: formData.claimDetail.trim(),
-        consumerRequest: formData.consumerRequest.trim(),
+        documentType: data.documentType,
+        documentNumber: data.documentNumber.trim(),
+        fullName: data.fullName.trim(),
+        address: data.address.trim(),
+        phone: data.phone.trim(),
+        email: data.email.trim().toLowerCase(),
+        isMinor: data.isMinor,
+        representativeName: data.isMinor && data.representativeName ? data.representativeName.trim() : undefined,
+        representativeDoc: data.isMinor && data.representativeDoc ? data.representativeDoc.trim() : undefined,
+        goodType: data.goodType,
+        goodDescription: data.goodDescription.trim(),
+        amount: data.amount ? parseFloat(data.amount) : undefined,
+        claimType: data.claimType,
+        claimDetail: data.claimDetail.trim(),
+        consumerRequest: data.consumerRequest.trim(),
       };
 
-      // Timeout extendido a 30s: el backend genera un PDF y envía un correo
       const response = await api.post<ComplaintResponse>("/complaints", payload, { timeout: 30000 });
+      setSubmittedValues(data);
       setSuccessData(response.data);
     } catch (err: any) {
       console.error("Error submitting complaint:", err);
@@ -116,8 +82,6 @@ export default function LibroDeReclamacionesPage() {
         ? err.response.data.message.join(". ")
         : err.response?.data?.message || "Ocurrió un error al registrar la reclamación. Intente nuevamente.";
       setErrorMessage(msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -130,7 +94,6 @@ export default function LibroDeReclamacionesPage() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg, #07110f)", color: "var(--text, #f2f7f5)", padding: "40px 20px 80px" }}>
       <div style={{ maxWidth: 880, margin: "0 auto" }}>
-        
         {/* Navigation Breadcrumb */}
         <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted, #8fa49d)", flexWrap: "wrap", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -160,7 +123,7 @@ export default function LibroDeReclamacionesPage() {
         </div>
 
         {/* Success Confirmation View */}
-        {successData ? (
+        {successData && submittedValues ? (
           <div
             className="card"
             style={{
@@ -233,17 +196,17 @@ export default function LibroDeReclamacionesPage() {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #162a22", paddingBottom: 8, marginBottom: 8 }}>
                 <span style={{ color: "#8fa49d" }}>Consumidor:</span>
-                <strong>{formData.fullName} ({formData.documentType} {formData.documentNumber})</strong>
+                <strong>{submittedValues.fullName} ({submittedValues.documentType} {submittedValues.documentNumber})</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #162a22", paddingBottom: 8, marginBottom: 8 }}>
                 <span style={{ color: "#8fa49d" }}>Tipo de Solicitud:</span>
-                <strong style={{ color: formData.claimType === "RECLAMO" ? "#55e6a5" : "#ffcd70" }}>
-                  {formData.claimType} — {formData.goodType}
+                <strong style={{ color: submittedValues.claimType === "RECLAMO" ? "#55e6a5" : "#ffcd70" }}>
+                  {submittedValues.claimType} — {submittedValues.goodType}
                 </strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#8fa49d" }}>Correo de Notificación:</span>
-                <strong>{formData.email}</strong>
+                <strong>{submittedValues.email}</strong>
               </div>
             </div>
 
@@ -264,7 +227,7 @@ export default function LibroDeReclamacionesPage() {
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
                 <Mail size={16} style={{ color: "#55e6a5", marginTop: 2, flexShrink: 0 }} />
                 <span>
-                  <strong>Copia Digital Remitida:</strong> Se ha enviado automáticamente una copia oficial en formato PDF de su Hoja de Reclamación a su correo electrónico <strong>{formData.email}</strong>.
+                  <strong>Copia Digital Remitida:</strong> Se ha enviado automáticamente una copia oficial en formato PDF de su Hoja de Reclamación a su correo electrónico <strong>{submittedValues.email}</strong>.
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -385,8 +348,7 @@ export default function LibroDeReclamacionesPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 32 }}>
-
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: "grid", gap: 32 }}>
               {/* SECCIÓN 1: Identificación del Consumidor */}
               <fieldset style={{ border: "1px solid #1c352b", borderRadius: 14, padding: "22px 20px", margin: 0 }}>
                 <legend style={{ padding: "0 10px", color: "#55e6a5", fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>
@@ -397,9 +359,7 @@ export default function LibroDeReclamacionesPage() {
                   <div className="field">
                     <label>Tipo de Documento *</label>
                     <select
-                      name="documentType"
-                      value={formData.documentType}
-                      onChange={handleChange}
+                      {...register("documentType")}
                       style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white" }}
                     >
                       <option value="DNI">DNI (Documento Nacional de Identidad)</option>
@@ -407,66 +367,57 @@ export default function LibroDeReclamacionesPage() {
                       <option value="PASAPORTE">Pasaporte</option>
                       <option value="RUC">RUC</option>
                     </select>
+                    {errors.documentType && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.documentType.message}</small>}
                   </div>
 
                   <div className="field">
                     <label>Número de Documento *</label>
                     <input
                       type="text"
-                      name="documentNumber"
-                      value={formData.documentNumber}
-                      onChange={handleChange}
+                      {...register("documentNumber")}
                       placeholder="Ej. 74839201"
-                      required
                     />
+                    {errors.documentNumber && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.documentNumber.message}</small>}
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
                     <label>Nombres y Apellidos Completos / Razón Social *</label>
                     <input
                       type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
+                      {...register("fullName")}
                       placeholder="Ingrese su nombre completo"
-                      required
                     />
+                    {errors.fullName && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.fullName.message}</small>}
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
                     <label>Domicilio (Dirección, Distrito, Provincia y Departamento) *</label>
                     <input
                       type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
+                      {...register("address")}
                       placeholder="Ej. Av. Los Laureles 123, San Borja, Lima"
-                      required
                     />
+                    {errors.address && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.address.message}</small>}
                   </div>
 
                   <div className="field">
                     <label>Teléfono o Celular *</label>
                     <input
                       type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
+                      {...register("phone")}
                       placeholder="Ej. 987654321"
-                      required
                     />
+                    {errors.phone && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.phone.message}</small>}
                   </div>
 
                   <div className="field">
                     <label>Correo Electrónico (Para recibir copia PDF) *</label>
                     <input
                       type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      {...register("email")}
                       placeholder="correo@ejemplo.com"
-                      required
                     />
+                    {errors.email && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.email.message}</small>}
                   </div>
                 </div>
 
@@ -475,34 +426,28 @@ export default function LibroDeReclamacionesPage() {
                   <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13, color: "#d8e4df" }}>
                     <input
                       type="checkbox"
-                      name="isMinor"
-                      checked={formData.isMinor}
-                      onChange={handleChange}
+                      {...register("isMinor")}
                       style={{ width: 17, height: 17, accentColor: "#55e6a5" }}
                     />
                     <span>El reclamante es menor de edad</span>
                   </label>
 
-                  {formData.isMinor && (
+                  {isMinor && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 14, background: "#081512", padding: 16, borderRadius: 10, border: "1px solid #1c352b" }}>
                       <div className="field">
                         <label>Nombre del Padre, Madre o Apoderado *</label>
                         <input
                           type="text"
-                          name="representativeName"
-                          value={formData.representativeName}
-                          onChange={handleChange}
+                          {...register("representativeName")}
                           placeholder="Nombre completo del apoderado"
-                          required={formData.isMinor}
                         />
+                        {errors.representativeName && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.representativeName.message}</small>}
                       </div>
                       <div className="field">
                         <label>Documento de Identidad del Apoderado</label>
                         <input
                           type="text"
-                          name="representativeDoc"
-                          value={formData.representativeDoc}
-                          onChange={handleChange}
+                          {...register("representativeDoc")}
                           placeholder="DNI / CE del apoderado"
                         />
                       </div>
@@ -524,10 +469,8 @@ export default function LibroDeReclamacionesPage() {
                       <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", background: "#0c1915", padding: "10px 16px", borderRadius: 10, border: "1px solid var(--line)", flex: 1 }}>
                         <input
                           type="radio"
-                          name="goodType"
                           value="PRODUCTO"
-                          checked={formData.goodType === "PRODUCTO"}
-                          onChange={handleChange}
+                          {...register("goodType")}
                           style={{ accentColor: "#55e6a5" }}
                         />
                         <span>Producto</span>
@@ -535,10 +478,8 @@ export default function LibroDeReclamacionesPage() {
                       <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", background: "#0c1915", padding: "10px 16px", borderRadius: 10, border: "1px solid var(--line)", flex: 1 }}>
                         <input
                           type="radio"
-                          name="goodType"
                           value="SERVICIO"
-                          checked={formData.goodType === "SERVICIO"}
-                          onChange={handleChange}
+                          {...register("goodType")}
                           style={{ accentColor: "#55e6a5" }}
                         />
                         <span>Servicio</span>
@@ -551,24 +492,21 @@ export default function LibroDeReclamacionesPage() {
                     <input
                       type="number"
                       step="0.01"
-                      name="amount"
-                      value={formData.amount}
-                      onChange={handleChange}
+                      {...register("amount")}
                       placeholder="0.00"
                     />
+                    {errors.amount && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.amount.message}</small>}
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
                     <label>Descripción del Producto o Servicio Contratado *</label>
                     <textarea
-                      name="goodDescription"
-                      value={formData.goodDescription}
-                      onChange={handleChange}
+                      {...register("goodDescription")}
                       placeholder="Ej. Canje de 50 EcoTokens por producto en tienda aliada / Servicio de recolección domiciliaria de botellas PET"
                       rows={3}
                       style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white", resize: "vertical" }}
-                      required
                     />
+                    {errors.goodDescription && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.goodDescription.message}</small>}
                   </div>
                 </div>
               </fieldset>
@@ -588,18 +526,16 @@ export default function LibroDeReclamacionesPage() {
                       style={{
                         padding: 14,
                         borderRadius: 12,
-                        border: formData.claimType === "RECLAMO" ? "1px solid #55e6a5" : "1px solid var(--line)",
-                        background: formData.claimType === "RECLAMO" ? "#122a21" : "#0c1915",
+                        border: claimType === "RECLAMO" ? "1px solid #55e6a5" : "1px solid var(--line)",
+                        background: claimType === "RECLAMO" ? "#122a21" : "#0c1915",
                         cursor: "pointer",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                         <input
                           type="radio"
-                          name="claimType"
                           value="RECLAMO"
-                          checked={formData.claimType === "RECLAMO"}
-                          onChange={handleChange}
+                          {...register("claimType")}
                           style={{ accentColor: "#55e6a5" }}
                         />
                         <strong style={{ color: "#55e6a5" }}>RECLAMO</strong>
@@ -613,18 +549,16 @@ export default function LibroDeReclamacionesPage() {
                       style={{
                         padding: 14,
                         borderRadius: 12,
-                        border: formData.claimType === "QUEJA" ? "1px solid #ffcd70" : "1px solid var(--line)",
-                        background: formData.claimType === "QUEJA" ? "#2a2212" : "#0c1915",
+                        border: claimType === "QUEJA" ? "1px solid #ffcd70" : "1px solid var(--line)",
+                        background: claimType === "QUEJA" ? "#2a2212" : "#0c1915",
                         cursor: "pointer",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                         <input
                           type="radio"
-                          name="claimType"
                           value="QUEJA"
-                          checked={formData.claimType === "QUEJA"}
-                          onChange={handleChange}
+                          {...register("claimType")}
                           style={{ accentColor: "#ffcd70" }}
                         />
                         <strong style={{ color: "#ffcd70" }}>QUEJA</strong>
@@ -639,27 +573,23 @@ export default function LibroDeReclamacionesPage() {
                 <div className="field">
                   <label>Detalle de la Reclamación (Hechos) *</label>
                   <textarea
-                    name="claimDetail"
-                    value={formData.claimDetail}
-                    onChange={handleChange}
+                    {...register("claimDetail")}
                     placeholder="Describa con claridad y precisión los hechos ocurridos..."
                     rows={4}
                     style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white", resize: "vertical" }}
-                    required
                   />
+                  {errors.claimDetail && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.claimDetail.message}</small>}
                 </div>
 
                 <div className="field">
                   <label>Pedido Concreto del Consumidor *</label>
                   <textarea
-                    name="consumerRequest"
-                    value={formData.consumerRequest}
-                    onChange={handleChange}
+                    {...register("consumerRequest")}
                     placeholder="Indique con claridad cuál es la solución o pedido que solicita..."
                     rows={3}
                     style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white", resize: "vertical" }}
-                    required
                   />
+                  {errors.consumerRequest && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.consumerRequest.message}</small>}
                 </div>
               </fieldset>
 
@@ -675,23 +605,25 @@ export default function LibroDeReclamacionesPage() {
                 <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
                   <input
                     type="checkbox"
-                    name="affidavitConsent"
-                    checked={formData.affidavitConsent}
-                    onChange={handleChange}
+                    {...register("affidavitConsent")}
                     style={{ width: 20, height: 20, marginTop: 2, accentColor: "#55e6a5" }}
-                    required
                   />
                   <span style={{ fontSize: 13, lineHeight: 1.5, color: "#d8e4df" }}>
                     <strong style={{ color: "#55e6a5" }}>Declaración Jurada:</strong> Declaro bajo fe de juramento que la información y hechos expresados en la presente Hoja de Reclamación son verídicos y corresponden a la realidad. Entiendo que se enviará una copia en PDF al correo indicado y que Livora responderá en un plazo máximo de 15 días hábiles conforme a la Ley N° 29571.
                   </span>
                 </label>
+                {errors.affidavitConsent && (
+                  <div style={{ marginTop: 8 }}>
+                    <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.affidavitConsent.message}</small>
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}
               <div>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   className="btn primary"
                   style={{
                     width: "100%",
@@ -699,11 +631,11 @@ export default function LibroDeReclamacionesPage() {
                     fontSize: 16,
                     fontWeight: 700,
                     borderRadius: 12,
-                    cursor: loading ? "not-allowed" : "pointer",
-                    opacity: loading ? 0.7 : 1,
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    opacity: isSubmitting ? 0.7 : 1,
                   }}
                 >
-                  {loading ? "Registrando Hoja de Reclamación..." : "Enviar Reclamación Virtual"}
+                  {isSubmitting ? "Registrando Hoja de Reclamación..." : "Enviar Reclamación Virtual"}
                 </button>
               </div>
             </form>

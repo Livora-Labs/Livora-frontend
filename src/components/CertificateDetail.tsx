@@ -1,47 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import type { Certificate } from "@/lib/types";
 import { PageHead, Status } from "./Shell";
-import axios from "axios";
-
-// Read token from localStorage
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
-});
-
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("livora_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
+import { fetchSales } from "@/lib/api";
 
 const shortId = (id: string) => (id ? `${id.slice(0, 6)}…${id.slice(-4)}` : "");
 const kg = (value: number) => new Intl.NumberFormat("es-PE", { maximumFractionDigits: 1 }).format(value) + " kg";
 const date = (value: string) => new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
 
 export function CertificateDetail({ certificate, admin = false }: { certificate: Certificate; admin?: boolean }) {
-  const [sale, setSale] = useState<any>(null);
+  const { data: sales = [] } = useQuery({
+    queryKey: ["sales"],
+    queryFn: fetchSales,
+    enabled: Boolean(certificate.saleId),
+  });
 
-  useEffect(() => {
-    async function loadSale() {
-      try {
-        const res = await api.get("/sales");
-        const matching = (res.data || []).find((x: any) => x.id === certificate.saleId);
-        setSale(matching);
-      } catch (e) {
-        // ignore
-      }
-    }
-    if (certificate.saleId) {
-      loadSale();
-    }
-  }, [certificate.saleId]);
+  const sale = sales.find((x: any) => x.id === certificate.saleId);
 
   return (
     <>

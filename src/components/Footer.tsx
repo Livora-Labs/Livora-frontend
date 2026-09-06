@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { LivoraLogo } from "@/components/LivoraLogo";
 
 export function IndecopiBookLogo({ className = "", width = 140, height = 90 }: { className?: string; width?: number; height?: number }) {
   return (
@@ -87,7 +88,7 @@ export function Footer() {
           {/* Col 1: Brand & Indecopi Reclamaciones Badge */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <span className="brandmark" style={{ width: 28, height: 28, borderRadius: 8, fontSize: 13 }} />
+              <LivoraLogo size={28} />
               <strong style={{ color: "#f2f7f5", fontSize: 17, letterSpacing: -0.3 }}>Livora S.A.C.</strong>
             </div>
             <p style={{ fontSize: 12, lineHeight: 1.6, color: "#8fa49d", margin: "0 0 16px" }}>

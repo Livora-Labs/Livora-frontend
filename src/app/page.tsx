@@ -6,15 +6,16 @@ import { useAuth } from "@/context/AuthContext";
 import { Role } from "@/lib/types";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { ArrowRight, LogIn, UserPlus } from "lucide-react";
+import { LivoraLogo } from "@/components/LivoraLogo";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, logout } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<Role>("HOGAR");
+  const [selectedRole, setSelectedRole] = useState<Role>("CENTRO_ACOPIO");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [marketingAccepted, setMarketingAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,15 +44,28 @@ export default function LoginPage() {
         router.push(`/verificar-cuenta?email=${encodeURIComponent(email.trim())}`);
       } else {
         const loggedUser = await login(email.trim(), password);
-        showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
 
-        // Redirect based on role
-        if (loggedUser.role === "ADMIN") router.push("/admin");
-        else if (loggedUser.role === "EMPRESA_B2B") router.push("/company");
-        else if (loggedUser.role === "HOGAR") router.push("/hogar");
-        else if (loggedUser.role === "RECOLECTOR") router.push("/recolector");
-        else if (loggedUser.role === "CENTRO_ACOPIO" || loggedUser.role === "ALMACEN") router.push("/centro");
-        else if (loggedUser.role === "TIENDA") router.push("/tienda");
+        // Redirect based on authorized web roles
+        if (loggedUser.role === "ADMIN") {
+          showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
+          router.push("/admin");
+        } else if (loggedUser.role === "EMPRESA_B2B") {
+          showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
+          router.push("/company");
+        } else if (loggedUser.role === "CENTRO_ACOPIO") {
+          showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
+          router.push("/centro");
+        } else if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(loggedUser.role)) {
+          logout();
+          showToast(
+            "Acceso no disponible en Web",
+            "error",
+            "Tu cuenta opera exclusivamente desde la app móvil Livora. Descárgala para continuar."
+          );
+        } else {
+          logout();
+          showToast("Rol no autorizado", "error", "Tu rol no cuenta con acceso a la plataforma web.");
+        }
       }
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || "Ocurrió un error inesperado.";
@@ -66,21 +80,7 @@ export default function LoginPage() {
       <ToastContainer />
       <section className="login-art" style={{ background: "radial-gradient(circle at 70% 30%, rgba(16, 185, 129, 0.2), transparent 40%), #0A192F" }}>
         <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #10B981, #059669)",
-              display: "grid",
-              placeItems: "center",
-              fontWeight: 900,
-              color: "#0A192F",
-              fontSize: 20,
-            }}
-          >
-            L
-          </div>
+          <LivoraLogo size={38} />
           <strong style={{ fontSize: 22, color: "#F8FAFC" }}>Livora</strong>
         </div>
 
@@ -186,11 +186,7 @@ export default function LoginPage() {
                       outline: "none",
                     }}
                   >
-                    <option value="HOGAR">Hogar / Ciudadano</option>
-                    <option value="RECOLECTOR">Recolector Urbano</option>
                     <option value="CENTRO_ACOPIO">Centro de Acopio</option>
-                    <option value="ALMACEN">Operador de Almacén</option>
-                    <option value="TIENDA">Tienda / Comercio Aliado</option>
                     <option value="EMPRESA_B2B">Empresa B2B / Compradora</option>
                   </select>
                 </div>

@@ -9,7 +9,7 @@ import { KeyRound, RefreshCw, ArrowRight } from "lucide-react";
 function VerifyAccountForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { verifyEmail, resendOtp } = useAuth();
+  const { verifyEmail, resendOtp, logout } = useAuth();
 
   const email = searchParams.get("email") || "";
   const [code, setCode] = useState("");
@@ -38,14 +38,26 @@ function VerifyAccountForm() {
       const loggedUser = await verifyEmail(email, code);
       showToast("¡Cuenta verificada!", "success", "Tu correo ha sido verificado con éxito.");
       
-      // Redirigir según el rol
+      // Redirigir según el rol autorizado
       setTimeout(() => {
-        if (loggedUser.role === "ADMIN") router.push("/admin");
-        else if (loggedUser.role === "EMPRESA_B2B") router.push("/company");
-        else if (loggedUser.role === "HOGAR") router.push("/hogar");
-        else if (loggedUser.role === "RECOLECTOR") router.push("/recolector");
-        else if (loggedUser.role === "CENTRO_ACOPIO" || loggedUser.role === "ALMACEN") router.push("/centro");
-        else if (loggedUser.role === "TIENDA") router.push("/tienda");
+        if (loggedUser.role === "ADMIN") {
+          router.push("/admin");
+        } else if (loggedUser.role === "EMPRESA_B2B") {
+          router.push("/company");
+        } else if (loggedUser.role === "CENTRO_ACOPIO") {
+          router.push("/centro");
+        } else if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(loggedUser.role)) {
+          logout();
+          showToast(
+            "Acceso no disponible en Web",
+            "error",
+            "Tu cuenta opera exclusivamente desde la app móvil Livora. Descárgala para continuar."
+          );
+          router.push("/");
+        } else {
+          logout();
+          router.push("/");
+        }
       }, 1000);
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || "Código incorrecto o expirado.";
@@ -188,7 +200,7 @@ export default function VerifyAccountPage() {
             Verificación de <em style={{ color: "#10B981", fontStyle: "normal" }}>Identidad.</em>
           </h1>
           <p style={{ color: "#94A3B8", fontSize: 16, lineHeight: 1.6 }}>
-            Valida tu correo electrónico mediante el código transaccional de un solo uso para activar tu billetera y comenzar a operar de forma segura en Arbitrum.
+            Valida tu correo electrónico mediante el código transaccional de un solo uso para activar tu billetera y comenzar a operar de forma segura en Stellar.
           </p>
         </div>
 

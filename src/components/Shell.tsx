@@ -2,8 +2,10 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { showToast } from "@/components/ToastNotification";
+import { LivoraLogo } from "@/components/LivoraLogo";
 
 type Item = { href: string; label: string };
 
@@ -24,42 +26,22 @@ const MENUS: Record<string, Item[]> = {
     { href: "/company/traceability", label: "⌁  Trazabilidad" },
     { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
-  hogar: [
-    { href: "/hogar", label: "⌂  Mi Hogar" },
-    { href: "/hogar/transfers", label: "⇄  Historial ECO" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
-  ],
-  recolector: [
-    { href: "/recolector", label: "⌂  Mi Ruta" },
-    { href: "/recolector/transfers", label: "⇄  Historial ECO" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
-  ],
   centro: [
     { href: "/centro", label: "⌂  Recepción Lotes" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
-  ],
-  tienda: [
-    { href: "/tienda", label: "⌂  POS & Cobros" },
     { href: "/perfil", label: "⚙  Mi Perfil" },
   ],
 };
 
 const WORKSPACES: Record<string, string> = {
   admin: "Livora Operaciones",
-  company: "Coca-Cola Perú",
-  hogar: "Hogar Ecológico",
-  recolector: "Unidad Recolectora",
+  company: "Portal Corporativo ESG",
   centro: "Centro de Acopio",
-  tienda: "Comercio Aliado",
 };
 
 const EYEBROWS: Record<string, string> = {
   admin: "Control de operaciones",
   company: "Portal corporativo",
-  hogar: "Portal ciudadano",
-  recolector: "Radar de campo",
   centro: "Dashboard industrial",
-  tienda: "Punto de Venta POS",
 };
 
 import { Footer } from "@/components/Footer";
@@ -68,10 +50,11 @@ export function Shell({
   role,
   children,
 }: {
-  role: "admin" | "company" | "hogar" | "recolector" | "centro" | "tienda";
+  role: "admin" | "company" | "centro";
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout, balance, refreshBalance } = useAuth();
 
   const [workspaceName, setWorkspaceName] = React.useState(WORKSPACES[role] || "Livora");
@@ -81,13 +64,53 @@ export function Shell({
     const savedToken = localStorage.getItem("livora_token");
     if (!savedToken) {
       router.push("/");
+      return;
     }
-    const dbRole = localStorage.getItem("livora_role");
-    if (dbRole === "ALMACEN") {
-      setWorkspaceName("Almacén Central");
-      setEyebrowText("Operación de inventario");
+
+    const currentRole = user?.role || localStorage.getItem("livora_role") || "";
+
+    // 1. Bloquear y expulsar roles móviles de la Web
+    if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(currentRole)) {
+      logout();
+      showToast(
+        "Acceso no disponible en Web",
+        "error",
+        "Tu cuenta opera exclusivamente desde la app móvil Livora. Descárgala para continuar."
+      );
+      router.push("/");
+      return;
     }
-  }, [router]);
+
+    // 2. Control estricto con privilegio de auditoría para ADMIN
+    if (currentRole === "ADMIN") {
+      // ADMIN tiene libre acceso de auditoría a /admin, /company, /centro y /perfil
+      return;
+    }
+
+    if (currentRole === "EMPRESA_B2B") {
+      if (pathname.startsWith("/admin") || pathname.startsWith("/centro")) {
+        showToast(
+          "Acceso restringido",
+          "error",
+          "Acceso restringido: Redirigiendo a tu panel autorizado."
+        );
+        router.push("/company");
+      }
+      return;
+    }
+
+    if (currentRole === "CENTRO_ACOPIO") {
+      if (pathname.startsWith("/admin") || pathname.startsWith("/company")) {
+        showToast(
+          "Acceso restringido",
+          "error",
+          "Acceso restringido: Redirigiendo a tu panel autorizado."
+        );
+        router.push("/centro");
+      }
+      return;
+    }
+  }, [router, pathname, user, logout]);
 
   const items = MENUS[role] || [];
 
@@ -103,7 +126,7 @@ export function Shell({
     <div className="shell">
       <aside className="sidebar">
         <Link className="brand" href={`/${role}`}>
-          <span className="brandmark" />
+          <LivoraLogo size={32} />
           Livora
         </Link>
         <div className="workspace">

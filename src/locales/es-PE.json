@@ -1,0 +1,39 @@
+{
+  "brand": {
+    "name": "Livora",
+    "tagline": "Trazabilidad que transforma",
+    "description": "Plataforma de reciclaje tokenizado, custodia y trazabilidad sobre Stellar / Soroban"
+  },
+  "roles": {
+    "HOGAR": "Ciudadano / Hogar",
+    "RECOLECTOR": "Recolector Ambiental",
+    "CENTRO_ACOPIO": "Centro de Acopio",
+    "EMPRESA_B2B": "Empresa Transformadora",
+    "TIENDA": "Tienda Aliada",
+    "ADMIN": "Administrador General"
+  },
+  "web3": {
+    "confirmTitle": "Confirmar Transacción Blockchain",
+    "delegationNotice": "Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar. Esta acción es irreversible.",
+    "networkFee": "0.00 ECO (Cubierto por Livora)",
+    "currency": "ECO"
+  },
+  "complaintBook": {
+    "title": "Libro de Reclamaciones Virtual",
+    "legalReference": "Conforme a la Ley N° 29571 y Ley N° 32495 (Indecopi)",
+    "responseTime": "15 días hábiles improrrogables",
+    "affidavit": "Declaro bajo fe de juramento que la información y hechos expresados en la presente Hoja de Reclamación son verídicos.",
+    "pdfNotice": "Se remitirá una copia digital en formato PDF a su correo electrónico al momento del envío."
+  },
+  "cookies": {
+    "title": "Aviso de Cookies y Privacidad — Livora",
+    "description": "Utilizamos cookies propias y de terceros técnicas y analíticas para garantizar el funcionamiento seguro bajo la Ley N° 29733.",
+    "acceptAll": "Aceptar todas",
+    "rejectNonEssential": "Rechazar no esenciales",
+    "customize": "Configurar cookies"
+  },
+  "offline": {
+    "disconnected": "Sin conexión a internet (Modo Offline)",
+    "reconnected": "Conexión restablecida"
+  }
+}

@@ -1,19 +1,62 @@
-export type Role = "HOGAR" | "RECOLECTOR" | "CENTRO_ACOPIO" | "TIENDA" | "EMPRESA_B2B" | "ADMIN" | "ALMACEN";
-export type BatchStatus = "OPEN" | "IN_TRANSIT" | "PROCESSING" | "RECEIVED" | "CONSOLIDATED";
+export type Role = "HOGAR" | "RECOLECTOR" | "CENTRO_ACOPIO" | "TIENDA" | "EMPRESA_B2B" | "ADMIN";
+export type BatchStatus = "OPEN" | "IN_TRANSIT" | "PROCESSING" | "RECEIVED" | "CONSOLIDATED" | "FLAGGED_FOR_REVIEW" | "DISPUTED";
 export type CertificateStatus = "ACTIVE" | "REVOKED";
+export type AssignmentMode = "AUTOMATIC" | "AUCTION";
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+export interface AcopioPriceList {
+  id: string;
+  centerId: string;
+  materialType: string;
+  pricePerKg: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AcopioBid {
+  id: string;
+  requestId: string;
+  centerId: string;
+  proposedRates: Record<string, number>;
+  totalEstimatedPenn: number;
+  totalEstimatedEco: number;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+  createdAt: string;
+  center?: { id: string; name?: string; email: string; address?: string };
+}
 
 export interface User {
   id: string;
   email: string;
   role: Role;
+  name?: string;
+  address?: string;
   walletAddress?: string;
   receptionPin?: string;
+  reputationScore?: number;
+  totalRatings?: number;
+  requiresQaReview?: boolean;
 }
 
 export interface CollectionRequest {
   id: string;
-  status: "PENDING" | "ACCEPTED" | "COLLECTED" | "COMPLETED" | "CANCELLED";
+  status: "PENDING" | "ACCEPTED" | "COMPLETED" | "CANCELLED";
+  assignmentMode?: AssignmentMode;
   itemsEstimated: Record<string, number>;
+  actualWeights?: Record<string, number>;
   photoUrl?: string;
   description?: string;
   verificationPin?: string;
@@ -21,8 +64,16 @@ export interface CollectionRequest {
   longitude: number;
   householdId: string;
   collectorId?: string;
+  assignedCenterId?: string;
+  agreedRates?: Record<string, number>;
+  escrowLocked?: number;
+  rating?: number;
+  feedback?: string;
   createdAt: string;
-  household?: { id: string; email: string };
+  household?: { id: string; email: string; name?: string };
+  assignedCenter?: { id: string; email: string; name?: string; address?: string };
+  collector?: { id: string; email: string; name?: string };
+  bids?: AcopioBid[];
 }
 
 export interface Batch {
@@ -34,6 +85,15 @@ export interface Batch {
   consolidatedBatchId?: string;
   ipfsCid?: string;
   txHash?: string;
+  hasDiscrepancy?: boolean;
+  discrepancyNote?: string;
+  totalWeightKg?: number;
+  receptionWeightKg?: number;
+  weightDiscrepancyKg?: number;
+  fiatSettled?: boolean;
+  fiatSettledAt?: string;
+  disputeReason?: string;
+  disputedAt?: string;
   createdAt: string;
   updatedAt: string;
   collector: Pick<User, "id" | "email">;
@@ -67,7 +127,7 @@ export interface QrRedemption {
   qrCodeRef: string;
   amountEcoTokens: number;
   storeId: string;
-  status: "PENDING" | "COMPLETED" | "EXPIRED";
+  status: "PENDING" | "COMPLETED" | "EXPIRED" | "REFUNDED";
   expiresAt: string;
 }
 

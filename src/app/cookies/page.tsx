@@ -96,7 +96,7 @@ export default function CookiesPage() {
                       <tr style={{ borderBottom: "1px solid #0d221c" }}>
                         <td style={{ padding: "8px", fontFamily: "monospace" }}>livora_role</td>
                         <td style={{ padding: "8px" }}>Livora</td>
-                        <td style={{ padding: "8px" }}>Registra el rol operativo asignado (e.g. hogar, recolector, centro) para habilitar las vistas específicas.</td>
+                        <td style={{ padding: "8px" }}>Registra el rol operativo asignado (e.g. centro, empresa, admin) para habilitar las vistas específicas.</td>
                         <td style={{ padding: "8px" }}>Local (Persistente hasta cierre de sesión)</td>
                       </tr>
                       <tr>

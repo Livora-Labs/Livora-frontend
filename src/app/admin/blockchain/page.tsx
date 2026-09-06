@@ -1,36 +1,42 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHead, Status } from "@/components/Shell";
 import { fetchBlockchainHealth, fetchBatches } from "@/lib/api";
-import { showToast, ToastContainer } from "@/components/ToastNotification";
+import { ToastContainer } from "@/components/ToastNotification";
 
 const shortId = (id: string) => (id ? `${id.slice(0, 6)}…${id.slice(-4)}` : "");
-const date = (value: string) => new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+const date = (value: string) =>
+  new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(value)
+  );
 
 export default function Page() {
-  const [health, setHealth] = useState<any>(null);
-  const [blockchainBatches, setBlockchainBatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: health,
+    isLoading: loadingHealth,
+    refetch: refetchHealth,
+  } = useQuery({
+    queryKey: ["blockchainHealth"],
+    queryFn: fetchBlockchainHealth,
+  });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const {
+    data: batches = [],
+    isLoading: loadingBatches,
+    refetch: refetchBatches,
+  } = useQuery({
+    queryKey: ["batches"],
+    queryFn: () => fetchBatches(),
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [healthData, batchesData] = await Promise.all([
-        fetchBlockchainHealth(),
-        fetchBatches()
-      ]);
-      setHealth(healthData);
-      setBlockchainBatches((batchesData || []).filter((b: any) => b.txHash));
-    } catch (err: any) {
-      showToast("Error al cargar datos blockchain", "error", err.message);
-    } finally {
-      setLoading(false);
-    }
+  const loading = loadingHealth || loadingBatches;
+  const blockchainBatches = batches.filter((b: any) => b.txHash);
+
+  const handleRefresh = () => {
+    refetchHealth();
+    refetchBatches();
   };
 
   return (
@@ -40,9 +46,13 @@ export default function Page() {
         eyebrow="Infraestructura Digital"
         title="Monitor de Trazabilidad"
         description="Estado de la red de verificación, procesamiento de lotes y evidencia digital."
-        action={<button onClick={loadData} className="btn">Actualizar ↻</button>}
+        action={
+          <button onClick={handleRefresh} className="btn" disabled={loading}>
+            Actualizar ↻
+          </button>
+        }
       />
-      
+
       {loading ? (
         <div style={{ padding: "40px 0", textAlign: "center", color: "#94A3B8" }}>
           Cargando estado de la infraestructura...
@@ -98,7 +108,7 @@ export default function Page() {
                         </td>
                       </tr>
                     ) : (
-                      blockchainBatches.map((b) => (
+                      blockchainBatches.map((b: any) => (
                         <tr key={b.id}>
                           <td className="mono">#{shortId(b.id)}</td>
                           <td className="mono">{shortId(b.txHash)}</td>
