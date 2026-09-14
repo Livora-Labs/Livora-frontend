@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { KeyRound, RefreshCw, ArrowRight } from "lucide-react";
+import { KeyRound, RefreshCw, ArrowRight, ArrowLeft } from "lucide-react";
+import { getErrorMessage } from "@/lib/api";
 
 function VerifyAccountForm() {
   const searchParams = useSearchParams();
@@ -60,8 +62,8 @@ function VerifyAccountForm() {
         }
       }, 1000);
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || "Código incorrecto o expirado.";
-      showToast("Error de Verificación", "error", Array.isArray(errMsg) ? errMsg.join(", ") : errMsg);
+      const errMsg = getErrorMessage(err, "Código incorrecto o expirado.");
+      showToast("Error de Verificación", "error", errMsg);
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ function VerifyAccountForm() {
       setCooldown(60);
       setCanResend(false);
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || "No se pudo reenviar el código.";
+      const errMsg = getErrorMessage(err, "No se pudo reenviar el código.");
       showToast("Error de reenvío", "error", errMsg);
     }
   };
@@ -90,7 +92,7 @@ function VerifyAccountForm() {
         Hemos enviado un código numérico de 6 dígitos a <strong style={{ color: "#F8FAFC" }}>{email}</strong>. Por favor, ingrésalo a continuación.
       </p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="field" style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Código OTP de 6 dígitos</label>
           <input
@@ -111,7 +113,6 @@ function VerifyAccountForm() {
               letterSpacing: 8,
               outline: "none",
             }}
-            required
           />
         </div>
 
@@ -165,6 +166,23 @@ function VerifyAccountForm() {
             Reenviar código en <strong style={{ color: "#06B6D4" }}>{cooldown}s</strong>
           </span>
         )}
+      </div>
+
+      <div style={{ marginTop: 18, textAlign: "center" }}>
+        <Link
+          href="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            color: "#94A3B8",
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+        >
+          <ArrowLeft size={14} />
+          Volver al inicio de sesión
+        </Link>
       </div>
     </div>
   );

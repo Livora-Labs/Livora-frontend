@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Shell } from "@/components/Shell";
 import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/lib/queryClient";
+import { setSecureCookie, deleteSecureCookie } from "@/lib/cookies";
 
 const mockPush = vi.fn();
 let currentPathname = "/centro";
@@ -40,6 +41,8 @@ vi.mock("@/lib/socket", () => ({
 describe("Web Shell Guard and Role Isolation Tests", () => {
   beforeEach(() => {
     localStorage.clear();
+    deleteSecureCookie("livora_token");
+    deleteSecureCookie("livora_refresh_token");
     mockPush.mockClear();
     vi.clearAllMocks();
   });
@@ -116,5 +119,24 @@ describe("Web Shell Guard and Role Isolation Tests", () => {
     );
 
     expect(mockPush).toHaveBeenCalledWith("/");
+  });
+
+  it("permite el acceso cuando el token vive solo en cookie (flujo real de login), sin copia en localStorage", () => {
+    setSecureCookie("livora_token", "centro_jwt_cookie", 7);
+    localStorage.setItem("livora_role", "CENTRO_ACOPIO");
+    currentPathname = "/centro";
+
+    render(
+      <QueryProvider>
+        <AuthProvider>
+          <Shell role="centro">
+            <div>Panel de Centro</div>
+          </Shell>
+        </AuthProvider>
+      </QueryProvider>
+    );
+
+    expect(screen.getByText("Panel de Centro")).toBeDefined();
+    expect(mockPush).not.toHaveBeenCalledWith("/");
   });
 });

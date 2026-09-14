@@ -21,6 +21,7 @@ import {
 } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { Batch } from "@/lib/types";
+import { formatStatus } from "@/lib/format";
 import {
   Scale,
   Cpu,
@@ -454,7 +455,7 @@ export default function CentroAcopioPage() {
         <Kpi
           label="CAMIONES EN CAMINO"
           value={`${transitBatches.length}`}
-          trend="Estado IN_TRANSIT"
+          trend={`Estado ${formatStatus("IN_TRANSIT")}`}
           accent="var(--blue)"
         />
         <Kpi
@@ -633,7 +634,7 @@ export default function CentroAcopioPage() {
         {/* Camiones en camino */}
         <section className="card">
           <div className="section-title">
-            <h2>Camiones en Camino (IN_TRANSIT)</h2>
+            <h2>Camiones en Camino ({formatStatus("IN_TRANSIT")})</h2>
           </div>
           {loadingTransit ? (
             <div
@@ -685,7 +686,7 @@ export default function CentroAcopioPage() {
                         className={`status ${batch.status}`}
                         style={{ fontSize: 9 }}
                       >
-                        {batch.status}
+                        {formatStatus(batch.status)}
                       </span>
                       <span
                         style={{
@@ -1487,6 +1488,7 @@ export default function CentroAcopioPage() {
             <form
               onSubmit={handleConfirmWeighing}
               style={{ display: "grid", gap: 14 }}
+              noValidate
             >
               {[
                 ["PET (Plástico)", petWeight, setPetWeight],
@@ -1705,7 +1707,7 @@ export default function CentroAcopioPage() {
               </button>
             </div>
 
-            <form onSubmit={handleConfirmSale} style={{ display: "grid", gap: 16 }}>
+            <form onSubmit={handleConfirmSale} style={{ display: "grid", gap: 16 }} noValidate>
               {/* Empresa Destino */}
               <div>
                 <label
@@ -2476,10 +2478,6 @@ export default function CentroAcopioPage() {
       {/* Printable QR Section (hidden on screen, visible on print) */}
       <div className="printable-qr-code hidden print:flex fixed inset-0 bg-white text-black z-[99999] flex-col items-center justify-center text-center p-12">
         <div className="border-4 border-[#2E7D32] p-8 rounded-3xl max-w-sm mx-auto flex flex-col items-center">
-          <div className="text-3xl font-extrabold text-[#2E7D32] mb-2 flex items-center gap-2">
-            <span>♻️</span>
-            <span>LIBORA</span>
-          </div>
           <p className="text-gray-600 text-xs mb-6 font-semibold tracking-wide">
             CENTRO DE ACOPIO OFICIAL
           </p>

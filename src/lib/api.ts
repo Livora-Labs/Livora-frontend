@@ -14,6 +14,50 @@ function resolveBaseUrl(): string {
 const API_URL = resolveBaseUrl();
 
 /**
+ * Extrae un mensaje de error apto para mostrar al usuario final.
+ *
+ * El backend responde errores en formato RFC 7807 (Problem Details):
+ * { type, title, status, detail, invalid_params? } — NO usa el campo
+ * "message" salvo en algunos casos heredados. Los errores 5xx nunca
+ * exponen el detalle real (fallas de BD, blockchain, etc.), así que
+ * siempre se devuelve un mensaje genérico y seguro para esos casos.
+ */
+export function getErrorMessage(err: any, fallback = "Ocurrió un error inesperado."): string {
+  // Sin respuesta del servidor: red caída, timeout, CORS, servidor apagado
+  if (!err?.response) {
+    if (err?.code === "ECONNABORTED" || /timeout/i.test(err?.message || "")) {
+      return "La solicitud tardó demasiado en responder. Inténtalo de nuevo.";
+    }
+    return "No se pudo conectar con el servidor. Verifica tu conexión o inténtalo más tarde.";
+  }
+
+  const status = err.response.status;
+  const data = err.response.data;
+
+  // Errores internos: nunca exponer detalles técnicos (BD, blockchain, etc.)
+  if (status >= 500) {
+    return "Ocurrió un error interno en el servidor. Por favor, inténtalo de nuevo más tarde.";
+  }
+
+  if (data) {
+    if (Array.isArray(data.invalid_params) && data.invalid_params.length > 0) {
+      return data.invalid_params.map((p: any) => p.reason).join(". ");
+    }
+    if (typeof data.detail === "string" && data.detail) {
+      return data.detail;
+    }
+    if (Array.isArray(data.message) && data.message.length > 0) {
+      return data.message.join(", ");
+    }
+    if (typeof data.message === "string" && data.message) {
+      return data.message;
+    }
+  }
+
+  return fallback;
+}
+
+/**
  * Generador de UUID v4 seguro para navegador y entornos serverless.
  */
 export function generateUuid(): string {

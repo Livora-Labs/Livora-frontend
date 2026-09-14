@@ -7,6 +7,7 @@ import { Role } from "@/lib/types";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { ArrowRight, LogIn, UserPlus } from "lucide-react";
 import { LivoraLogo } from "@/components/LivoraLogo";
+import { getErrorMessage } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,8 +69,8 @@ export default function LoginPage() {
         }
       }
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || "Ocurrió un error inesperado.";
-      showToast(isRegister ? "Error de Registro" : "Error de Autenticación", "error", Array.isArray(errMsg) ? errMsg.join(", ") : errMsg);
+      const errMsg = getErrorMessage(err);
+      showToast(isRegister ? "Error de Registro" : "Error de Autenticación", "error", errMsg);
     } finally {
       setLoading(false);
     }
@@ -104,7 +105,7 @@ export default function LoginPage() {
             {isRegister ? "Crear cuenta Livora" : "Iniciar sesión"}
           </h2>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="field" style={{ marginBottom: 14 }}>
               <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Correo electrónico</label>
               <input
@@ -122,7 +123,6 @@ export default function LoginPage() {
                   fontSize: 13,
                   outline: "none",
                 }}
-                required
               />
             </div>
 
@@ -143,7 +143,6 @@ export default function LoginPage() {
                   fontSize: 13,
                   outline: "none",
                 }}
-                required
               />
               {isRegister && (
                 <p style={{ fontSize: 11, color: "#64748B", marginTop: 6, lineHeight: 1.5 }}>
@@ -216,7 +215,6 @@ export default function LoginPage() {
                         cursor: "pointer",
                         flexShrink: 0,
                       }}
-                      required
                     />
                     <span>
                       Acepto los{" "}

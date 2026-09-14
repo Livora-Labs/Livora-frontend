@@ -184,7 +184,7 @@ export default function PerfilPage() {
               <div className="section-title" style={{ marginBottom: 20 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Datos Personales</h2>
               </div>
-              <form onSubmit={handleUpdateProfile} style={{ display: "grid", gap: 16 }}>
+              <form onSubmit={handleUpdateProfile} style={{ display: "grid", gap: 16 }} noValidate>
                 <div>
                   <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Nombre Completo</label>
                   <input
@@ -299,7 +299,7 @@ export default function PerfilPage() {
               <div className="section-title" style={{ marginBottom: 20 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Seguridad y Contraseña</h2>
               </div>
-              <form onSubmit={handleChangePassword} style={{ display: "grid", gap: 16 }}>
+              <form onSubmit={handleChangePassword} style={{ display: "grid", gap: 16 }} noValidate>
                 <div>
                   <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Nueva Contraseña</label>
                   <input

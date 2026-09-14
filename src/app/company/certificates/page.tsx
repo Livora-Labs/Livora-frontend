@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CertificateCard } from "@/components/Assets";
-import { PageHead } from "@/components/Shell";
+import { Shell, PageHead } from "@/components/Shell";
 import { fetchCertificates } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 
@@ -27,7 +27,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <Shell role="company">
       <ToastContainer />
       <PageHead
         eyebrow="Portafolio ambiental"
@@ -64,6 +64,6 @@ export default function Page() {
           ))}
         </div>
       )}
-    </>
+    </Shell>
   );
 }

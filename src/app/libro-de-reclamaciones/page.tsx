@@ -348,7 +348,7 @@ export default function LibroDeReclamacionesPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ display: "grid", gap: 32 }}>
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: "grid", gap: 32 }} noValidate>
               {/* SECCIÓN 1: Identificación del Consumidor */}
               <fieldset style={{ border: "1px solid #1c352b", borderRadius: 14, padding: "22px 20px", margin: 0 }}>
                 <legend style={{ padding: "0 10px", color: "#55e6a5", fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>

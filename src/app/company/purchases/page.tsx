@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Kpi, PageHead, Status } from "@/components/Shell";
+import { Shell, Kpi, PageHead, Status } from "@/components/Shell";
 import { fetchSales, fetchCertificates } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 
@@ -41,7 +41,7 @@ export default function Page() {
   const centersCount = Array.from(new Set(salesList.map((s) => s.center?.email))).filter(Boolean).length;
 
   return (
-    <>
+    <Shell role="company">
       <ToastContainer />
       <PageHead
         eyebrow="Abastecimiento circular"
@@ -124,6 +124,6 @@ export default function Page() {
           </section>
         </>
       )}
-    </>
+    </Shell>
   );
 }

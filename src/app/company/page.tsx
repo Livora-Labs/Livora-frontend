@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { PageHead, Kpi } from "@/components/Shell";
+import { Shell, PageHead, Kpi } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { fetchCertificates, fetchIncomingB2bTransfers, receiveB2bTransfer, fetchSales } from "@/lib/api";
 import { ShieldCheck, Award, RefreshCw, CheckCircle2, ExternalLink, Hash } from "lucide-react";
@@ -122,7 +122,7 @@ export default function B2bCompanyPage() {
   });
 
   return (
-    <>
+    <Shell role="company">
       <ToastContainer />
       <PageHead
         eyebrow="Resumen corporativo"
@@ -728,6 +728,6 @@ export default function B2bCompanyPage() {
           </div>
         </div>
       )}
-    </>
+    </Shell>
   );
 }

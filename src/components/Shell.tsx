@@ -6,29 +6,45 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/components/ToastNotification";
 import { LivoraLogo } from "@/components/LivoraLogo";
+import { getSecureCookie } from "@/lib/cookies";
+import { formatRole } from "@/lib/format";
+import {
+  Home,
+  Package,
+  FileText,
+  BarChart3,
+  Users,
+  Link2,
+  Settings,
+  Leaf,
+  ShoppingCart,
+  Scale,
+  ChevronDown,
+  type LucideIcon,
+} from "lucide-react";
 
-type Item = { href: string; label: string };
+type Item = { href: string; label: string; icon: LucideIcon };
 
 const MENUS: Record<string, Item[]> = {
   admin: [
-    { href: "/admin", label: "⌂  Resumen" },
-    { href: "/admin/batches", label: "◇  Lotes" },
-    { href: "/admin/certificates", label: "▣  Certificados" },
-    { href: "/admin/inventory", label: "▤  Inventario" },
-    { href: "/admin/users-kyc", label: "♙  Usuarios y KYC" },
-    { href: "/admin/blockchain", label: "⌁  Blockchain" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
+    { href: "/admin", label: "Resumen", icon: Home },
+    { href: "/admin/batches", label: "Lotes", icon: Package },
+    { href: "/admin/certificates", label: "Certificados", icon: FileText },
+    { href: "/admin/inventory", label: "Inventario", icon: BarChart3 },
+    { href: "/admin/users-kyc", label: "Usuarios y KYC", icon: Users },
+    { href: "/admin/blockchain", label: "Blockchain", icon: Link2 },
+    { href: "/perfil", label: "Mi Perfil", icon: Settings },
   ],
   company: [
-    { href: "/company", label: "⌂  Resumen ESG" },
-    { href: "/company/certificates", label: "▣  Certificados" },
-    { href: "/company/purchases", label: "⇄  Compras" },
-    { href: "/company/traceability", label: "⌁  Trazabilidad" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
+    { href: "/company", label: "Resumen ESG", icon: Leaf },
+    { href: "/company/certificates", label: "Certificados", icon: FileText },
+    { href: "/company/purchases", label: "Compras", icon: ShoppingCart },
+    { href: "/company/traceability", label: "Trazabilidad", icon: Link2 },
+    { href: "/perfil", label: "Mi Perfil", icon: Settings },
   ],
   centro: [
-    { href: "/centro", label: "⌂  Recepción Lotes" },
-    { href: "/perfil", label: "⚙  Mi Perfil" },
+    { href: "/centro", label: "Recepción Lotes", icon: Scale },
+    { href: "/perfil", label: "Mi Perfil", icon: Settings },
   ],
 };
 
@@ -61,7 +77,7 @@ export function Shell({
   const [eyebrowText, setEyebrowText] = React.useState(EYEBROWS[role] || "Plataforma Livora");
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("livora_token");
+    const savedToken = getSecureCookie("livora_token") || localStorage.getItem("livora_token");
     if (!savedToken) {
       router.push("/");
       return;
@@ -131,12 +147,20 @@ export function Shell({
         </Link>
         <div className="workspace">
           <small>Espacio de trabajo</small>
-          <strong>{workspaceName}⌄</strong>
+          <strong style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {workspaceName}
+            <ChevronDown size={14} />
+          </strong>
         </div>
         <nav className="nav">
           {items.map((i) => (
-            <Link key={i.href} href={i.href}>
-              {i.label}
+            <Link
+              key={i.href}
+              href={i.href}
+              className={pathname === i.href ? "active" : undefined}
+            >
+              <i.icon size={16} />
+              <span>{i.label}</span>
             </Link>
           ))}
         </nav>
@@ -145,7 +169,7 @@ export function Shell({
             <span className="avatar">{initials}</span>
             <div>
               <strong>{email.split("@")[0]}</strong>
-              <small>{user?.role || role.toUpperCase()}</small>
+              <small>{formatRole(user?.role) || role.toUpperCase()}</small>
             </div>
           </Link>
           <button
@@ -186,8 +210,14 @@ export function Shell({
 
       <nav className="mobile-nav">
         {items.slice(0, 4).map((i) => (
-          <Link key={i.href} href={i.href}>
-            {i.label.replace(/^\S+\s+/, "")}
+          <Link
+            key={i.href}
+            href={i.href}
+            className={pathname === i.href ? "active" : undefined}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}
+          >
+            <i.icon size={16} />
+            <span>{i.label}</span>
           </Link>
         ))}
       </nav>

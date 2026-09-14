@@ -176,7 +176,7 @@ function SeguimientoPageContent() {
           </div>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch}>
+          <form onSubmit={handleSearch} noValidate>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <input
                 type="text"
@@ -195,7 +195,6 @@ function SeguimientoPageContent() {
                   fontFamily: "monospace",
                   letterSpacing: 1,
                 }}
-                required
               />
               <button
                 type="submit"

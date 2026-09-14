@@ -107,7 +107,7 @@ function RestablecerContrasenaForm() {
         Ingresa tu nueva contraseña a continuación. Asegúrate de que cumpla con los requisitos mínimos de seguridad.
       </p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div style={{ marginBottom: 14 }}>
           <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Nueva contraseña</label>
           <input
@@ -125,7 +125,6 @@ function RestablecerContrasenaForm() {
               fontSize: 13,
               outline: "none",
             }}
-            required
           />
         </div>
 
@@ -146,7 +145,6 @@ function RestablecerContrasenaForm() {
               fontSize: 13,
               outline: "none",
             }}
-            required
           />
         </div>
 

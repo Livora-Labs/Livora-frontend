@@ -60,6 +60,12 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    // La CSP estricta (sin 'unsafe-inline') bloquea los scripts inline que
+    // Turbopack inyecta para el bootstrap de hidratación en `next dev`,
+    // dejando toda la app sin interactividad. Solo se aplica en producción.
+    if (process.env.NODE_ENV !== "production") {
+      return [];
+    }
     return [
       {
         source: "/:path*",

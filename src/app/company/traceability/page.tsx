@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { PageHead, Status } from "@/components/Shell";
+import { Shell, PageHead, Status } from "@/components/Shell";
 import { fetchCertificates, fetchSales, fetchBatches } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 
@@ -50,7 +50,7 @@ export default function Page() {
   const hasData = cert && sale && batch;
 
   return (
-    <>
+    <Shell role="company">
       <ToastContainer />
       <PageHead
         eyebrow="Cadena de custodia"
@@ -143,6 +143,6 @@ export default function Page() {
           </div>
         </>
       )}
-    </>
+    </Shell>
   );
 }
