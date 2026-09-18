@@ -192,7 +192,7 @@ export default function LoginPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
               Red Stellar Soroban Testnet · Activa
             </span>
-            <span>Alta Disponibilidad 99.9%</span>
+            <span className="text-emerald-400/80 font-medium">Plataforma Oficial Livora</span>
           </div>
         </div>
 
