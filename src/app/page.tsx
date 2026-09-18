@@ -1,24 +1,44 @@
-"use client";
+﻿"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Role } from "@/lib/types";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { ArrowRight, LogIn, UserPlus, Eye, EyeOff, Check, X } from "lucide-react";
+import {
+  ArrowRight,
+  LogIn,
+  UserPlus,
+  Eye,
+  EyeOff,
+  Check,
+  X,
+  Mail,
+  Lock,
+  ShieldCheck,
+  Cpu,
+  Database,
+  Warehouse,
+  Building2,
+  Store,
+  Scale,
+  Sparkles,
+  ExternalLink,
+} from "lucide-react";
 import { LivoraFullLogo } from "@/components/LivoraLogo";
-import { Footer } from "@/components/Footer";
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, token, role, login, register, logout } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (token && role) {
       if (role === "ADMIN") router.replace("/admin");
       else if (role === "EMPRESA_B2B") router.replace("/company");
       else if (role === "CENTRO_ACOPIO") router.replace("/centro");
+      else if (role === "TIENDA") router.replace("/store");
     }
   }, [token, role, router]);
 
@@ -68,7 +88,6 @@ export default function LoginPage() {
       } else {
         const loggedUser = await login(email.trim(), password);
 
-        // Redirect based on authorized web roles
         if (loggedUser.role === "ADMIN") {
           showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
           router.push("/admin");
@@ -102,317 +121,380 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login" style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)" }}>
+    <div className="min-h-screen w-full bg-[#040807] text-[#eaf4f0] flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
       <ToastContainer />
-      <section
-        className="login-art"
-        style={{
-          background: "radial-gradient(circle at 70% 30%, rgba(5, 150, 105, 0.12), transparent 45%), var(--panel2)",
-          borderRight: "1px solid var(--line)",
-        }}
-      >
-        <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <LivoraFullLogo width={160} height={44} />
-        </div>
 
-        <div>
-          <span className="eyebrow" style={{ color: "var(--blue)" }}>Trazabilidad Verde Verificable</span>
-          <h1 style={{ fontSize: 46, fontWeight: 900, letterSpacing: "-1.5px", margin: "12px 0", color: "var(--text)" }}>
-            Economía Circular <em style={{ color: "var(--green)", fontStyle: "normal" }}>Verificable.</em>
-          </h1>
-          <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.6 }}>
-            Accede a la plataforma para registrar recolecciones, validar entregas físicas on-chain, procesar pesajes y redimir EcoTokens en comercios locales.
-          </p>
-        </div>
+      {/* Main Grid: Split Screen Enterprise */}
+      <div className="flex-1 grid lg:grid-cols-12 w-full max-w-[1580px] mx-auto min-h-0">
+        
+        {/* LADO IZQUIERDO: Branding Corporativo de Alto Impacto */}
+        <div className="lg:col-span-6 xl:col-span-7 p-8 lg:p-14 xl:p-20 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-[#061510] via-[#040d0a] to-[#030706] border-b lg:border-b-0 lg:border-r border-emerald-900/25">
+          {/* Ambient Glow Effects */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-        <small className="muted" style={{ color: "var(--muted)" }}>Ecosistema de Reciclaje y Recompensas Circulares Livora</small>
-      </section>
+          {/* Top Header con Logotipo Oficial Grande */}
+          <div className="relative z-10">
+            <Link href="/" className="inline-block transition-opacity hover:opacity-90">
+              <LivoraFullLogo width={210} height={54} />
+            </Link>
+          </div>
 
-      <section className="login-form" style={{ background: "var(--panel)" }}>
-        <div className="login-card" style={{ maxWidth: 460 }}>
-          <span className="eyebrow" style={{ color: "var(--green)" }}>Acceso de Usuarios</span>
-          <h2 style={{ fontSize: 26, fontWeight: 800, margin: "6px 0 16px", color: "var(--text)" }}>
-            {isRegister ? "Crear cuenta Livora" : "Iniciar sesión"}
-          </h2>
-
-          <form onSubmit={handleSubmit}>
-            <div className="field" style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 600 }}>
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                placeholder="ejemplo@livora.pe"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "12px 14px",
-                  background: "var(--panel2)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 10,
-                  color: "var(--text)",
-                  fontSize: 13,
-                  outline: "none",
-                  transition: "border-color 0.15s ease",
-                }}
-                required
-              />
+          {/* Value Proposition Core */}
+          <div className="relative z-10 my-10 lg:my-0 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono uppercase tracking-wider mb-6">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Trazabilidad Circular · Stellar Web3
             </div>
 
-            <div className="field" style={{ marginBottom: 18 }}>
-              <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 600 }}>
-                Contraseña
-              </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px 42px 12px 14px",
-                    background: "var(--panel2)",
-                    border: "1px solid var(--line)",
-                    borderRadius: 10,
-                    color: "var(--text)",
-                    fontSize: 13,
-                    outline: "none",
-                    transition: "border-color 0.15s ease",
-                  }}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    color: "var(--muted)",
-                    cursor: "pointer",
-                    display: "grid",
-                    placeItems: "center",
-                    padding: 4,
-                  }}
-                  title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.12]">
+              Infraestructura de Reciclaje y Compensación{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+                Verificable.
+              </span>
+            </h1>
+
+            <p className="mt-5 text-sm sm:text-base text-emerald-100/70 leading-relaxed font-light">
+              Plataforma industrial para centros de acopio, empresas B2B y comercios. Registra entregas físicas, concilia saldos en el libro mayor y valida certificados ESG respaldados criptográficamente.
+            </p>
+
+            {/* Enterprise Feature Cards */}
+            <div className="mt-8 grid sm:grid-cols-3 gap-3">
+              <div className="bg-[#081713]/80 border border-emerald-900/35 rounded-xl p-3.5 backdrop-blur-sm">
+                <Cpu className="w-5 h-5 text-emerald-400 mb-2" />
+                <h4 className="text-xs font-semibold text-white">Smart Contracts</h4>
+                <p className="text-[11px] text-emerald-200/60 mt-1 leading-snug">
+                  Soroban RPC con liquidación irreversible on-chain.
+                </p>
               </div>
 
+              <div className="bg-[#081713]/80 border border-emerald-900/35 rounded-xl p-3.5 backdrop-blur-sm">
+                <Database className="w-5 h-5 text-teal-400 mb-2" />
+                <h4 className="text-xs font-semibold text-white">Doble Partida</h4>
+                <p className="text-[11px] text-emerald-200/60 mt-1 leading-snug">
+                  Transactional Outbox y conciliación financiera auditada.
+                </p>
+              </div>
+
+              <div className="bg-[#081713]/80 border border-emerald-900/35 rounded-xl p-3.5 backdrop-blur-sm">
+                <ShieldCheck className="w-5 h-5 text-cyan-400 mb-2" />
+                <h4 className="text-xs font-semibold text-white">Certificación ESG</h4>
+                <p className="text-[11px] text-emerald-200/60 mt-1 leading-snug">
+                  Hash inmutable en IPFS con validez de cumplimiento.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Trust Badge */}
+          <div className="relative z-10 pt-4 flex items-center justify-between text-xs text-emerald-300/60 font-mono border-t border-emerald-900/20">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+              Red Stellar Soroban Testnet · Activa
+            </span>
+            <span>Alta Disponibilidad 99.9%</span>
+          </div>
+        </div>
+
+        {/* LADO DERECHO: Tarjeta de Autenticación */}
+        <div className="lg:col-span-6 xl:col-span-5 p-6 sm:p-10 lg:p-12 xl:p-16 flex items-center justify-center relative">
+          <div className="w-full max-w-md bg-[#091512]/95 border border-emerald-500/20 rounded-2xl p-7 sm:p-9 shadow-2xl shadow-black/80 backdrop-blur-md">
+            
+            {/* Segmented Control Tabs [ Iniciar Sesión | Registrarse ] */}
+            <div className="grid grid-cols-2 p-1 bg-[#050e0b] border border-emerald-950 rounded-xl mb-6">
+              <button
+                type="button"
+                onClick={() => setIsRegister(false)}
+                className={`py-2 text-xs font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                  !isRegister
+                    ? "bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-500/40 text-emerald-300 shadow-sm"
+                    : "text-emerald-100/50 hover:text-emerald-200"
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Iniciar Sesión
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsRegister(true)}
+                className={`py-2 text-xs font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                  isRegister
+                    ? "bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-500/40 text-emerald-300 shadow-sm"
+                    : "text-emerald-100/50 hover:text-emerald-200"
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Registrarse
+              </button>
+            </div>
+
+            {/* Encabezado del Formulario */}
+            <div className="mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                {isRegister ? "Crear cuenta corporativa" : "Bienvenido a Livora"}
+              </h2>
+              <p className="text-xs text-emerald-200/60 mt-1">
+                {isRegister
+                  ? "Selecciona tu perfil industrial y regístrate en la red."
+                  : "Ingresa tus credenciales para acceder a tu panel de control."}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Campo Correo Electrónico */}
+              <div>
+                <label className="block text-xs font-medium text-emerald-200/80 mb-1.5">
+                  Correo electrónico
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-emerald-400/60 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ejemplo@livora.pe"
+                    className="w-full bg-[#050e0b] border border-emerald-900/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 text-white rounded-xl text-sm py-2.5 pl-10 pr-4 transition-all duration-150 outline-none placeholder:text-emerald-300/25"
+                  />
+                </div>
+              </div>
+
+              {/* Campo Contraseña */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-medium text-emerald-200/80">
+                    Contraseña
+                  </label>
+                  {!isRegister && (
+                    <Link
+                      href="/recuperar-contrasena"
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </Link>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-emerald-400/60 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full bg-[#050e0b] border border-emerald-900/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 text-white rounded-xl text-sm py-2.5 pl-10 pr-10 transition-all duration-150 outline-none placeholder:text-emerald-300/25"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400/60 hover:text-emerald-300 transition-colors p-1"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Controles Exclusivos de Registro */}
               {isRegister && (
-                <div style={{ marginTop: 10, padding: 10, background: "var(--panel2)", borderRadius: 8, border: "1px solid var(--line)", fontSize: 11 }}>
-                  <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>Requisitos de seguridad:</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: hasMinLen ? "var(--green)" : "var(--muted)" }}>
-                      {hasMinLen ? <Check size={11} /> : <X size={11} />} Mín. 8 caracteres
-                    </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: hasUpper ? "var(--green)" : "var(--muted)" }}>
-                      {hasUpper ? <Check size={11} /> : <X size={11} />} Una mayúscula
-                    </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: hasLower ? "var(--green)" : "var(--muted)" }}>
-                      {hasLower ? <Check size={11} /> : <X size={11} />} Una minúscula
-                    </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: hasNumber ? "var(--green)" : "var(--muted)" }}>
-                      {hasNumber ? <Check size={11} /> : <X size={11} />} Un número
-                    </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: hasSpecial ? "var(--green)" : "var(--muted)", gridColumn: "span 2" }}>
-                      {hasSpecial ? <Check size={11} /> : <X size={11} />} Un símbolo (!@#$%^&*...)
-                    </span>
+                <div className="space-y-4 pt-1">
+                  {/* Selector de Rol Profesional */}
+                  <div>
+                    <label className="block text-xs font-medium text-emerald-200/80 mb-2">
+                      Tipo de Organización en Livora
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("CENTRO_ACOPIO")}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          selectedRole === "CENTRO_ACOPIO"
+                            ? "bg-emerald-500/15 border-emerald-400 text-white"
+                            : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
+                        }`}
+                      >
+                        <Warehouse className="w-4 h-4 text-emerald-400 mb-1" />
+                        <div className="text-xs font-semibold">Acopio</div>
+                        <div className="text-[10px] text-emerald-200/50">Báscula</div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("EMPRESA_B2B")}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          selectedRole === "EMPRESA_B2B"
+                            ? "bg-emerald-500/15 border-emerald-400 text-white"
+                            : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
+                        }`}
+                      >
+                        <Building2 className="w-4 h-4 text-teal-400 mb-1" />
+                        <div className="text-xs font-semibold">Empresa</div>
+                        <div className="text-[10px] text-emerald-200/50">Compras</div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("TIENDA")}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          selectedRole === "TIENDA"
+                            ? "bg-emerald-500/15 border-emerald-400 text-white"
+                            : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
+                        }`}
+                      >
+                        <Store className="w-4 h-4 text-cyan-400 mb-1" />
+                        <div className="text-xs font-semibold">Comercio</div>
+                        <div className="text-[10px] text-emerald-200/50">Canjes POS</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Checklist Reactivo de Contraseña */}
+                  <div className="p-3 bg-[#050e0b] border border-emerald-950 rounded-xl space-y-1.5 text-[11px]">
+                    <div className="font-medium text-emerald-300/80 mb-1">Requisitos de seguridad:</div>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-emerald-100/60">
+                      <span className={`flex items-center gap-1.5 ${hasMinLen ? "text-emerald-400" : ""}`}>
+                        {hasMinLen ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-red-400/60" />}
+                        Mínimo 8 caracteres
+                      </span>
+                      <span className={`flex items-center gap-1.5 ${hasUpper ? "text-emerald-400" : ""}`}>
+                        {hasUpper ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-red-400/60" />}
+                        Una mayúscula
+                      </span>
+                      <span className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-400" : ""}`}>
+                        {hasNumber ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-red-400/60" />}
+                        Un número
+                      </span>
+                      <span className={`flex items-center gap-1.5 ${hasSpecial ? "text-emerald-400" : ""}`}>
+                        {hasSpecial ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-red-400/60" />}
+                        Un carácter especial
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Checkboxes de Consentimiento Legal (Ley 29733 ANPD) */}
+                  <div className="space-y-2 pt-1 text-xs">
+                    <label className="flex items-start gap-2.5 cursor-pointer text-emerald-100/70">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 rounded border-emerald-900/60 bg-[#050e0b] text-emerald-500 focus:ring-emerald-500/20"
+                      />
+                      <span>
+                        Acepto los{" "}
+                        <Link href="/terminos" target="_blank" className="text-emerald-400 underline hover:text-emerald-300">
+                          Términos y Condiciones
+                        </Link>{" "}
+                        y la{" "}
+                        <Link href="/privacidad" target="_blank" className="text-emerald-400 underline hover:text-emerald-300">
+                          Política de Privacidad
+                        </Link>
+                        .
+                      </span>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 cursor-pointer text-emerald-100/60">
+                      <input
+                        type="checkbox"
+                        checked={marketingAccepted}
+                        onChange={(e) => setMarketingAccepted(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 rounded border-emerald-900/60 bg-[#050e0b] text-emerald-500 focus:ring-emerald-500/20"
+                      />
+                      <span>Deseo recibir actualizaciones comerciales y comunicados sobre el token.</span>
+                    </label>
                   </div>
                 </div>
               )}
 
-              {!isRegister && (
-                <div style={{ textAlign: "right", marginTop: 8 }}>
-                  <a
-                    href="/recuperar-contrasena"
-                    style={{
-                      fontSize: 12,
-                      color: "var(--blue)",
-                      textDecoration: "none",
-                      fontWeight: 600,
-                    }}
+              {/* Botón Principal de Acción */}
+              <button
+                type="submit"
+                disabled={loading || (isRegister && (!isPasswordValid || !acceptedTerms))}
+                className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 text-sm"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Procesando...
+                  </span>
+                ) : isRegister ? (
+                  <>
+                    <span>Registrar e Ingresar</span>
+                    <UserPlus className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    <span>Ingresar a la Plataforma</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Alternador inferior */}
+            <div className="mt-6 pt-5 border-t border-emerald-900/20 text-center text-xs text-emerald-200/60">
+              {isRegister ? (
+                <p>
+                  ¿Ya tienes una cuenta registrada?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(false)}
+                    className="text-emerald-400 font-semibold hover:text-emerald-300 ml-1 transition-colors"
                   >
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
+                    Inicia sesión
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  ¿No tienes una cuenta aún?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(true)}
+                    className="text-emerald-400 font-semibold hover:text-emerald-300 ml-1 transition-colors"
+                  >
+                    Regístrate aquí
+                  </button>
+                </p>
               )}
             </div>
 
-            {isRegister && (
-              <>
-                <div className="field" style={{ marginBottom: 16 }}>
-                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 600 }}>
-                    Rol en el ecosistema
-                  </label>
-                  <select
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value as Role)}
-                    style={{
-                      width: "100%",
-                      padding: 12,
-                      background: "var(--panel2)",
-                      border: "1px solid var(--line)",
-                      borderRadius: 10,
-                      color: "var(--text)",
-                      fontSize: 13,
-                      outline: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <option value="CENTRO_ACOPIO">Centro de Acopio</option>
-                    <option value="EMPRESA_B2B">Empresa B2B / Compradora</option>
-                  </select>
-                </div>
-
-                {/* Consent Checkboxes */}
-                <div style={{ marginBottom: 12 }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 10,
-                      fontSize: 12.5,
-                      color: "var(--text)",
-                      cursor: "pointer",
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      style={{
-                        marginTop: 2,
-                        accentColor: "var(--green)",
-                        width: 16,
-                        height: 16,
-                        cursor: "pointer",
-                        flexShrink: 0,
-                      }}
-                      required
-                    />
-                    <span>
-                      Acepto los{" "}
-                      <a
-                        href="/terminos"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 700 }}
-                      >
-                        Términos y Condiciones
-                      </a>{" "}
-                      y la{" "}
-                      <a
-                        href="/privacidad"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 700 }}
-                      >
-                        Política de Privacidad
-                      </a>{" "}
-                      de Livora.
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginBottom: 18 }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 10,
-                      fontSize: 12,
-                      color: "var(--muted)",
-                      cursor: "pointer",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={marketingAccepted}
-                      onChange={(e) => setMarketingAccepted(e.target.checked)}
-                      style={{
-                        marginTop: 2,
-                        accentColor: "var(--green)",
-                        width: 16,
-                        height: 16,
-                        cursor: "pointer",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span>
-                      Autorizo el envío de publicidad y promociones sobre tiendas asociadas y beneficios comerciales (Opcional).
-                    </span>
-                  </label>
-                </div>
-
-                <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16, lineHeight: 1.45 }}>
-                  Tus datos serán recopilados por Livora para gestionar tu cuenta y monedero. Conoce más en nuestra{" "}
-                  <a
-                    href="/privacidad"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 700 }}
-                  >
-                    Política de Privacidad
-                  </a>.
-                </p>
-              </>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || (isRegister && !isPasswordValid)}
-              style={{
-                width: "100%",
-                background: "var(--green)",
-                color: "#06110d",
-                border: "none",
-                padding: 14,
-                borderRadius: 12,
-                fontSize: 15,
-                fontWeight: 800,
-                cursor: loading || (isRegister && !isPasswordValid) ? "not-allowed" : "pointer",
-                opacity: loading || (isRegister && !isPasswordValid) ? 0.7 : 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                marginTop: 10,
-                transition: "opacity 0.2s",
-              }}
-            >
-              <span>{loading ? "Procesando..." : isRegister ? "Registrar e Ingresar" : "Ingresar"}</span>
-              {isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
-            </button>
-          </form>
-
-          <div style={{ marginTop: 20, textAlign: "center", fontSize: 13 }}>
-            <button
-              type="button"
-              onClick={() => setIsRegister(!isRegister)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "var(--blue)",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              {isRegister ? "¿Ya tienes una cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate aquí"}
-            </button>
           </div>
         </div>
-      </section>
+      </div>
 
-      <Footer />
+      {/* FOOTER COMPACTO DE UNA SOLA LÍNEA (Sin Desbordar) */}
+      <footer className="w-full border-t border-emerald-950/60 bg-[#020504] py-3.5 px-6">
+        <div className="max-w-[1580px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-emerald-300/60 font-light">
+          <div>
+            © {new Date().getFullYear()} Livora S.A.C. · RUC 20608912345 · Todos los derechos reservados.
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs font-normal">
+            <Link href="/terminos" target="_blank" className="hover:text-emerald-300 transition-colors">
+              Términos
+            </Link>
+            <span className="text-emerald-900">·</span>
+            <Link href="/privacidad" target="_blank" className="hover:text-emerald-300 transition-colors">
+              Privacidad
+            </Link>
+            <span className="text-emerald-900">·</span>
+            <Link href="/cookies" target="_blank" className="hover:text-emerald-300 transition-colors">
+              Cookies
+            </Link>
+            <span className="text-emerald-900">·</span>
+            <Link
+              href="/libro-de-reclamaciones"
+              target="_blank"
+              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 font-medium transition-colors"
+            >
+              <Scale className="w-3.5 h-3.5 text-emerald-400" />
+              Libro de Reclamaciones
+            </Link>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 }
