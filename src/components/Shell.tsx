@@ -111,7 +111,7 @@ export function Shell({
     const savedToken =
       getSecureCookie("livora_token") || localStorage.getItem("livora_token");
     if (!savedToken) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
@@ -125,7 +125,7 @@ export function Shell({
         "error",
         "Tu cuenta opera exclusivamente desde la app móvil Livora. Descárgala para continuar."
       );
-      router.push("/");
+      router.push("/login");
       return;
     }
 
