@@ -155,8 +155,8 @@ export default function Page() {
   };
 
   const handleToggleUserActive = async (user: any) => {
-    const newStatus = user.isActive ? "SUSPENDED" : "ACTIVE";
     const newActive = !user.isActive;
+    const newStatus = newActive ? "ACTIVE" : "SUSPENDED_FRAUD";
     try {
       await updateAdminUserStatus(user.id, {
         isActive: newActive,
@@ -441,19 +441,32 @@ export default function Page() {
                           {date(u.createdAt)}
                         </td>
                         <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleUserActive(u)}
-                            className="btn ghost"
-                            style={{
-                              fontSize: 11,
-                              padding: "4px 8px",
-                              color: u.isActive ? "#F43F5E" : "var(--green)",
-                              borderColor: u.isActive ? "rgba(244,63,94,0.3)" : "rgba(5,150,105,0.3)",
-                            }}
-                          >
-                            {u.isActive ? "Suspender" : "Reactivar"}
-                          </button>
+                          {u.role === "ADMIN" ? (
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--muted)",
+                                padding: "4px 8px",
+                                fontStyle: "italic",
+                              }}
+                            >
+                              Administrador
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleUserActive(u)}
+                              className="btn ghost"
+                              style={{
+                                fontSize: 11,
+                                padding: "4px 8px",
+                                color: u.isActive ? "#F43F5E" : "var(--green)",
+                                borderColor: u.isActive ? "rgba(244,63,94,0.3)" : "rgba(5,150,105,0.3)",
+                              }}
+                            >
+                              {u.isActive ? "Suspender" : "Reactivar"}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
