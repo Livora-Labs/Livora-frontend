@@ -22,6 +22,13 @@ export const metadata: Metadata = {
   },
   description: "Plataforma de trazabilidad de reciclaje, canje Web3 y cumplimiento ESG sobre Stellar/Soroban",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/icon-192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
