@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -135,8 +135,8 @@ export default function LoginPage() {
 
           {/* Top Header con Logotipo Oficial Grande */}
           <div className="relative z-10">
-            <Link href="/" className="inline-block transition-opacity hover:opacity-90">
-              <LivoraFullLogo width={210} height={54} />
+            <Link href="/" className="inline-block transition-transform duration-200 hover:scale-[1.02]">
+              <LivoraFullLogo width={260} height={66} />
             </Link>
           </div>
 

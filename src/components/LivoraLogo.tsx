@@ -44,12 +44,12 @@ interface LivoraFullLogoProps {
 }
 
 /**
- * Logotipo oficial completo de Livora (Isotipo + Marca tipográfica integrada).
- * Ideal para pantallas de autenticación, landing page, footers y reportes impresos.
+ * Logotipo oficial completo de Livora (Isotipo + Marca tipográfica horizontal integrada).
+ * Ideal para barras de navegación, landing page, footers y reportes impresos.
  */
 export function LivoraFullLogo({
-  height = 40,
-  width = 160,
+  height = 48,
+  width = 190,
   className = "",
   style,
   alt = "Livora — Trazabilidad y Reciclaje Circular",
@@ -57,6 +57,37 @@ export function LivoraFullLogo({
   return (
     <Image
       src="/images/livora-logotipo.png"
+      alt={alt}
+      width={width}
+      height={height}
+      priority
+      className={className}
+      style={{
+        objectFit: "contain",
+        height: height,
+        width: "auto",
+        display: "inline-block",
+        flexShrink: 0,
+        ...style,
+      }}
+    />
+  );
+}
+
+/**
+ * Logotipo oficial completo en disposición vertical/apilada (Isotipo arriba, texto abajo).
+ * Ideal para pantallas de autenticación, splash y presentaciones de gran formato.
+ */
+export function LivoraStackedLogo({
+  height = 120,
+  width = 120,
+  className = "",
+  style,
+  alt = "Livora — Trazabilidad y Reciclaje Circular",
+}: LivoraFullLogoProps) {
+  return (
+    <Image
+      src="/images/livora-logotipo-vertical.png"
       alt={alt}
       width={width}
       height={height}
