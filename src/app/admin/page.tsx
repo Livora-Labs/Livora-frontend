@@ -6,7 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { Shell, PageHead, Kpi } from "@/components/Shell";
 import { ToastContainer } from "@/components/ToastNotification";
 import { fetchBatches, fetchCertificates } from "@/lib/api";
-import { ExternalLink, ShieldCheck, Hash, RefreshCw, Package, Eye, X } from "lucide-react";
+import { ExternalLink, ShieldCheck, Hash, RefreshCw, Package, Eye, X, Award, Activity } from "lucide-react";
+import { TableSkeleton } from "@/components/skeletons/SkeletonUI";
+import { ErrorState, EmptyState } from "@/components/StateFeedback";
 
 const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 
@@ -26,6 +28,8 @@ export default function AdminPage() {
   const {
     data: batches = [],
     isLoading: loadingBatches,
+    isError: isErrorBatches,
+    error: errorBatches,
     isRefetching: refetchingBatches,
     refetch: refetchBatches,
   } = useQuery({
@@ -37,11 +41,13 @@ export default function AdminPage() {
   const {
     data: certificates = [],
     isLoading: loadingCerts,
+    isError: isErrorCerts,
+    error: errorCerts,
     isRefetching: refetchingCerts,
     refetch: refetchCerts,
   } = useQuery({
     queryKey: ["certificates"],
-    queryFn: () => fetchCertificates().catch(() => []),
+    queryFn: fetchCertificates,
     enabled: Boolean(token),
   });
 
@@ -73,7 +79,7 @@ export default function AdminPage() {
   };
 
   return (
-    <Shell role="admin">
+    <>
       <ToastContainer />
       <PageHead
         eyebrow="Vista general del sistema"
@@ -96,7 +102,7 @@ export default function AdminPage() {
       />
 
       {/* KPI Cards */}
-      <div className="grid kpis" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 24 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 kpis" style={{ marginBottom: 24 }}>
         <Kpi
           label="MATERIAL RECUPERADO"
           value={`${totalKg.toFixed(0)} kg`}
@@ -132,10 +138,22 @@ export default function AdminPage() {
           <span style={{ fontSize: 12, color: "#94A3B8" }}>{receivedBatches.length} lotes</span>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#94A3B8" }}>Cargando lotes...</div>
+        {loadingBatches ? (
+          <TableSkeleton rows={4} columns={8} />
+        ) : isErrorBatches ? (
+          <ErrorState
+            title="Error al cargar lotes operativos"
+            message={(errorBatches as any)?.response?.data?.message || (errorBatches as any)?.message || "No pudimos conectar con el servidor para consultar los lotes."}
+            onRetry={refetchBatches}
+          />
         ) : receivedBatches.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#94A3B8" }}>No hay lotes recibidos aún.</div>
+          <EmptyState
+            icon={Package}
+            title="Sin lotes consolidados"
+            description="Actualmente no se registran lotes en estado RECIBIDO dentro de los centros de acopio."
+            actionHref="/admin/batches"
+            actionLabel="Explorar todos los lotes"
+          />
         ) : (
           <div className="table-wrap">
             <table className="table">
@@ -288,10 +306,22 @@ export default function AdminPage() {
           <span style={{ fontSize: 12, color: "#94A3B8" }}>{certificates.length} certificados</span>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "30px 0", color: "#94A3B8" }}>Cargando certificados...</div>
+        {loadingCerts ? (
+          <TableSkeleton rows={4} columns={7} />
+        ) : isErrorCerts ? (
+          <ErrorState
+            title="Error al cargar certificados ESG"
+            message={(errorCerts as any)?.response?.data?.message || (errorCerts as any)?.message || "No pudimos conectar con el registro digital de certificados."}
+            onRetry={refetchCerts}
+          />
         ) : certificates.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "30px 0", color: "#94A3B8" }}>No hay certificados emitidos.</div>
+          <EmptyState
+            icon={Award}
+            title="Sin certificados emitidos"
+            description="Aún no se han emitido certificados de compensación ambiental para empresas B2B en la red."
+            actionHref="/admin/certificates"
+            actionLabel="Ver registro de certificados"
+          />
         ) : (
           <div className="table-wrap">
             <table className="table">
@@ -385,7 +415,7 @@ export default function AdminPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10,25,47,0.9)",
+            background: "rgba(0, 0, 0, 0.65)",
             backdropFilter: "blur(10px)",
             display: "grid",
             placeItems: "center",
@@ -395,14 +425,15 @@ export default function AdminPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
               borderRadius: 20,
               padding: 28,
               maxWidth: 580,
               width: "100%",
               maxHeight: "90vh",
               overflowY: "auto",
+              boxShadow: "var(--card-shadow)",
             }}
           >
             <div
@@ -421,6 +452,7 @@ export default function AdminPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
+                  color: "var(--text)",
                 }}
               >
                 <ShieldCheck size={18} style={{ color: "#10B981" }} />
@@ -431,7 +463,7 @@ export default function AdminPage() {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--muted)",
                   cursor: "pointer",
                 }}
               >
@@ -441,15 +473,15 @@ export default function AdminPage() {
 
             <div style={{ display: "grid", gap: 12, fontSize: 13 }}>
               {/* ID Completo */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 6 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 700, marginBottom: 6 }}>
                   BATCH ID (UUID)
                 </div>
                 <div
                   style={{
                     fontFamily: "monospace",
                     fontSize: 12,
-                    color: "#06B6D4",
+                    color: "var(--blue)",
                     wordBreak: "break-all",
                   }}
                 >
@@ -458,24 +490,24 @@ export default function AdminPage() {
               </div>
 
               {/* Actores */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 700, marginBottom: 8 }}>
                   ACTORES INVOLUCRADOS
                 </div>
-                <div style={{ display: "grid", gap: 6 }}>
+                <div style={{ display: "grid", gap: 6, color: "var(--text)" }}>
                   <div>
-                    <span style={{ color: "#64748B" }}>Recolector: </span>
+                    <span style={{ color: "var(--muted)" }}>Recolector: </span>
                     <strong>{selectedBatch.collector?.email}</strong>
                   </div>
                   {selectedBatch.destinationCenter && (
                     <div>
-                      <span style={{ color: "#64748B" }}>Centro de Acopio: </span>
+                      <span style={{ color: "var(--muted)" }}>Centro de Acopio: </span>
                       <strong>{selectedBatch.destinationCenter.email}</strong>
                     </div>
                   )}
                   {(selectedBatch.requests || []).length > 0 && (
                     <div>
-                      <span style={{ color: "#64748B" }}>Solicitudes de Hogar: </span>
+                      <span style={{ color: "var(--muted)" }}>Solicitudes de Hogar: </span>
                       <strong>{selectedBatch.requests.length}</strong>
                     </div>
                   )}
@@ -483,8 +515,8 @@ export default function AdminPage() {
               </div>
 
               {/* Materiales */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 700, marginBottom: 8 }}>
                   COMPOSICIÓN DE MATERIALES
                 </div>
                 {Object.entries(selectedBatch.materialsActual || {}).map(([mat, kg]: any) => (
@@ -496,18 +528,18 @@ export default function AdminPage() {
                       marginBottom: 4,
                     }}
                   >
-                    <span style={{ color: "#CBD5E1" }}>{mat}</span>
+                    <span style={{ color: "var(--text)" }}>{mat}</span>
                     <strong style={{ color: "#10B981" }}>{Number(kg).toFixed(2)} kg</strong>
                   </div>
                 ))}
               </div>
 
               {/* IPFS */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#64748B",
+                    color: "var(--muted)",
                     fontWeight: 700,
                     marginBottom: 8,
                     display: "flex",
@@ -523,7 +555,7 @@ export default function AdminPage() {
                       style={{
                         fontFamily: "monospace",
                         fontSize: 11,
-                        color: "#06B6D4",
+                        color: "var(--blue)",
                         wordBreak: "break-all",
                         marginBottom: 10,
                       }}
@@ -552,18 +584,18 @@ export default function AdminPage() {
                     </a>
                   </>
                 ) : (
-                  <div style={{ color: "#475569", fontSize: 12 }}>
+                  <div style={{ color: "var(--muted)", fontSize: 12 }}>
                     IPFS CID no disponible — lote anterior a la integración.
                   </div>
                 )}
               </div>
 
               {/* Stellar */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#64748B",
+                    color: "var(--muted)",
                     fontWeight: 700,
                     marginBottom: 8,
                     display: "flex",
@@ -571,7 +603,7 @@ export default function AdminPage() {
                     gap: 4,
                   }}
                 >
-                  ⬡ STELLAR TESTNET — TX HASH
+                  <Activity size={12} style={{ color: "#3B82F6" }} /> STELLAR TESTNET — TX HASH
                 </div>
                 {selectedBatch.txHash ? (
                   <>
@@ -608,24 +640,24 @@ export default function AdminPage() {
                     </a>
                   </>
                 ) : (
-                  <div style={{ color: "#475569", fontSize: 12 }}>
+                  <div style={{ color: "var(--muted)", fontSize: 12 }}>
                     Tx Hash no disponible — lote anterior a la integración.
                   </div>
                 )}
               </div>
 
               {/* Timeline */}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, marginBottom: 8 }}>
+              <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 700, marginBottom: 8 }}>
                   TIMELINE
                 </div>
-                <div style={{ display: "grid", gap: 4, fontSize: 11 }}>
+                <div style={{ display: "grid", gap: 4, fontSize: 11, color: "var(--text)" }}>
                   <div>
-                    <span style={{ color: "#64748B" }}>Creado: </span>
+                    <span style={{ color: "var(--muted)" }}>Creado: </span>
                     {new Date(selectedBatch.createdAt).toLocaleString("es-PE")}
                   </div>
                   <div>
-                    <span style={{ color: "#64748B" }}>Última actualización: </span>
+                    <span style={{ color: "var(--muted)" }}>Última actualización: </span>
                     {new Date(selectedBatch.updatedAt).toLocaleString("es-PE")}
                   </div>
                 </div>
@@ -639,9 +671,9 @@ export default function AdminPage() {
                 width: "100%",
                 marginTop: 16,
                 padding: 12,
-                background: "#1E293B",
-                border: "none",
-                color: "#F8FAFC",
+                background: "var(--panel2)",
+                border: "1px solid var(--line)",
+                color: "var(--text)",
                 borderRadius: 12,
                 cursor: "pointer",
                 fontWeight: 700,
@@ -652,6 +684,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-    </Shell>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { CookieBanner } from "@/components/CookieBanner";
 import { QueryProvider } from "@/lib/queryClient";
 import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
@@ -9,13 +10,16 @@ import { isMaintenanceMode } from "@/lib/flags";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 
 export const viewport: Viewport = {
-  themeColor: "#0A192F",
+  themeColor: "#07110f",
   width: "device-width",
   initialScale: 1,
 };
 
 export const metadata: Metadata = {
-  title: "Livora — Trazabilidad que transforma",
+  title: {
+    default: "Livora — Trazabilidad que transforma",
+    template: "%s | Livora",
+  },
   description: "Plataforma de trazabilidad de reciclaje, canje Web3 y cumplimiento ESG sobre Stellar/Soroban",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -37,9 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : (
           <QueryProvider>
             <AuthProvider>
-              {children}
-              <CookieBanner />
-              <NetworkStatusIndicator />
+              <ThemeProvider>
+                {children}
+                <CookieBanner />
+                <NetworkStatusIndicator />
+              </ThemeProvider>
             </AuthProvider>
           </QueryProvider>
         )}

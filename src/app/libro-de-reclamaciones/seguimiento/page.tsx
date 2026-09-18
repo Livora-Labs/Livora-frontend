@@ -14,6 +14,8 @@ interface ComplaintRecord {
   correlativeNumber: string;
   fullName: string;
   email: string;
+  documentType?: string;
+  documentNumberMasked?: string;
   claimType: string;
   goodType: string;
   goodDescription: string;
@@ -69,11 +71,13 @@ function formatCorrelative(raw: string): string {
 function SeguimientoPageContent() {
   const searchParams = useSearchParams();
   const [input, setInput] = useState(searchParams.get("n") ?? "");
+  const [documentNumber, setDocumentNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [complaint, setComplaint] = useState<ComplaintRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Si viene con ?n=R-00001-2026 desde la pantalla de confirmación, busca automáticamente
+  // Si viene con ?n=R-00001-2026 desde la pantalla de confirmación, rellena el campo
   useEffect(() => {
     const n = searchParams.get("n");
     if (n) {
@@ -95,17 +99,28 @@ function SeguimientoPageContent() {
       return;
     }
 
+    if (!documentNumber.trim() || documentNumber.trim().length < 4) {
+      setErrorMessage(
+        "Ingrese el número de documento de identidad (DNI, CE, Pasaporte o RUC) registrado con la reclamación."
+      );
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await api.get<ComplaintRecord>(
-        `/complaints/correlative/${encodeURIComponent(correlative)}`
+      const response = await api.post<ComplaintRecord>(
+        `/complaints/track`,
+        {
+          correlativeNumber: correlative,
+          documentNumber: documentNumber.trim(),
+        }
       );
       setComplaint(response.data);
     } catch (err: any) {
       const status = err.response?.status;
       if (status === 404) {
         setErrorMessage(
-          `No se encontró ninguna reclamación con el número correlativo "${correlative}". Verifique el número en su correo de confirmación.`
+          `No se encontró ninguna reclamación con los datos proporcionados. Verifique el número correlativo y su documento de identidad.`
         );
       } else {
         setErrorMessage(
@@ -114,6 +129,34 @@ function SeguimientoPageContent() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!complaint) return;
+    setDownloadingPdf(true);
+    try {
+      const response = await api.post(
+        '/complaints/track/pdf',
+        {
+          correlativeNumber: complaint.correlativeNumber,
+          documentNumber: documentNumber.trim(),
+        },
+        { responseType: 'blob' },
+      );
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Hoja-Reclamacion-${complaint.correlativeNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch {
+      alert('Error al descargar la hoja de reclamación en PDF.');
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -134,16 +177,16 @@ function SeguimientoPageContent() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg, #07110f)", color: "var(--text, #f2f7f5)", padding: "40px 20px 80px" }}>
+    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", padding: "40px 20px 80px" }}>
       <div style={{ maxWidth: 780, margin: "0 auto" }}>
 
         {/* Breadcrumb */}
-        <div style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted, #8fa49d)" }}>
-          <Link href="/" style={{ color: "var(--green, #55e6a5)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <div style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)" }}>
+          <Link href="/" style={{ color: "var(--green)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
             <ArrowLeft size={14} /> Inicio
           </Link>
           <span>/</span>
-          <Link href="/libro-de-reclamaciones" style={{ color: "var(--green, #55e6a5)", textDecoration: "none" }}>Libro de Reclamaciones</Link>
+          <Link href="/libro-de-reclamaciones" style={{ color: "var(--green)", textDecoration: "none" }}>Libro de Reclamaciones</Link>
           <span>/</span>
           <span>Consulta de Seguimiento</span>
         </div>
@@ -152,23 +195,23 @@ function SeguimientoPageContent() {
         <div
           className="card"
           style={{
-            background: "linear-gradient(145deg, #0e1c18, #091310)",
-            border: "1px solid var(--line, #20332d)",
+            background: "var(--panel)",
+            border: "1px solid var(--line)",
             borderRadius: 18,
             padding: "32px 28px",
-            boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
             marginBottom: 24,
           }}
         >
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, marginBottom: 24 }}>
             <div>
-              <span className="eyebrow" style={{ color: "var(--green, #55e6a5)" }}>
+              <span className="eyebrow" style={{ color: "var(--green)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
                 República del Perú — Indecopi
               </span>
-              <h1 style={{ fontSize: 24, margin: "6px 0 8px", color: "#f2f7f5", letterSpacing: -0.5 }}>
+              <h1 style={{ fontSize: 24, margin: "6px 0 8px", color: "var(--text)", letterSpacing: -0.5, fontWeight: 800 }}>
                 Consulta de Seguimiento
               </h1>
-              <p style={{ margin: 0, fontSize: 13, color: "var(--muted, #8fa49d)", maxWidth: 500, lineHeight: 1.5 }}>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--muted)", maxWidth: 500, lineHeight: 1.5 }}>
                 Ingrese el número correlativo recibido en su correo de confirmación para consultar el estado de su reclamación.
               </p>
             </div>
@@ -182,18 +225,38 @@ function SeguimientoPageContent() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ej. R-00001-2026 o Q-00001-2026"
+                placeholder="N° Correlativo (Ej. R-00001-2026)"
                 style={{
                   flex: 1,
-                  minWidth: 260,
-                  padding: "13px 16px",
-                  background: "#0c1915",
-                  border: "1px solid var(--line, #20332d)",
+                  minWidth: 220,
+                  padding: "12px 14px",
+                  background: "var(--panel2)",
+                  border: "1px solid var(--line)",
                   borderRadius: 10,
-                  color: "white",
-                  fontSize: 15,
+                  color: "var(--text)",
+                  fontSize: 14,
                   fontFamily: "monospace",
                   letterSpacing: 1,
+                  outline: "none",
+                }}
+                required
+              />
+              <input
+                type="text"
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                placeholder="N° Documento (DNI / CE / RUC)"
+                style={{
+                  flex: 1,
+                  minWidth: 200,
+                  padding: "12px 14px",
+                  background: "var(--panel2)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 10,
+                  color: "var(--text)",
+                  fontSize: 14,
+                  letterSpacing: 1,
+                  outline: "none",
                 }}
                 required
               />
@@ -202,10 +265,13 @@ function SeguimientoPageContent() {
                 disabled={loading}
                 className="btn primary"
                 style={{
-                  padding: "13px 24px",
+                  padding: "12px 24px",
                   fontSize: 14,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   borderRadius: 10,
+                  background: "var(--green)",
+                  color: "#06110d",
+                  border: "none",
                   cursor: loading ? "not-allowed" : "pointer",
                   opacity: loading ? 0.7 : 1,
                   whiteSpace: "nowrap",
@@ -222,8 +288,8 @@ function SeguimientoPageContent() {
               </button>
             </div>
 
-            <p style={{ fontSize: 11, color: "#6e847d", marginTop: 10 }}>
-              El número correlativo tiene el formato <strong style={{ color: "#8fa49d", fontFamily: "monospace" }}>R-XXXXX-AAAA</strong> (Reclamo) o <strong style={{ color: "#8fa49d", fontFamily: "monospace" }}>Q-XXXXX-AAAA</strong> (Queja).
+            <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>
+              Por su seguridad y cumplimiento de la Ley N° 29733 (Protección de Datos Personales), se requiere validar el número correlativo junto con el documento de identidad registrado.
             </p>
           </form>
 
@@ -231,9 +297,9 @@ function SeguimientoPageContent() {
           {errorMessage && (
             <div
               style={{
-                background: "#3d1818",
-                border: "1px solid #6b2d2d",
-                color: "#ff9e9e",
+                background: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid #ef4444",
+                color: "#ef4444",
                 padding: "14px 18px",
                 borderRadius: 10,
                 fontSize: 13,
@@ -254,11 +320,11 @@ function SeguimientoPageContent() {
           <div
             className="card"
             style={{
-              background: "linear-gradient(145deg, #0d211b, #071410)",
-              border: "1px solid #234f3e",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
               borderRadius: 18,
               padding: "32px 28px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
             }}
           >
             {/* Status Badge */}
@@ -417,29 +483,32 @@ function SeguimientoPageContent() {
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
-              <Link
-                href={`/complaints/correlative/${complaint.correlativeNumber}/pdf`}
-                target="_blank"
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloadingPdf}
                 className="btn"
                 style={{
                   background: "#172e25",
                   borderColor: "#2d5746",
                   color: "#f2f7f5",
                   padding: "11px 20px",
-                  textDecoration: "none",
+                  cursor: downloadingPdf ? "not-allowed" : "pointer",
+                  opacity: downloadingPdf ? 0.7 : 1,
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
                   fontSize: 13,
+                  borderRadius: 10,
                 }}
               >
-                <FileText size={16} /> Descargar Hoja de Reclamación (PDF)
-              </Link>
+                <FileText size={16} /> {downloadingPdf ? "Descargando..." : "Descargar Hoja de Reclamación (PDF)"}
+              </button>
               <button
                 type="button"
-                onClick={() => { setComplaint(null); setInput(""); }}
+                onClick={() => { setComplaint(null); setInput(""); setDocumentNumber(""); }}
                 className="btn"
-                style={{ background: "#0c1915", borderColor: "#1c352b", color: "#8fa49d", padding: "11px 20px", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}
+                style={{ background: "#0c1915", borderColor: "#1c352b", color: "#8fa49d", padding: "11px 20px", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 10, cursor: "pointer" }}
               >
                 Nueva Consulta
               </button>

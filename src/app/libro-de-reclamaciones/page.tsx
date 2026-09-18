@@ -92,12 +92,12 @@ export default function LibroDeReclamacionesPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg, #07110f)", color: "var(--text, #f2f7f5)", padding: "40px 20px 80px" }}>
+    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", padding: "40px 20px 80px" }}>
       <div style={{ maxWidth: 880, margin: "0 auto" }}>
         {/* Navigation Breadcrumb */}
-        <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted, #8fa49d)", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", flexWrap: "wrap", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/" style={{ color: "var(--green, #55e6a5)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Link href="/" style={{ color: "var(--green)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
               <ArrowLeft size={14} /> Volver al inicio
             </Link>
             <span>/</span>
@@ -107,15 +107,16 @@ export default function LibroDeReclamacionesPage() {
             href="/libro-de-reclamaciones/seguimiento"
             style={{
               fontSize: 12,
-              color: "#55e6a5",
+              color: "var(--green)",
               textDecoration: "none",
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "5px 12px",
-              background: "#0c1915",
-              border: "1px solid #1c352b",
+              padding: "6px 14px",
+              background: "var(--panel2)",
+              border: "1px solid var(--line)",
               borderRadius: 8,
+              fontWeight: 600,
             }}
           >
             <Search size={12} /> Consultar seguimiento de reclamo existente
@@ -127,11 +128,11 @@ export default function LibroDeReclamacionesPage() {
           <div
             className="card"
             style={{
-              background: "linear-gradient(145deg, #0d211b, #071410)",
-              border: "1px solid #234f3e",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
               borderRadius: 18,
               padding: "40px 32px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
               textAlign: "center",
             }}
           >
@@ -140,20 +141,20 @@ export default function LibroDeReclamacionesPage() {
                 width: 64,
                 height: 64,
                 borderRadius: "50%",
-                background: "rgba(85, 230, 165, 0.15)",
-                border: "2px solid #55e6a5",
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "2px solid var(--green)",
                 display: "grid",
                 placeItems: "center",
                 margin: "0 auto 20px",
               }}
             >
-              <CheckCircle2 size={32} style={{ color: "#55e6a5" }} />
+              <CheckCircle2 size={32} style={{ color: "var(--green)" }} />
             </div>
 
-            <span className="eyebrow" style={{ color: "#55e6a5", fontWeight: 700 }}>
+            <span className="eyebrow" style={{ color: "var(--green)", fontWeight: 700 }}>
               Registro Exitoso conforme a Ley N° 29571
             </span>
-            <h1 style={{ fontSize: 28, margin: "8px 0 16px", color: "#f2f7f5" }}>
+            <h1 style={{ fontSize: 28, margin: "8px 0 16px", color: "var(--text)", fontWeight: 800 }}>
               Hoja de Reclamación Registrada
             </h1>
 
@@ -161,17 +162,17 @@ export default function LibroDeReclamacionesPage() {
             <div
               style={{
                 display: "inline-block",
-                background: "#081813",
-                border: "2px solid #55e6a5",
+                background: "var(--panel2)",
+                border: "2px solid var(--green)",
                 padding: "16px 32px",
                 borderRadius: 14,
                 margin: "12px 0 24px",
               }}
             >
-              <small style={{ display: "block", color: "#8fa49d", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.2 }}>
+              <small style={{ display: "block", color: "var(--muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.2 }}>
                 Número Correlativo Único
               </small>
-              <strong style={{ fontSize: 32, color: "#55e6a5", letterSpacing: 1, fontFamily: "monospace" }}>
+              <strong style={{ fontSize: 32, color: "var(--green)", letterSpacing: 1, fontFamily: "monospace" }}>
                 {successData.correlativeNumber}
               </strong>
             </div>
@@ -179,8 +180,8 @@ export default function LibroDeReclamacionesPage() {
             {/* Summary Details */}
             <div
               style={{
-                background: "#060f0d",
-                border: "1px solid #1c382d",
+                background: "var(--panel2)",
+                border: "1px solid var(--line)",
                 borderRadius: 12,
                 padding: 20,
                 textAlign: "left",
@@ -190,48 +191,48 @@ export default function LibroDeReclamacionesPage() {
                 lineHeight: 1.7,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #162a22", paddingBottom: 8, marginBottom: 8 }}>
-                <span style={{ color: "#8fa49d" }}>Fecha y hora de registro:</span>
-                <strong>{new Date(successData.createdAt).toLocaleString("es-PE")}</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: 8, marginBottom: 8 }}>
+                <span style={{ color: "var(--muted)" }}>Fecha y hora de registro:</span>
+                <strong style={{ color: "var(--text)" }}>{new Date(successData.createdAt).toLocaleString("es-PE")}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #162a22", paddingBottom: 8, marginBottom: 8 }}>
-                <span style={{ color: "#8fa49d" }}>Consumidor:</span>
-                <strong>{submittedValues.fullName} ({submittedValues.documentType} {submittedValues.documentNumber})</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: 8, marginBottom: 8 }}>
+                <span style={{ color: "var(--muted)" }}>Consumidor:</span>
+                <strong style={{ color: "var(--text)" }}>{submittedValues.fullName} ({submittedValues.documentType} {submittedValues.documentNumber})</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #162a22", paddingBottom: 8, marginBottom: 8 }}>
-                <span style={{ color: "#8fa49d" }}>Tipo de Solicitud:</span>
-                <strong style={{ color: submittedValues.claimType === "RECLAMO" ? "#55e6a5" : "#ffcd70" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: 8, marginBottom: 8 }}>
+                <span style={{ color: "var(--muted)" }}>Tipo de Solicitud:</span>
+                <strong style={{ color: submittedValues.claimType === "RECLAMO" ? "var(--green)" : "#eab308" }}>
                   {submittedValues.claimType} — {submittedValues.goodType}
                 </strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#8fa49d" }}>Correo de Notificación:</span>
-                <strong>{submittedValues.email}</strong>
+                <span style={{ color: "var(--muted)" }}>Correo de Notificación:</span>
+                <strong style={{ color: "var(--text)" }}>{submittedValues.email}</strong>
               </div>
             </div>
 
             {/* Notification Notice */}
             <div
               style={{
-                background: "rgba(85, 230, 165, 0.08)",
-                border: "1px solid rgba(85, 230, 165, 0.3)",
+                background: "rgba(16, 185, 129, 0.06)",
+                border: "1px solid var(--line)",
                 borderRadius: 12,
                 padding: "16px 20px",
                 maxWidth: 600,
                 margin: "0 auto 30px",
-                color: "#d8e4df",
+                color: "var(--text)",
                 fontSize: 13,
                 lineHeight: 1.5,
               }}
             >
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
-                <Mail size={16} style={{ color: "#55e6a5", marginTop: 2, flexShrink: 0 }} />
+                <Mail size={16} style={{ color: "var(--green)", marginTop: 2, flexShrink: 0 }} />
                 <span>
-                  <strong>Copia Digital Remitida:</strong> Se ha enviado automáticamente una copia oficial en formato PDF de su Hoja de Reclamación a su correo electrónico <strong>{submittedValues.email}</strong>.
+                  <strong>Copia Digital Remitida:</strong> Se ha enviado automáticamente una copia oficial en formato PDF de su Hoja de Reclamación a su correo electrónico <strong style={{ color: "var(--text)" }}>{submittedValues.email}</strong>.
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <Scale size={16} style={{ color: "#55e6a5", marginTop: 2, flexShrink: 0 }} />
+                <Scale size={16} style={{ color: "var(--green)", marginTop: 2, flexShrink: 0 }} />
                 <span>
                   <strong>Plazo Legal de Respuesta:</strong> Conforme al D.S. 011-2011-PCM y la Ley N° 29571, Livora S.A.C. emitirá su respuesta formal en un plazo máximo de <strong>quince (15) días hábiles improrrogables</strong>.
                 </span>
@@ -244,21 +245,21 @@ export default function LibroDeReclamacionesPage() {
                 type="button"
                 onClick={handlePrint}
                 className="btn"
-                style={{ background: "#172e25", borderColor: "#2d5746", color: "#f2f7f5", padding: "12px 22px", display: "inline-flex", alignItems: "center", gap: 8 }}
+                style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--text)", padding: "12px 22px", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", borderRadius: 10, fontWeight: 600 }}
               >
                 <Printer size={16} /> Imprimir Constancia
               </button>
               <Link
                 href={`/libro-de-reclamaciones/seguimiento?n=${successData.correlativeNumber}`}
                 className="btn"
-                style={{ padding: "12px 24px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, background: "#172e25", borderColor: "#2d5746", color: "#55e6a5" }}
+                style={{ padding: "12px 24px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--green)", borderRadius: 10, fontWeight: 600 }}
               >
                 <Search size={16} /> Consultar Seguimiento
               </Link>
               <Link
                 href="/"
                 className="btn primary"
-                style={{ padding: "12px 24px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
+                style={{ padding: "12px 24px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, background: "var(--green)", color: "#06110d", borderRadius: 10, fontWeight: 800 }}
               >
                 Finalizar y Volver al Inicio
               </Link>
@@ -269,23 +270,23 @@ export default function LibroDeReclamacionesPage() {
           <div
             className="card"
             style={{
-              background: "linear-gradient(145deg, #0e1c18, #091310)",
-              border: "1px solid var(--line, #20332d)",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
               borderRadius: 18,
               padding: "36px 30px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
             }}
           >
             {/* Header with Indecopi Badge & Corporate Info */}
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, borderBottom: "1px solid #1c352b", paddingBottom: 24, marginBottom: 28 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, borderBottom: "1px solid var(--line)", paddingBottom: 24, marginBottom: 28 }}>
               <div>
-                <span className="eyebrow" style={{ color: "var(--green, #55e6a5)" }}>
+                <span className="eyebrow" style={{ color: "var(--green)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
                   República del Perú — Indecopi
                 </span>
-                <h1 style={{ fontSize: 26, margin: "6px 0 10px", color: "#f2f7f5", letterSpacing: -0.5 }}>
+                <h1 style={{ fontSize: 26, margin: "6px 0 10px", color: "var(--text)", letterSpacing: -0.5, fontWeight: 800 }}>
                   Libro de Reclamaciones Virtual
                 </h1>
-                <p style={{ margin: 0, fontSize: 13, color: "var(--muted, #8fa49d)", maxWidth: 540, lineHeight: 1.5 }}>
+                <p style={{ margin: 0, fontSize: 13, color: "var(--muted)", maxWidth: 540, lineHeight: 1.5 }}>
                   Conforme a lo establecido en el Código de Protección y Defensa del Consumidor (Ley N° 29571) y Ley N° 32495.
                 </p>
               </div>
@@ -298,31 +299,31 @@ export default function LibroDeReclamacionesPage() {
             {/* Corporate Identification Banner */}
             <div
               style={{
-                background: "#081512",
-                border: "1px solid #1a332a",
+                background: "var(--panel2)",
+                border: "1px solid var(--line)",
                 borderRadius: 12,
                 padding: "16px 20px",
                 marginBottom: 32,
                 fontSize: 12,
-                color: "#8fa49d",
+                color: "var(--muted)",
                 lineHeight: 1.6,
               }}
             >
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                 <div>
-                  <strong style={{ color: "#c6d7d1", display: "block" }}>Razón Social:</strong>
+                  <strong style={{ color: "var(--text)", display: "block" }}>Razón Social:</strong>
                   Livora S.A.C.
                 </div>
                 <div>
-                  <strong style={{ color: "#c6d7d1", display: "block" }}>RUC:</strong>
+                  <strong style={{ color: "var(--text)", display: "block" }}>RUC:</strong>
                   20608912345
                 </div>
                 <div>
-                  <strong style={{ color: "#c6d7d1", display: "block" }}>Domicilio Legal:</strong>
+                  <strong style={{ color: "var(--text)", display: "block" }}>Domicilio Legal:</strong>
                   Av. Javier Prado Este 4200, Surco, Lima, Perú
                 </div>
                 <div>
-                  <strong style={{ color: "#c6d7d1", display: "block" }}>Plazo de Respuesta:</strong>
+                  <strong style={{ color: "var(--text)", display: "block" }}>Plazo de Respuesta:</strong>
                   15 días hábiles improrrogables
                 </div>
               </div>
@@ -357,8 +358,9 @@ export default function LibroDeReclamacionesPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 10 }}>
                   <div className="field">
-                    <label>Tipo de Documento *</label>
+                    <label htmlFor="documentType">Tipo de Documento *</label>
                     <select
+                      id="documentType"
                       {...register("documentType")}
                       style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white" }}
                     >
@@ -371,8 +373,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field">
-                    <label>Número de Documento *</label>
+                    <label htmlFor="documentNumber">Número de Documento *</label>
                     <input
+                      id="documentNumber"
                       type="text"
                       {...register("documentNumber")}
                       placeholder="Ej. 74839201"
@@ -381,8 +384,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
-                    <label>Nombres y Apellidos Completos / Razón Social *</label>
+                    <label htmlFor="fullName">Nombres y Apellidos Completos / Razón Social *</label>
                     <input
+                      id="fullName"
                       type="text"
                       {...register("fullName")}
                       placeholder="Ingrese su nombre completo"
@@ -391,8 +395,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
-                    <label>Domicilio (Dirección, Distrito, Provincia y Departamento) *</label>
+                    <label htmlFor="address">Domicilio (Dirección, Distrito, Provincia y Departamento) *</label>
                     <input
+                      id="address"
                       type="text"
                       {...register("address")}
                       placeholder="Ej. Av. Los Laureles 123, San Borja, Lima"
@@ -401,8 +406,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field">
-                    <label>Teléfono o Celular *</label>
+                    <label htmlFor="phone">Teléfono o Celular *</label>
                     <input
+                      id="phone"
                       type="tel"
                       {...register("phone")}
                       placeholder="Ej. 987654321"
@@ -411,8 +417,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field">
-                    <label>Correo Electrónico (Para recibir copia PDF) *</label>
+                    <label htmlFor="email">Correo Electrónico (Para recibir copia PDF) *</label>
                     <input
+                      id="email"
                       type="email"
                       {...register("email")}
                       placeholder="correo@ejemplo.com"
@@ -435,8 +442,9 @@ export default function LibroDeReclamacionesPage() {
                   {isMinor && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 14, background: "#081512", padding: 16, borderRadius: 10, border: "1px solid #1c352b" }}>
                       <div className="field">
-                        <label>Nombre del Padre, Madre o Apoderado *</label>
+                        <label htmlFor="representativeName">Nombre del Padre, Madre o Apoderado *</label>
                         <input
+                          id="representativeName"
                           type="text"
                           {...register("representativeName")}
                           placeholder="Nombre completo del apoderado"
@@ -444,8 +452,9 @@ export default function LibroDeReclamacionesPage() {
                         {errors.representativeName && <small style={{ color: "#ff9e9e", fontSize: 11 }}>{errors.representativeName.message}</small>}
                       </div>
                       <div className="field">
-                        <label>Documento de Identidad del Apoderado</label>
+                        <label htmlFor="representativeDoc">Documento de Identidad del Apoderado</label>
                         <input
+                          id="representativeDoc"
                           type="text"
                           {...register("representativeDoc")}
                           placeholder="DNI / CE del apoderado"
@@ -488,8 +497,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field">
-                    <label>Monto Reclamado (Opcional - S/. o ECO)</label>
+                    <label htmlFor="amount">Monto Reclamado (Opcional - S/. o ECO)</label>
                     <input
+                      id="amount"
                       type="number"
                       step="0.01"
                       {...register("amount")}
@@ -499,8 +509,9 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
-                    <label>Descripción del Producto o Servicio Contratado *</label>
+                    <label htmlFor="goodDescription">Descripción del Producto o Servicio Contratado *</label>
                     <textarea
+                      id="goodDescription"
                       {...register("goodDescription")}
                       placeholder="Ej. Canje de 50 EcoTokens por producto en tienda aliada / Servicio de recolección domiciliaria de botellas PET"
                       rows={3}
@@ -571,8 +582,9 @@ export default function LibroDeReclamacionesPage() {
                 </div>
 
                 <div className="field">
-                  <label>Detalle de la Reclamación (Hechos) *</label>
+                  <label htmlFor="claimDetail">Detalle de la Reclamación (Hechos) *</label>
                   <textarea
+                    id="claimDetail"
                     {...register("claimDetail")}
                     placeholder="Describa con claridad y precisión los hechos ocurridos..."
                     rows={4}
@@ -582,8 +594,9 @@ export default function LibroDeReclamacionesPage() {
                 </div>
 
                 <div className="field">
-                  <label>Pedido Concreto del Consumidor *</label>
+                  <label htmlFor="consumerRequest">Pedido Concreto del Consumidor *</label>
                   <textarea
+                    id="consumerRequest"
                     {...register("consumerRequest")}
                     placeholder="Indique con claridad cuál es la solución o pedido que solicita..."
                     rows={3}
@@ -602,8 +615,9 @@ export default function LibroDeReclamacionesPage() {
                   padding: "20px 22px",
                 }}
               >
-                <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
+                <label htmlFor="affidavitConsent" style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
                   <input
+                    id="affidavitConsent"
                     type="checkbox"
                     {...register("affidavitConsent")}
                     style={{ width: 20, height: 20, marginTop: 2, accentColor: "#55e6a5" }}

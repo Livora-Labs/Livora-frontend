@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+import React from "react";
+import { Shell } from "@/components/Shell";
+
+export default function CompanyLayout({ children }: { children: React.ReactNode }) {
+  return <Shell role="company">{children}</Shell>;
 }

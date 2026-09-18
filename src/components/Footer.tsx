@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { LivoraLogo } from "@/components/LivoraLogo";
+import { LivoraLogo, LivoraFullLogo } from "@/components/LivoraLogo";
 
 export function IndecopiBookLogo({ className = "", width = 140, height = 90 }: { className?: string; width?: number; height?: number }) {
   return (
@@ -82,21 +82,20 @@ export function Footer() {
   };
 
   return (
-    <footer className="livora-footer" style={{ borderTop: "1px solid var(--line, #20332d)", background: "#060e0c", marginTop: "auto", color: "#8fa49d", fontSize: 13 }}>
+    <footer className="livora-footer" style={{ borderTop: "1px solid var(--line)", background: "var(--footer-bg)", marginTop: "auto", color: "var(--muted)", fontSize: 13 }}>
       <div style={{ maxWidth: 1440, margin: "0 auto", padding: "40px 34px 28px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 32, marginBottom: 32 }}>
           {/* Col 1: Brand & Indecopi Reclamaciones Badge */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <LivoraLogo size={28} />
-              <strong style={{ color: "#f2f7f5", fontSize: 17, letterSpacing: -0.3 }}>Livora S.A.C.</strong>
+              <LivoraFullLogo width={140} height={38} />
             </div>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: "#8fa49d", margin: "0 0 16px" }}>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: "0 0 16px" }}>
               Plataforma de trazabilidad de reciclaje con canje Web3 en la blockchain Stellar y cumplimiento integral de normativas ambientales y de protección al consumidor en el Perú.
             </p>
             {/* Indecopi Legal Warning */}
-            <p style={{ fontSize: 9.5, lineHeight: 1.4, color: "#aec2bb", margin: "0 0 12px", fontWeight: 600, maxWidth: 300 }}>
-              CONFORME A LO ESTABLECIDO EN EL CÓDIGO DE PROTECCIÓN Y DEFENSA DEL CONSUMIDOR, ESTE ESTABLECIMIENTO CUENTA CON UN LIBRO DE RECLAMACIONES A SU DISPOSICIÓN.
+            <p style={{ fontSize: 9.5, lineHeight: 1.4, color: "var(--muted)", margin: "0 0 12px", fontWeight: 600, maxWidth: 320, textTransform: "uppercase" }}>
+              Conforme a lo establecido en el Código de Protección y Defensa del Consumidor, este establecimiento cuenta con un Libro de Reclamaciones a su disposición.
             </p>
             {/* Libro de Reclamaciones Link with Official Badge */}
             <Link
@@ -106,24 +105,25 @@ export function Footer() {
                 alignItems: "center",
                 gap: 12,
                 padding: "10px 14px",
-                background: "#0a1714",
-                border: "1px solid #204034",
+                background: "var(--panel2)",
+                border: "1px solid var(--line)",
                 borderRadius: 12,
                 textDecoration: "none",
                 transition: "all 0.2s ease",
+                boxShadow: "var(--card-shadow)",
               }}
               className="libro-badge-link"
               title="Libro de Reclamaciones Virtual - Livora"
             >
               <IndecopiBookLogo width={110} height={68} />
               <div>
-                <span style={{ display: "block", color: "#55e6a5", fontSize: 12, fontWeight: 700 }}>
+                <span style={{ display: "block", color: "var(--green)", fontSize: 12, fontWeight: 700 }}>
                   Libro de Reclamaciones
                 </span>
-                <span style={{ display: "block", color: "#aec2bb", fontSize: 10, marginTop: 2 }}>
+                <span style={{ display: "block", color: "var(--text)", fontSize: 10, marginTop: 2 }}>
                   Hoja de Reclamación Virtual
                 </span>
-                <span style={{ display: "block", color: "#6e847d", fontSize: 9, marginTop: 2 }}>
+                <span style={{ display: "block", color: "var(--muted)", fontSize: 9, marginTop: 2 }}>
                   Plazo legal: 15 días hábiles
                 </span>
               </div>
@@ -132,32 +132,32 @@ export function Footer() {
 
           {/* Col 2: Legal & Compliance Links */}
           <div>
-            <h4 style={{ color: "#f2f7f5", fontSize: 13, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 14 }}>
+            <h4 style={{ color: "var(--text)", fontSize: 13, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 14, fontWeight: 700 }}>
               Marco Legal y Regulatorio
             </h4>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
               <li>
-                <Link href="/terminos" style={{ color: "#b8cbc4", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
+                <Link href="/terminos" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
                   Términos y Condiciones de Uso
                 </Link>
               </li>
               <li>
-                <Link href="/privacidad" style={{ color: "#b8cbc4", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
+                <Link href="/privacidad" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
                   Política de Privacidad (Ley 29733)
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" style={{ color: "#b8cbc4", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
+                <Link href="/cookies" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
                   Política de Cookies
                 </Link>
               </li>
               <li>
-                <Link href="/libro-de-reclamaciones" style={{ color: "#b8cbc4", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
+                <Link href="/libro-de-reclamaciones" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover-green">
                   Libro de Reclamaciones Virtual
                 </Link>
               </li>
               <li>
-                <Link href="/libro-de-reclamaciones/seguimiento" style={{ color: "#55e6a5", textDecoration: "none", transition: "color 0.2s", display: "inline-flex", alignItems: "center", gap: 6 }} className="hover-green">
+                <Link href="/libro-de-reclamaciones/seguimiento" style={{ color: "var(--green)", textDecoration: "none", transition: "color 0.2s", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }} className="hover-green">
                   <Search size={14} /> Consultar Seguimiento de Reclamo
                 </Link>
               </li>
@@ -168,11 +168,12 @@ export function Footer() {
                     background: "none",
                     border: "none",
                     padding: 0,
-                    color: "#55e6a5",
+                    color: "var(--green)",
                     fontSize: 13,
                     cursor: "pointer",
                     textAlign: "left",
                     textDecoration: "underline",
+                    fontWeight: 600,
                   }}
                 >
                   Configuración de Cookies y Privacidad
@@ -183,20 +184,20 @@ export function Footer() {
 
           {/* Col 3: Proteccion de Datos y Contacto */}
           <div>
-            <h4 style={{ color: "#f2f7f5", fontSize: 13, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 14 }}>
+            <h4 style={{ color: "var(--text)", fontSize: 13, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 14, fontWeight: 700 }}>
               Protección de Datos & Contacto
             </h4>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: "#8fa49d", margin: "0 0 10px" }}>
-              <strong style={{ color: "#c6d7d1" }}>Banco de Datos:</strong> &ldquo;Usuarios de la Plataforma&rdquo; — Registro Nacional de Protección de Datos Personales (ANPD).
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: "0 0 10px" }}>
+              <strong style={{ color: "var(--text)" }}>Banco de Datos:</strong> &ldquo;Usuarios de la Plataforma&rdquo; — Registro Nacional de Protección de Datos Personales (ANPD).
             </p>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: "#8fa49d", margin: "0 0 10px" }}>
-              <strong style={{ color: "#c6d7d1" }}>Derechos ARCO:</strong> Envíe su solicitud formal a{" "}
-              <a href="mailto:privacidad@livora.pe" style={{ color: "#55e6a5", textDecoration: "underline" }}>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: "0 0 10px" }}>
+              <strong style={{ color: "var(--text)" }}>Derechos ARCO:</strong> Envíe su solicitud formal a{" "}
+              <a href="mailto:privacidad@livora.pe" style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 600 }}>
                 privacidad@livora.pe
               </a>
             </p>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: "#8fa49d", margin: 0 }}>
-              <strong style={{ color: "#c6d7d1" }}>Sede Operativa:</strong> Lima, República del Perú.
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>Sede Operativa:</strong> Lima, República del Perú.
             </p>
           </div>
         </div>
@@ -204,7 +205,7 @@ export function Footer() {
         {/* Bottom Bar: Copyright & Corporate Details */}
         <div
           style={{
-            borderTop: "1px solid #162621",
+            borderTop: "1px solid var(--line)",
             paddingTop: 20,
             display: "flex",
             flexWrap: "wrap",
@@ -212,7 +213,7 @@ export function Footer() {
             justifyContent: "space-between",
             gap: 16,
             fontSize: 11,
-            color: "#6e847d",
+            color: "var(--muted)",
           }}
         >
           <div>

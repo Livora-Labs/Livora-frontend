@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { Shell, PageHead, Kpi } from "@/components/Shell";
+import { PageHead, Kpi } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import {
   receiveBatch,
@@ -37,10 +38,12 @@ import {
   Clock,
   Hash,
   Printer,
+  Check,
+  Coins,
+  Truck,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { AcopioTarifarioSection } from "@/components/AcopioTarifarioSection";
-import { AcopioSubastasPanel } from "@/components/AcopioSubastasPanel";
+import { Web3ConfirmModal } from "@/components/Web3ConfirmModal";
 
 interface MaterialLine {
   material: string;
@@ -55,6 +58,65 @@ function ipfsLink(cid: string): string {
   }
   const hash = cid.startsWith("ipfs://") ? cid.replace("ipfs://", "") : cid;
   return `${IPFS_GATEWAY}${hash}`;
+}
+
+function TransitBatchesSkeleton() {
+  return (
+    <div style={{ display: "grid", gap: 14 }}>
+      {[1, 2, 3].map((x) => (
+        <div
+          key={x}
+          className="animate-pulse"
+          style={{
+            background: "var(--panel, #ffffff)",
+            border: "1px solid var(--line, #e2e8f0)",
+            borderRadius: 14,
+            padding: 18,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ width: "65%" }}>
+            <div
+              style={{
+                height: 14,
+                width: "45%",
+                background: "var(--line, #e2e8f0)",
+                borderRadius: 6,
+                marginBottom: 10,
+              }}
+            />
+            <div
+              style={{
+                height: 12,
+                width: "60%",
+                background: "var(--line-subtle, #edf2f7)",
+                borderRadius: 6,
+                marginBottom: 8,
+              }}
+            />
+            <div
+              style={{
+                height: 10,
+                width: "35%",
+                background: "var(--line-subtle, #edf2f7)",
+                borderRadius: 6,
+              }}
+            />
+          </div>
+          <div
+            style={{
+              height: 38,
+              width: 110,
+              background: "var(--line, #e2e8f0)",
+              borderRadius: 10,
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function CentroAcopioPage() {
@@ -77,6 +139,9 @@ export default function CentroAcopioPage() {
   const [petWeight, setPetWeight] = useState<number>(0);
   const [hdpeWeight, setHdpeWeight] = useState<number>(0);
   const [cartonWeight, setCartonWeight] = useState<number>(0);
+  const [wasteWeight, setWasteWeight] = useState<number>(0);
+  const [isScaleWeb3ModalOpen, setIsScaleWeb3ModalOpen] = useState(false);
+  const [isB2bWeb3ModalOpen, setIsB2bWeb3ModalOpen] = useState(false);
 
   // Blockchain Processing Animation State
   const [isBlockchainProcessing, setIsBlockchainProcessing] = useState(false);
@@ -188,6 +253,7 @@ export default function CentroAcopioPage() {
   useEffect(() => {
     if (!token) return;
     const socket = getSocket(token);
+    if (!socket) return;
 
     const handleBatchCompleted = (data: any) => {
       const completedId = data.batchId;
@@ -214,10 +280,14 @@ export default function CentroAcopioPage() {
     mutationFn: ({
       batchId,
       materialsActual,
+      usefulWeightKg,
+      wasteWeightKg,
     }: {
       batchId: string;
       materialsActual: Record<string, number>;
-    }) => receiveBatch(batchId, materialsActual),
+      usefulWeightKg?: number;
+      wasteWeightKg?: number;
+    }) => receiveBatch(batchId, materialsActual, usefulWeightKg, wasteWeightKg),
     onMutate: async ({ batchId, materialsActual }) => {
       // Cancelar consultas salientes
       await queryClient.cancelQueries({ queryKey: ["batches", "IN_TRANSIT"] });
@@ -320,17 +390,31 @@ export default function CentroAcopioPage() {
     setPetWeight(batch.materialsActual?.PET || 0);
     setHdpeWeight(batch.materialsActual?.HDPE || 0);
     setCartonWeight(batch.materialsActual?.CARTON || 0);
+    setWasteWeight(0);
   };
 
   const handleConfirmWeighing = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedBatch) return;
+    setIsScaleWeb3ModalOpen(true);
+  };
+
+  const handleExecuteWeighing = () => {
     if (!selectedBatch) return;
     const materialsActual = {
       PET: petWeight,
       HDPE: hdpeWeight,
       CARTON: cartonWeight,
     };
-    receiveMutation.mutate({ batchId: selectedBatch.id, materialsActual });
+    const grossTotal = petWeight + hdpeWeight + cartonWeight;
+    const usefulWeightKg = Math.max(0, Number((grossTotal - wasteWeight).toFixed(2)));
+    setIsScaleWeb3ModalOpen(false);
+    receiveMutation.mutate({
+      batchId: selectedBatch.id,
+      materialsActual,
+      usefulWeightKg,
+      wasteWeightKg: wasteWeight,
+    });
   };
 
   const addSaleLine = () =>
@@ -358,6 +442,12 @@ export default function CentroAcopioPage() {
       );
       return;
     }
+    setIsB2bWeb3ModalOpen(true);
+  };
+
+  const handleExecuteSale = () => {
+    const validLines = saleLines.filter((l) => l.weightKg > 0);
+    setIsB2bWeb3ModalOpen(false);
     b2bSaleMutation.mutate({
       buyerId: saleBuyerId,
       materials: validLines.map((l) => ({
@@ -378,9 +468,9 @@ export default function CentroAcopioPage() {
 
   const inputStyle = {
     width: "100%",
-    background: "#0A192F",
-    border: "1px solid #1E293B",
-    color: "#F8FAFC",
+    background: "var(--panel, #ffffff)",
+    border: "1px solid var(--line, #cbd5e1)",
+    color: "var(--fg, #0f172a)",
     padding: "10px 12px",
     borderRadius: 10,
     fontSize: 13,
@@ -389,7 +479,7 @@ export default function CentroAcopioPage() {
   const selectStyle = { ...inputStyle };
 
   return (
-    <Shell role="centro">
+    <>
       <ToastContainer />
       <PageHead
         eyebrow="Dashboard industrial"
@@ -471,11 +561,97 @@ export default function CentroAcopioPage() {
         />
       </div>
 
-      {/* Tarifario por Acopio (Dynamic Rates) */}
-      <AcopioTarifarioSection centerId={user?.id || ""} />
+      {/* Accesos directos a módulos de operaciones */}
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: 16,
+          marginBottom: 24,
+        }}
+      >
+        <Link
+          href="/centro/tarifario"
+          className="card hover-glow"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            textDecoration: "none",
+            color: "inherit",
+            padding: 16,
+            background: "var(--panel, #ffffff)",
+            border: "1px solid var(--line, #e2e8f0)",
+            borderRadius: 14,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "rgba(16, 185, 129, 0.1)",
+                display: "grid",
+                placeItems: "center",
+                color: "#10B981",
+              }}
+            >
+              <Coins size={20} />
+            </div>
+            <div>
+              <strong style={{ fontSize: 14, color: "var(--text, #0f172a)", display: "block" }}>
+                Tarifario de Compra
+              </strong>
+              <span style={{ fontSize: 12, color: "var(--muted, #64748b)" }}>
+                Ajustar precios por kg pagados a recolectores
+              </span>
+            </div>
+          </div>
+          <ArrowUpRight size={16} style={{ color: "var(--muted, #64748b)" }} />
+        </Link>
 
-      {/* Mercado de Subastas y Asignación Automática */}
-      <AcopioSubastasPanel centerId={user?.id || ""} />
+        <Link
+          href="/centro/despachos"
+          className="card hover-glow"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            textDecoration: "none",
+            color: "inherit",
+            padding: 16,
+            background: "var(--panel, #ffffff)",
+            border: "1px solid var(--line, #e2e8f0)",
+            borderRadius: 14,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "rgba(59, 130, 246, 0.1)",
+                display: "grid",
+                placeItems: "center",
+                color: "#3B82F6",
+              }}
+            >
+              <Truck size={20} />
+            </div>
+            <div>
+              <strong style={{ fontSize: 14, color: "var(--text, #0f172a)", display: "block" }}>
+                Despachos y Subastas B2B
+              </strong>
+              <span style={{ fontSize: 12, color: "var(--muted, #64748b)" }}>
+                Pujar en recolecciones y transferir a recicladoras
+              </span>
+            </div>
+          </div>
+          <ArrowUpRight size={16} style={{ color: "var(--muted, #64748b)" }} />
+        </Link>
+      </div>
 
       {/* Alerta de Discrepancias / Lotes Observados */}
       {flaggedBatches.length > 0 && (
@@ -508,7 +684,7 @@ export default function CentroAcopioPage() {
                 fontSize: 18,
               }}
             >
-              ⚠️
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#F87171" }}>
@@ -636,26 +812,20 @@ export default function CentroAcopioPage() {
             <h2>Camiones en Camino (IN_TRANSIT)</h2>
           </div>
           {loadingTransit ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "30px 0",
-                color: "#94A3B8",
-                fontSize: 13,
-              }}
-            >
-              Cargando camiones...
-            </div>
+            <TransitBatchesSkeleton />
           ) : transitBatches.length === 0 ? (
             <div
               style={{
                 textAlign: "center",
-                padding: "30px 0",
-                color: "#94A3B8",
+                padding: "36px 16px",
+                color: "var(--muted, #475569)",
                 fontSize: 13,
+                background: "var(--panel2, #f8fafc)",
+                borderRadius: 14,
+                border: "1px dashed var(--line, #e2e8f0)",
               }}
             >
-              No hay camiones en traslado hacia este centro.
+              No hay camiones en traslado activo hacia este centro.
             </div>
           ) : (
             <div style={{ display: "grid", gap: 14 }}>
@@ -663,13 +833,14 @@ export default function CentroAcopioPage() {
                 <div
                   key={batch.id}
                   style={{
-                    background: "#0A192F",
-                    border: "1px solid #1E293B",
-                    borderRadius: 12,
+                    background: "var(--panel, #ffffff)",
+                    border: "1px solid var(--line, #e2e8f0)",
+                    borderRadius: 14,
                     padding: 16,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
                   }}
                 >
                   <div>
@@ -691,19 +862,19 @@ export default function CentroAcopioPage() {
                         style={{
                           fontSize: 13,
                           fontWeight: 700,
-                          color: "#F8FAFC",
+                          color: "var(--text, #0f172a)",
                         }}
                       >
                         Lote #{batch.id.slice(0, 8)}
                       </span>
                     </div>
-                    <div style={{ fontSize: 12, color: "#94A3B8" }}>
+                    <div style={{ fontSize: 12, color: "var(--muted, #475569)" }}>
                       Recolector:{" "}
-                      <strong style={{ color: "#F8FAFC" }}>
+                      <strong style={{ color: "var(--text, #0f172a)" }}>
                         {batch.collector?.email.split("@")[0]}
                       </strong>
                     </div>
-                    <small style={{ color: "#94A3B8", fontSize: 11 }}>
+                    <small style={{ color: "var(--muted, #475569)", fontSize: 11 }}>
                       Carga Estimada:{" "}
                       {(Object.values(batch.materialsActual || {}) as number[])
                         .reduce((a: number, b: number) => a + b, 0)
@@ -714,7 +885,7 @@ export default function CentroAcopioPage() {
                   <button
                     onClick={() => handleOpenScale(batch)}
                     className="btn primary"
-                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, borderRadius: 10 }}
                   >
                     <Scale size={16} />
                     <span>Pesar Lote</span>
@@ -927,9 +1098,13 @@ export default function CentroAcopioPage() {
                             padding: "3px 8px",
                             borderRadius: 12,
                             fontWeight: 700,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
                           }}
                         >
-                          ✓ Fiat Pagado
+                          <Check size={11} />
+                          <span>Fiat Pagado</span>
                         </span>
                       ) : (
                         <button
@@ -1081,9 +1256,14 @@ export default function CentroAcopioPage() {
                             fontWeight: 700,
                           }}
                         >
-                          {hasTx
-                            ? "✓ VERIFICADO EN BLOCKCHAIN"
-                            : "⚙ PROCESADO"}
+                          {hasTx ? (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              <Check size={11} />
+                              <span>VERIFICADO EN BLOCKCHAIN</span>
+                            </span>
+                          ) : (
+                            "PROCESADO"
+                          )}
                         </span>
                         <span style={{ fontSize: 11, color: "#64748B" }}>
                           #{b.id}
@@ -1137,7 +1317,8 @@ export default function CentroAcopioPage() {
                     {/* Composición de Materiales */}
                     <div
                       style={{
-                        background: "#112240",
+                        background: "var(--panel2)",
+                        border: "1px solid var(--line)",
                         borderRadius: 12,
                         padding: 14,
                       }}
@@ -1207,7 +1388,8 @@ export default function CentroAcopioPage() {
                     {/* Actores Involucrados */}
                     <div
                       style={{
-                        background: "#112240",
+                        background: "var(--panel2)",
+                        border: "1px solid var(--line)",
                         borderRadius: 12,
                         padding: 14,
                       }}
@@ -1259,7 +1441,8 @@ export default function CentroAcopioPage() {
                     {/* Prueba On-Chain */}
                     <div
                       style={{
-                        background: "#112240",
+                        background: "var(--panel2)",
+                        border: "1px solid var(--line)",
                         borderRadius: 12,
                         padding: 14,
                       }}
@@ -1432,7 +1615,7 @@ export default function CentroAcopioPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.85)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(8px)",
             display: "grid",
             placeItems: "center",
@@ -1442,11 +1625,12 @@ export default function CentroAcopioPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
               borderRadius: 20,
-              padding: 26,
-              maxWidth: 480,
+              padding: 24,
+              maxWidth: 500,
               width: "100%",
             }}
           >
@@ -1458,90 +1642,380 @@ export default function CentroAcopioPage() {
                 marginBottom: 16,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Scale size={22} style={{ color: "#10B981" }} />
-                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
-                  Pesaje en Báscula Industrial
-                </h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    background: "rgba(16, 185, 129, 0.12)",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  <Scale size={22} style={{ color: "#059669" }} />
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 800,
+                      margin: 0,
+                      color: "var(--fg, #0f172a)",
+                    }}
+                  >
+                    Báscula Industrial
+                  </h3>
+                  <span style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
+                    Lectura directa y deducción de impurezas
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedBatch(null)}
                 style={{
-                  background: "none",
+                  background: "var(--bg, #f1f5f9)",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--muted, #64748b)",
                   cursor: "pointer",
-                  fontSize: 20,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  display: "grid",
+                  placeItems: "center",
                 }}
               >
                 ✕
               </button>
             </div>
-            <p style={{ fontSize: 13, color: "#94A3B8", marginBottom: 16 }}>
-              Lote{" "}
-              <strong style={{ color: "#F8FAFC" }}>
-                #{selectedBatch.id.slice(0, 8)}
-              </strong>{" "}
-              — Recolector: {selectedBatch.collector?.email}
-            </p>
+
+            <div
+              style={{
+                background: "var(--bg, #f8fafc)",
+                border: "1px solid var(--line, #e2e8f0)",
+                borderRadius: 12,
+                padding: "10px 14px",
+                fontSize: 12,
+                color: "var(--muted, #64748b)",
+                marginBottom: 16,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                Lote:{" "}
+                <strong style={{ color: "var(--fg, #0f172a)" }}>
+                  #{selectedBatch.id.slice(0, 8)}
+                </strong>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
+                Recolector:{" "}
+                <span style={{ color: "var(--fg, #0f172a)", fontWeight: 600 }}>
+                  {selectedBatch.collector?.email}
+                </span>
+              </div>
+            </div>
+
             <form
               onSubmit={handleConfirmWeighing}
               style={{ display: "grid", gap: 14 }}
             >
               {[
-                ["PET (Plástico)", petWeight, setPetWeight],
+                ["PET (Plástico Botellas)", petWeight, setPetWeight],
                 ["HDPE (Plástico Rígido)", hdpeWeight, setHdpeWeight],
-                ["Cartón / Papel", cartonWeight, setCartonWeight],
+                ["Cartón / Papel Prensado", cartonWeight, setCartonWeight],
               ].map(([label, val, setter]: any) => (
                 <div
                   key={String(label)}
                   style={{
-                    background: "#0A192F",
-                    padding: 12,
+                    background: "var(--bg, #f8fafc)",
+                    border: "1px solid var(--line, #e2e8f0)",
+                    padding: "12px 14px",
                     borderRadius: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--fg, #0f172a)",
+                      }}
+                    >
+                      {label}
+                    </label>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {[1, 5, 10].map((inc) => (
+                        <button
+                          key={inc}
+                          type="button"
+                          onClick={() =>
+                            setter(Number(((val || 0) + inc).toFixed(1)))
+                          }
+                          style={{
+                            background: "var(--panel, #ffffff)",
+                            border: "1px solid var(--line, #cbd5e1)",
+                            borderRadius: 6,
+                            padding: "2px 6px",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: "#059669",
+                            cursor: "pointer",
+                          }}
+                        >
+                          +{inc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={val || ""}
+                      onChange={(e) => setter(parseFloat(e.target.value) || 0)}
+                      placeholder="0.0"
+                      style={{
+                        width: "100%",
+                        background: "var(--panel, #ffffff)",
+                        border: "1px solid var(--line, #cbd5e1)",
+                        color: "var(--fg, #0f172a)",
+                        padding: "10px 42px 10px 12px",
+                        borderRadius: 10,
+                        fontSize: 16,
+                        fontWeight: 800,
+                        boxSizing: "border-box",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--muted, #64748b)",
+                      }}
+                    >
+                      kg
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Campo de Merma / Material Contaminado */}
+              <div
+                style={{
+                  background: "#fffbeb",
+                  border: "1px solid #fde68a",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 6,
                   }}
                 >
                   <label
                     style={{
-                      display: "block",
                       fontSize: 12,
-                      color: "#94A3B8",
-                      marginBottom: 4,
+                      color: "#b45309",
+                      fontWeight: 700,
                     }}
                   >
-                    {label} (kg)
+                    Merma / Descarte Contaminado (kg)
                   </label>
+                  {wasteWeight > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setWasteWeight(0)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "#b45309",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+                <div style={{ position: "relative" }}>
                   <input
                     type="number"
                     step="0.1"
                     min="0"
-                    value={val}
-                    onChange={(e) => setter(parseFloat(e.target.value) || 0)}
+                    value={wasteWeight || ""}
+                    onChange={(e) =>
+                      setWasteWeight(parseFloat(e.target.value) || 0)
+                    }
+                    placeholder="0.0"
                     style={{
                       width: "100%",
-                      background: "#112240",
-                      border: "1px solid #1E293B",
-                      color: "#F8FAFC",
-                      padding: 10,
+                      background: "#ffffff",
+                      border: "1px solid #f59e0b",
+                      color: "#b45309",
+                      padding: "10px 42px 10px 12px",
                       borderRadius: 10,
-                      fontSize: 15,
-                      fontWeight: 700,
+                      fontSize: 16,
+                      fontWeight: 800,
+                      boxSizing: "border-box",
                     }}
                   />
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: "#b45309",
+                    }}
+                  >
+                    kg
+                  </span>
                 </div>
-              ))}
-              <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#92400e",
+                    display: "block",
+                    marginTop: 4,
+                  }}
+                >
+                  Materiales no reciclables o impurezas a deducir del lote.
+                </span>
+              </div>
+
+              {/* Resumen de Pesaje Industrial */}
+              {(() => {
+                const grossTotal = Number(
+                  (petWeight + hdpeWeight + cartonWeight).toFixed(2)
+                );
+                const usefulWeight = Math.max(
+                  0,
+                  Number((grossTotal - wasteWeight).toFixed(2))
+                );
+                return (
+                  <div
+                    style={{
+                      background: "var(--bg, #f8fafc)",
+                      border: "1px solid var(--line, #cbd5e1)",
+                      borderRadius: 12,
+                      padding: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 12,
+                        color: "var(--muted, #64748b)",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <span>Peso Bruto Registrado:</span>
+                      <strong style={{ color: "var(--fg, #0f172a)" }}>
+                        {grossTotal} kg
+                      </strong>
+                    </div>
+                    {wasteWeight > 0 && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: 12,
+                          color: "#d97706",
+                          marginBottom: 6,
+                        }}
+                      >
+                        <span>Deducción de Merma:</span>
+                        <strong>- {wasteWeight} kg</strong>
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        background: "#ecfdf5",
+                        border: "1px solid #a7f3d0",
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        marginTop: 6,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 13,
+                          color: "#065f46",
+                        }}
+                      >
+                        Peso Neto Útil a Liquidar:
+                      </span>
+                      <strong
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 900,
+                          color: "#047857",
+                        }}
+                      >
+                        {usefulWeight} kg
+                      </strong>
+                    </div>
+                    {wasteWeight > 0 && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "#92400e",
+                          marginTop: 6,
+                          textAlign: "center",
+                          background: "#fef3c7",
+                          padding: "3px 6px",
+                          borderRadius: 4,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Aceptación Parcial (PARTIALLY_ACCEPTED) con merma documentada
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
                 <button
                   type="button"
                   onClick={() => setSelectedBatch(null)}
                   style={{
                     flex: 1,
-                    background: "#1E293B",
-                    border: "none",
-                    color: "#F8FAFC",
+                    background: "var(--bg, #f1f5f9)",
+                    border: "1px solid var(--line, #cbd5e1)",
+                    color: "var(--fg, #0f172a)",
                     padding: 12,
                     borderRadius: 12,
                     cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: 13,
                   }}
                 >
                   Cancelar
@@ -1554,23 +2028,26 @@ export default function CentroAcopioPage() {
                       type="submit"
                       disabled={receiveMutation.isPending || !valid}
                       style={{
-                        flex: 1,
+                        flex: 1.5,
                         background: valid
-                          ? "linear-gradient(135deg, #10B981, #059669)"
-                          : "#1E293B",
+                          ? "linear-gradient(135deg, #059669, #047857)"
+                          : "var(--line, #e2e8f0)",
                         border: "none",
-                        color: valid ? "#0A192F" : "#94A3B8",
+                        color: valid ? "#ffffff" : "var(--muted, #94a3b8)",
                         padding: 12,
                         borderRadius: 12,
                         cursor: valid ? "pointer" : "not-allowed",
                         fontSize: 14,
                         fontWeight: 800,
-                        opacity: valid ? 1 : 0.5,
+                        boxShadow: valid
+                          ? "0 4px 12px rgba(5, 150, 105, 0.25)"
+                          : "none",
+                        opacity: valid ? 1 : 0.6,
                       }}
                     >
                       {receiveMutation.isPending
                         ? "Procesando..."
-                        : "Confirmar y Liquidar Lote"}
+                        : "Confirmar y Liquidar"}
                     </button>
                   );
                 })()}
@@ -1586,63 +2063,85 @@ export default function CentroAcopioPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.92)",
-            backdropFilter: "blur(12px)",
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(10px)",
             display: "grid",
             placeItems: "center",
             zIndex: 200,
             padding: 20,
           }}
         >
-          <div style={{ textAlign: "center", maxWidth: 420 }}>
+          <div
+            style={{
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
+              borderRadius: 24,
+              padding: "36px 28px",
+              textAlign: "center",
+              maxWidth: 420,
+              width: "100%",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
+            }}
+          >
             <div
               style={{
-                width: 70,
-                height: 70,
+                width: 72,
+                height: 72,
                 borderRadius: "50%",
-                background: "rgba(16,185,129,0.15)",
-                border: "2px solid #10B981",
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "2px solid #059669",
                 display: "grid",
                 placeItems: "center",
                 margin: "0 auto 20px",
-                boxShadow: "0 0 30px #10B981",
+                boxShadow: "0 0 25px rgba(16, 185, 129, 0.35)",
               }}
             >
-              <Cpu size={36} style={{ color: "#10B981" }} />
+              <Cpu size={36} style={{ color: "#059669" }} />
             </div>
             <span
               style={{
                 fontSize: 11,
-                background: "rgba(16,185,129,0.2)",
-                color: "#10B981",
-                padding: "4px 12px",
+                background: "rgba(16, 185, 129, 0.15)",
+                color: "#047857",
+                padding: "4px 14px",
                 borderRadius: 20,
-                fontWeight: 700,
+                fontWeight: 800,
+                border: "1px solid rgba(16, 185, 129, 0.3)",
               }}
             >
               HTTP 202 ACCEPTED
             </span>
             <h2
-              style={{ fontSize: 22, fontWeight: 800, margin: "12px 0 6px" }}
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                margin: "14px 0 6px",
+                color: "var(--fg, #0f172a)",
+              }}
             >
               Procesando en Blockchain
             </h2>
             <p
               style={{
                 fontSize: 13,
-                color: "#94A3B8",
+                color: "var(--muted, #64748b)",
                 lineHeight: 1.6,
+                margin: "0 0 16px",
               }}
             >
-              Generando manifiesto IPFS, registrando transacción en blockchain y
-              liquidando EcoTokens...
+              Generando manifiesto IPFS, registrando transacción en la red Stellar y
+              liquidando EcoTokens al recolector...
             </p>
             <div
               style={{
                 fontSize: 11,
-                color: "#06B6D4",
+                color: "#0369a1",
+                background: "#f0f9ff",
+                border: "1px solid #bae6fd",
+                padding: "6px 12px",
+                borderRadius: 8,
                 fontFamily: "monospace",
-                marginTop: 10,
+                display: "inline-block",
               }}
             >
               Job ID: {processingJobId}
@@ -1657,7 +2156,7 @@ export default function CentroAcopioPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.85)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(8px)",
             display: "grid",
             placeItems: "center",
@@ -1667,14 +2166,15 @@ export default function CentroAcopioPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
               borderRadius: 20,
               padding: 26,
               maxWidth: 540,
               width: "100%",
               maxHeight: "90vh",
               overflowY: "auto",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
             }}
           >
             <div
@@ -1685,20 +2185,48 @@ export default function CentroAcopioPage() {
                 marginBottom: 20,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Factory size={22} style={{ color: "#10B981" }} />
-                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
-                  Despacho a Empresa B2B
-                </h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "rgba(16, 185, 129, 0.12)",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  <Factory size={22} style={{ color: "#059669" }} />
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 800,
+                      margin: 0,
+                      color: "var(--fg, #0f172a)",
+                    }}
+                  >
+                    Despacho a Empresa B2B
+                  </h3>
+                  <span style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
+                    Asignación de lote y salida de inventario
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setIsSaleModalOpen(false)}
                 style={{
-                  background: "none",
+                  background: "var(--bg, #f1f5f9)",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--muted, #64748b)",
                   cursor: "pointer",
-                  fontSize: 20,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  display: "grid",
+                  placeItems: "center",
                 }}
               >
                 ✕
@@ -1712,16 +2240,25 @@ export default function CentroAcopioPage() {
                   style={{
                     display: "block",
                     fontSize: 12,
-                    color: "#94A3B8",
+                    color: "var(--fg, #0f172a)",
                     marginBottom: 6,
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   Empresa B2B Destino
                 </label>
                 {b2bCompanies.length === 0 ? (
-                  <div style={{ fontSize: 12, color: "#EF4444" }}>
-                    No hay empresas B2B registradas.
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#dc2626",
+                      background: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                    }}
+                  >
+                    No hay empresas B2B registradas en el sistema.
                   </div>
                 ) : (
                   <select
@@ -1749,7 +2286,11 @@ export default function CentroAcopioPage() {
                   }}
                 >
                   <label
-                    style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600 }}
+                    style={{
+                      fontSize: 12,
+                      color: "var(--fg, #0f172a)",
+                      fontWeight: 700,
+                    }}
                   >
                     Materiales a Despachar
                   </label>
@@ -1761,13 +2302,13 @@ export default function CentroAcopioPage() {
                       alignItems: "center",
                       gap: 4,
                       background: "rgba(16,185,129,0.1)",
-                      border: "1px solid #10B981",
-                      color: "#10B981",
+                      border: "1px solid #059669",
+                      color: "#059669",
                       padding: "4px 10px",
                       borderRadius: 8,
                       fontSize: 11,
                       cursor: "pointer",
-                      fontWeight: 600,
+                      fontWeight: 700,
                     }}
                   >
                     <Plus size={12} /> Agregar Material
@@ -1791,12 +2332,12 @@ export default function CentroAcopioPage() {
                       <div
                         key={idx}
                         style={{
-                          background: "#0A192F",
+                          background: "var(--bg, #f8fafc)",
                           borderRadius: 12,
                           padding: 14,
                           border: overStock
-                            ? "1px solid #EF4444"
-                            : "1px solid #1E293B",
+                            ? "1px solid #ef4444"
+                            : "1px solid var(--line, #e2e8f0)",
                         }}
                       >
                         <div
@@ -1811,8 +2352,9 @@ export default function CentroAcopioPage() {
                               style={{
                                 display: "block",
                                 fontSize: 11,
-                                color: "#94A3B8",
+                                color: "var(--muted, #64748b)",
                                 marginBottom: 4,
+                                fontWeight: 600,
                               }}
                             >
                               Material
@@ -1838,14 +2380,16 @@ export default function CentroAcopioPage() {
                               style={{
                                 display: "block",
                                 fontSize: 11,
-                                color: "#94A3B8",
+                                color: "var(--muted, #64748b)",
                                 marginBottom: 4,
+                                fontWeight: 600,
                               }}
                             >
                               Peso (kg){" "}
                               <span
                                 style={{
-                                  color: maxStock > 0 ? "#10B981" : "#64748B",
+                                  color: maxStock > 0 ? "#059669" : "#64748b",
+                                  fontWeight: 700,
                                 }}
                               >
                                 máx. {maxStock.toFixed(1)} kg
@@ -1868,8 +2412,8 @@ export default function CentroAcopioPage() {
                                 ...inputStyle,
                                 padding: "8px 10px",
                                 border: overStock
-                                  ? "1px solid #EF4444"
-                                  : "1px solid #1E293B",
+                                  ? "1px solid #ef4444"
+                                  : "1px solid var(--line, #cbd5e1)",
                               }}
                             />
                           </div>
@@ -1879,8 +2423,8 @@ export default function CentroAcopioPage() {
                               onClick={() => removeSaleLine(idx)}
                               style={{
                                 background: "rgba(239,68,68,0.1)",
-                                border: "1px solid #EF4444",
-                                color: "#EF4444",
+                                border: "1px solid #ef4444",
+                                color: "#ef4444",
                                 padding: "8px 10px",
                                 borderRadius: 8,
                                 cursor: "pointer",
@@ -1894,11 +2438,16 @@ export default function CentroAcopioPage() {
                           <div
                             style={{
                               fontSize: 11,
-                              color: "#EF4444",
+                              color: "#dc2626",
                               marginTop: 6,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                              fontWeight: 600,
                             }}
                           >
-                            ⚠ El peso supera el stock disponible (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            El peso supera el stock disponible (
                             {maxStock.toFixed(1)} kg)
                           </div>
                         )}
@@ -1912,8 +2461,8 @@ export default function CentroAcopioPage() {
               {saleLines.some((l) => l.weightKg > 0) && (
                 <div
                   style={{
-                    background: "rgba(16,185,129,0.05)",
-                    border: "1px solid rgba(16,185,129,0.2)",
+                    background: "#ecfdf5",
+                    border: "1px solid #a7f3d0",
                     borderRadius: 12,
                     padding: 14,
                   }}
@@ -1921,7 +2470,8 @@ export default function CentroAcopioPage() {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "#94A3B8",
+                      color: "#065f46",
+                      fontWeight: 700,
                       marginBottom: 8,
                     }}
                   >
@@ -1939,24 +2489,24 @@ export default function CentroAcopioPage() {
                           marginBottom: 4,
                         }}
                       >
-                        <span style={{ color: "#CBD5E1" }}>{l.material}</span>
-                        <strong style={{ color: "#10B981" }}>
+                        <span style={{ color: "#334155" }}>{l.material}</span>
+                        <strong style={{ color: "#047857" }}>
                           {l.weightKg.toFixed(1)} kg
                         </strong>
                       </div>
                     ))}
                   <div
                     style={{
-                      borderTop: "1px solid rgba(16,185,129,0.2)",
+                      borderTop: "1px solid #a7f3d0",
                       marginTop: 8,
                       paddingTop: 8,
                       display: "flex",
                       justifyContent: "space-between",
-                      fontWeight: 700,
+                      fontWeight: 800,
                     }}
                   >
-                    <span>Total</span>
-                    <span style={{ color: "#10B981" }}>
+                    <span style={{ color: "#065f46" }}>Total</span>
+                    <span style={{ color: "#047857" }}>
                       {saleLines
                         .filter((l) => l.weightKg > 0)
                         .reduce((s, l) => s + l.weightKg, 0)
@@ -1973,13 +2523,14 @@ export default function CentroAcopioPage() {
                   onClick={() => setIsSaleModalOpen(false)}
                   style={{
                     flex: 1,
-                    background: "#1E293B",
-                    border: "none",
-                    color: "#F8FAFC",
+                    background: "var(--bg, #f1f5f9)",
+                    border: "1px solid var(--line, #cbd5e1)",
+                    color: "var(--fg, #0f172a)",
                     padding: 12,
                     borderRadius: 12,
                     cursor: "pointer",
                     fontSize: 13,
+                    fontWeight: 600,
                   }}
                 >
                   Cancelar
@@ -2004,18 +2555,21 @@ export default function CentroAcopioPage() {
                       type="submit"
                       disabled={b2bSaleMutation.isPending || !valid}
                       style={{
-                        flex: 1,
+                        flex: 1.5,
                         background: valid
-                          ? "linear-gradient(135deg, #10B981, #059669)"
-                          : "#1E293B",
+                          ? "linear-gradient(135deg, #059669, #047857)"
+                          : "var(--line, #e2e8f0)",
                         border: "none",
-                        color: valid ? "#0A192F" : "#94A3B8",
+                        color: valid ? "#ffffff" : "var(--muted, #94a3b8)",
                         padding: 12,
                         borderRadius: 12,
                         cursor: valid ? "pointer" : "not-allowed",
                         fontSize: 14,
                         fontWeight: 800,
-                        opacity: valid ? 1 : 0.5,
+                        boxShadow: valid
+                          ? "0 4px 12px rgba(5, 150, 105, 0.25)"
+                          : "none",
+                        opacity: valid ? 1 : 0.6,
                       }}
                     >
                       {b2bSaleMutation.isPending
@@ -2036,7 +2590,7 @@ export default function CentroAcopioPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.85)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(8px)",
             display: "grid",
             placeItems: "center",
@@ -2046,12 +2600,13 @@ export default function CentroAcopioPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
               borderRadius: 20,
               padding: 24,
               maxWidth: 550,
               width: "100%",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
             }}
           >
             <div
@@ -2062,33 +2617,58 @@ export default function CentroAcopioPage() {
                 marginBottom: 16,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ShieldCheck size={20} style={{ color: "#10B981" }} />
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
-                  Trazabilidad de {selectedMaterialForTrace}
-                </h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: "rgba(16, 185, 129, 0.12)",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  <ShieldCheck size={20} style={{ color: "#059669" }} />
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 800,
+                      margin: 0,
+                      color: "var(--fg, #0f172a)",
+                    }}
+                  >
+                    Trazabilidad de {selectedMaterialForTrace}
+                  </h3>
+                  <span style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
+                    Lotes aportantes al inventario verificado
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedMaterialForTrace(null)}
                 style={{
-                  background: "none",
+                  background: "var(--bg, #f1f5f9)",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--muted, #64748b)",
                   cursor: "pointer",
-                  fontSize: 18,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  display: "grid",
+                  placeItems: "center",
                 }}
               >
                 ✕
               </button>
             </div>
-            <p style={{ fontSize: 12, color: "#94A3B8", marginBottom: 14 }}>
-              Lotes que aportaron al stock actual:
-            </p>
             <div
               style={{
                 display: "grid",
                 gap: 10,
-                maxHeight: 300,
+                maxHeight: 320,
                 overflowY: "auto",
                 paddingRight: 4,
               }}
@@ -2108,12 +2688,16 @@ export default function CentroAcopioPage() {
                   return (
                     <div
                       style={{
-                        color: "#94A3B8",
-                        fontSize: 12,
+                        color: "var(--muted, #64748b)",
+                        fontSize: 13,
                         textAlign: "center",
+                        padding: "24px 0",
+                        background: "var(--bg, #f8fafc)",
+                        borderRadius: 12,
+                        border: "1px solid var(--line, #e2e8f0)",
                       }}
                     >
-                      No hay lotes con este material.
+                      No hay lotes recibidos con este material actualmente.
                     </div>
                   );
                 return materialBatches.map((b: any) => {
@@ -2130,9 +2714,9 @@ export default function CentroAcopioPage() {
                     <div
                       key={b.id}
                       style={{
-                        background: "#0A192F",
-                        border: "1px solid #1E293B",
-                        borderRadius: 10,
+                        background: "var(--bg, #f8fafc)",
+                        border: "1px solid var(--line, #e2e8f0)",
+                        borderRadius: 12,
                         padding: 12,
                         display: "flex",
                         justifyContent: "space-between",
@@ -2140,13 +2724,19 @@ export default function CentroAcopioPage() {
                       }}
                     >
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 13 }}>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 13,
+                            color: "var(--fg, #0f172a)",
+                          }}
+                        >
                           Lote #{b.id.slice(0, 8)}
                         </div>
                         <div
                           style={{
                             fontSize: 11,
-                            color: "#94A3B8",
+                            color: "var(--muted, #64748b)",
                             marginTop: 4,
                           }}
                         >
@@ -2162,7 +2752,7 @@ export default function CentroAcopioPage() {
                           gap: 6,
                         }}
                       >
-                        <strong style={{ color: "#10B981" }}>
+                        <strong style={{ color: "#059669", fontSize: 14 }}>
                           +{Number(weight).toFixed(1)} kg
                         </strong>
                         {b.txHash && (
@@ -2171,15 +2761,16 @@ export default function CentroAcopioPage() {
                             target="_blank"
                             rel="noreferrer"
                             style={{
-                              fontSize: 10,
-                              color: "#3B82F6",
+                              fontSize: 11,
+                              color: "#2563eb",
                               display: "inline-flex",
                               alignItems: "center",
                               gap: 2,
+                              fontWeight: 600,
                             }}
                           >
                             <span>Stellar</span>
-                            <ArrowUpRight size={10} />
+                            <ArrowUpRight size={11} />
                           </a>
                         )}
                       </div>
@@ -2190,16 +2781,17 @@ export default function CentroAcopioPage() {
             </div>
             <button
               onClick={() => setSelectedMaterialForTrace(null)}
-              className="btn"
               style={{
                 width: "100%",
                 marginTop: 16,
                 padding: "12px",
-                background: "#1E293B",
-                border: "none",
-                color: "#F8FAFC",
+                background: "var(--bg, #f1f5f9)",
+                border: "1px solid var(--line, #cbd5e1)",
+                color: "var(--fg, #0f172a)",
                 borderRadius: 12,
                 cursor: "pointer",
+                fontWeight: 600,
+                fontSize: 13,
               }}
             >
               Cerrar
@@ -2214,7 +2806,7 @@ export default function CentroAcopioPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.85)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(8px)",
             display: "grid",
             placeItems: "center",
@@ -2224,14 +2816,15 @@ export default function CentroAcopioPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
               borderRadius: 20,
               padding: 24,
               maxWidth: 560,
               width: "100%",
               maxHeight: "90vh",
               overflowY: "auto",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
             }}
           >
             <div
@@ -2242,65 +2835,99 @@ export default function CentroAcopioPage() {
                 marginBottom: 20,
               }}
             >
-              <h3
-                style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  margin: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <ShieldCheck size={18} style={{ color: "#10B981" }} />
-                Trazabilidad Completa — Lote #{selectedBatchDetail.id.slice(0, 8)}
-              </h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: "rgba(16, 185, 129, 0.12)",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  <ShieldCheck size={20} style={{ color: "#059669" }} />
+                </div>
+                <h3
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 800,
+                    margin: 0,
+                    color: "var(--fg, #0f172a)",
+                  }}
+                >
+                  Trazabilidad Completa — Lote #{selectedBatchDetail.id.slice(0, 8)}
+                </h3>
+              </div>
               <button
                 onClick={() => setSelectedBatchDetail(null)}
                 style={{
-                  background: "none",
+                  background: "var(--bg, #f1f5f9)",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--muted, #64748b)",
                   cursor: "pointer",
-                  fontSize: 18,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  display: "grid",
+                  placeItems: "center",
                 }}
               >
                 ✕
               </button>
             </div>
             <div style={{ display: "grid", gap: 12, fontSize: 13 }}>
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#94A3B8",
-                    fontWeight: 700,
-                    marginBottom: 8,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
+                    marginBottom: 6,
+                    letterSpacing: "0.05em",
                   }}
                 >
-                  ID COMPLETO
+                  ID COMPLETO DEL LOTE
                 </div>
                 <div
                   style={{
                     fontFamily: "monospace",
                     fontSize: 12,
-                    color: "#06B6D4",
+                    color: "#0369a1",
                     wordBreak: "break-all",
+                    fontWeight: 600,
                   }}
                 >
                   {selectedBatchDetail.id}
                 </div>
               </div>
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#94A3B8",
-                    fontWeight: 700,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
                     marginBottom: 8,
+                    letterSpacing: "0.05em",
                   }}
                 >
-                  MATERIALES
+                  MATERIALES REGISTRADOS
                 </div>
                 {Object.entries(selectedBatchDetail.materialsActual || {}).map(
                   ([k, v]) => (
@@ -2310,57 +2937,82 @@ export default function CentroAcopioPage() {
                         display: "flex",
                         justifyContent: "space-between",
                         marginBottom: 4,
+                        fontSize: 13,
                       }}
                     >
-                      <span>{k}</span>
-                      <strong style={{ color: "#10B981" }}>
+                      <span style={{ color: "var(--fg, #0f172a)", fontWeight: 600 }}>
+                        {k}
+                      </span>
+                      <strong style={{ color: "#059669" }}>
                         {Number(v).toFixed(1)} kg
                       </strong>
                     </div>
                   )
                 )}
               </div>
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#94A3B8",
-                    fontWeight: 700,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
                     marginBottom: 8,
+                    letterSpacing: "0.05em",
                   }}
                 >
-                  ACTORES
+                  ACTORES INVOLUCRADOS
                 </div>
-                <div style={{ marginBottom: 4 }}>
-                  <span style={{ color: "#94A3B8" }}>Recolector: </span>
-                  {selectedBatchDetail.collector?.email}
+                <div style={{ marginBottom: 6, fontSize: 13 }}>
+                  <span style={{ color: "var(--muted, #64748b)" }}>Recolector: </span>
+                  <strong style={{ color: "var(--fg, #0f172a)" }}>
+                    {selectedBatchDetail.collector?.email}
+                  </strong>
                 </div>
                 {selectedBatchDetail.destinationCenter && (
-                  <div>
-                    <span style={{ color: "#94A3B8" }}>Centro: </span>
-                    {selectedBatchDetail.destinationCenter.email}
+                  <div style={{ fontSize: 13 }}>
+                    <span style={{ color: "var(--muted, #64748b)" }}>Centro de Acopio: </span>
+                    <strong style={{ color: "var(--fg, #0f172a)" }}>
+                      {selectedBatchDetail.destinationCenter.email}
+                    </strong>
                   </div>
                 )}
               </div>
+
               {selectedBatchDetail.ipfsCid && (
-                <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+                <div
+                  style={{
+                    background: "var(--bg, #f8fafc)",
+                    border: "1px solid var(--line, #e2e8f0)",
+                    borderRadius: 12,
+                    padding: 14,
+                  }}
+                >
                   <div
                     style={{
                       fontSize: 10,
-                      color: "#94A3B8",
-                      fontWeight: 700,
-                      marginBottom: 8,
+                      color: "var(--muted, #64748b)",
+                      fontWeight: 800,
+                      marginBottom: 6,
+                      letterSpacing: "0.05em",
                     }}
                   >
-                    IPFS CID
+                    MANIFIESTO IPFS
                   </div>
                   <div
                     style={{
                       fontFamily: "monospace",
                       fontSize: 11,
-                      color: "#06B6D4",
+                      color: "#0369a1",
                       wordBreak: "break-all",
-                      marginBottom: 8,
+                      marginBottom: 10,
                     }}
                   >
                     {selectedBatchDetail.ipfsCid}
@@ -2369,43 +3021,52 @@ export default function CentroAcopioPage() {
                     href={ipfsLink(selectedBatchDetail.ipfsCid)}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn"
                     style={{
                       fontSize: 12,
                       padding: "8px 14px",
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 6,
-                      background: "rgba(6, 182, 212, 0.1)",
-                      border: "1px solid #06B6D4",
-                      color: "#06B6D4",
+                      background: "#f0f9ff",
+                      border: "1px solid #bae6fd",
+                      color: "#0284c7",
                       borderRadius: 8,
                       textDecoration: "none",
+                      fontWeight: 700,
                     }}
                   >
                     <ExternalLink size={12} /> Ver contenido IPFS
                   </a>
                 </div>
               )}
+
               {selectedBatchDetail.txHash && (
-                <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+                <div
+                  style={{
+                    background: "var(--bg, #f8fafc)",
+                    border: "1px solid var(--line, #e2e8f0)",
+                    borderRadius: 12,
+                    padding: 14,
+                  }}
+                >
                   <div
                     style={{
                       fontSize: 10,
-                      color: "#94A3B8",
-                      fontWeight: 700,
-                      marginBottom: 8,
+                      color: "var(--muted, #64748b)",
+                      fontWeight: 800,
+                      marginBottom: 6,
+                      letterSpacing: "0.05em",
                     }}
                   >
-                    TX HASH STELLAR
+                    TRANSACCIÓN STELLAR
                   </div>
                   <div
                     style={{
                       fontFamily: "monospace",
                       fontSize: 11,
-                      color: "#3B82F6",
+                      color: "#2563eb",
                       wordBreak: "break-all",
-                      marginBottom: 8,
+                      marginBottom: 10,
                     }}
                   >
                     {selectedBatchDetail.txHash}
@@ -2414,57 +3075,72 @@ export default function CentroAcopioPage() {
                     href={`https://stellar.expert/explorer/testnet/tx/${selectedBatchDetail.txHash}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn"
                     style={{
                       fontSize: 12,
                       padding: "8px 14px",
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 6,
-                      background: "rgba(59,130,246,0.1)",
-                      border: "1px solid #3B82F6",
-                      color: "#3B82F6",
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
+                      color: "#2563eb",
                       borderRadius: 8,
                       textDecoration: "none",
+                      fontWeight: 700,
                     }}
                   >
                     <ExternalLink size={12} /> Ver en Stellar Expert
                   </a>
                 </div>
               )}
-              <div style={{ background: "#0A192F", borderRadius: 10, padding: 14 }}>
+
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#94A3B8",
-                    fontWeight: 700,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
                     marginBottom: 8,
+                    letterSpacing: "0.05em",
                   }}
                 >
-                  TIMELINE
+                  LÍNEA DE TIEMPO
                 </div>
-                <div style={{ marginBottom: 4 }}>
-                  <span style={{ color: "#94A3B8" }}>Creado: </span>
-                  {new Date(selectedBatchDetail.createdAt).toLocaleString("es-PE")}
+                <div style={{ marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "var(--muted, #64748b)" }}>Creado: </span>
+                  <strong style={{ color: "var(--fg, #0f172a)" }}>
+                    {new Date(selectedBatchDetail.createdAt).toLocaleString("es-PE")}
+                  </strong>
                 </div>
-                <div>
-                  <span style={{ color: "#94A3B8" }}>Actualizado: </span>
-                  {new Date(selectedBatchDetail.updatedAt).toLocaleString("es-PE")}
+                <div style={{ fontSize: 12 }}>
+                  <span style={{ color: "var(--muted, #64748b)" }}>Actualizado: </span>
+                  <strong style={{ color: "var(--fg, #0f172a)" }}>
+                    {new Date(selectedBatchDetail.updatedAt).toLocaleString("es-PE")}
+                  </strong>
                 </div>
               </div>
             </div>
+
             <button
               onClick={() => setSelectedBatchDetail(null)}
-              className="btn"
               style={{
                 width: "100%",
-                marginTop: 16,
+                marginTop: 18,
                 padding: "12px",
-                background: "#1E293B",
-                border: "none",
-                color: "#F8FAFC",
+                background: "var(--bg, #f1f5f9)",
+                border: "1px solid var(--line, #cbd5e1)",
+                color: "var(--fg, #0f172a)",
                 borderRadius: 12,
                 cursor: "pointer",
+                fontWeight: 600,
+                fontSize: 13,
               }}
             >
               Cerrar
@@ -2477,8 +3153,8 @@ export default function CentroAcopioPage() {
       <div className="printable-qr-code hidden print:flex fixed inset-0 bg-white text-black z-[99999] flex-col items-center justify-center text-center p-12">
         <div className="border-4 border-[#2E7D32] p-8 rounded-3xl max-w-sm mx-auto flex flex-col items-center">
           <div className="text-3xl font-extrabold text-[#2E7D32] mb-2 flex items-center gap-2">
-            <span>♻️</span>
-            <span>LIBORA</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"></path><path d="M11 19h8.2a1.8 1.8 0 0 0 1.564-.914c.311-.534.298-1.2-.033-1.72L16.8 9.5"></path><path d="m11 5 3.9 6.5"></path><path d="m7 5 4-4 4 4"></path><path d="M16 19l4 4-4 4"></path></svg>
+            <span>LIVORA</span>
           </div>
           <p className="text-gray-600 text-xs mb-6 font-semibold tracking-wide">
             CENTRO DE ACOPIO OFICIAL
@@ -2523,6 +3199,35 @@ export default function CentroAcopioPage() {
           }
         }
       `}</style>
-    </Shell>
+
+      {/* Modal Web3 Delegated Signature for Batch Weighing & Token Minting */}
+      <Web3ConfirmModal
+        isOpen={isScaleWeb3ModalOpen}
+        title="Confirmar Notarización y Liquidación Blockchain"
+        tokenAmount={(petWeight + hdpeWeight + cartonWeight).toFixed(1)}
+        tokenSymbol="KG MATERIAL"
+        destinationName={selectedBatch?.collector?.email || "Recolector Registrado"}
+        destinationAddress={selectedBatch?.collector?.id}
+        actionDescription="Notarización de Lote en Stellar y Liquidación de EcoTokens"
+        warningText="Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar y liquidar los EcoTokens correspondientes. Esta acción es irreversible."
+        isLoading={receiveMutation.isPending}
+        onConfirm={handleExecuteWeighing}
+        onCancel={() => setIsScaleWeb3ModalOpen(false)}
+      />
+
+      {/* Modal Web3 Delegated Signature for B2B Transfer */}
+      <Web3ConfirmModal
+        isOpen={isB2bWeb3ModalOpen}
+        title="Confirmar Despacho B2B On-Chain"
+        tokenAmount={saleLines.reduce((acc, l) => acc + (l.weightKg || 0), 0).toFixed(1)}
+        tokenSymbol="KG TOTALES"
+        destinationName={b2bCompanies.find((c: any) => c.id === saleBuyerId)?.email || "Empresa B2B"}
+        actionDescription="Despacho de Material Reciclado y Trazabilidad On-Chain"
+        warningText="Al confirmar, autorizas a Livora a emitir la orden de transferencia y registro en la blockchain Stellar."
+        isLoading={b2bSaleMutation.isPending}
+        onConfirm={handleExecuteSale}
+        onCancel={() => setIsB2bWeb3ModalOpen(false)}
+      />
+    </>
   );
 }

@@ -135,7 +135,7 @@ export function CookieBanner() {
           >
             <div style={{ flex: "1 1 500px", minWidth: 280 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 16 }}>🍪</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55e6a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <strong style={{ fontSize: 15, color: "#55e6a5" }}>
                   Aviso de Cookies y Privacidad — Livora
                 </strong>

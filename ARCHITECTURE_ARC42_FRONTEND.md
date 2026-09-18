@@ -72,7 +72,7 @@ Livora es un ecosistema digital de economía circular que incentiva el reciclaje
 
 1. **Administración (`ADMIN`):** Monitoreo global de operaciones, trazabilidad integral de lotes, auditoría de certificados ESG, estado de infraestructura blockchain Stellar e IPFS, supervisión de inventarios y aprobación de KYC.
 2. **Empresas B2B / Compradoras (`EMPRESA_B2B`):** Tablero corporativo de métricas de impacto ambiental (CO₂ evitado, agua ahorrada), recepción de transferencias de material consolidado, descarga de manifiestos IPFS y visualización de certificados ESG inmutables.
-3. **Centros de Acopio y Almacenes (`CENTRO_ACOPIO` / `ALMACEN`):** Estación de pesaje en báscula industrial (PET, HDPE, Cartón, Vidrio, Aluminio), confirmación y liquidación asíncrona de lotes en blockchain (HTTP 202 Accepted + WebSockets), gestión de PIN de recepción para recolectores, despacho multi-material a compradores B2B y trazabilidad por lote/material.
+3. **Centros de Acopio (`CENTRO_ACOPIO`):** Estación de pesaje en báscula industrial (PET, HDPE, Cartón, Vidrio, Aluminio), confirmación y liquidación asíncrona de lotes en blockchain (HTTP 202 Accepted + WebSockets), gestión de PIN de recepción para recolectores, despacho multi-material a compradores B2B y trazabilidad por lote/material.
 4. **Hogares / Ciudadanos (`HOGAR`):** Creación de solicitudes de recolección georreferenciadas con evidencia fotográfica y estimación de residuos, generación de PIN de entrega para recolectores, consulta de balance en EcoTokens y pago/canje en comercios aliados mediante QR o código alfanumérico.
 5. **Recolectores Urbanos (`RECOLECTOR`):** Radar de solicitudes geolocalizadas por radio (5km, 10km, 50km), aceptación de recolecciones, verificación física con PIN numérico de 4 dígitos, consolidación de carga en camión y traslado a centros de acopio.
 6. **Comercios Aliados / Tiendas (`TIENDA`):** Terminal de punto de venta (POS) para cobrar en EcoTokens mediante código QR dinámico o ID manual del ciudadano, historial de canjes y solicitud de liquidación bancaria (*cash-out*) a cuenta bancaria/CCI en moneda fiduciaria (PEN).
@@ -240,7 +240,7 @@ graph TD
 - **Enrutamiento por Rol:** Tras el login exitoso en `src/app/page.tsx`, el usuario es redirigido automáticamente a su espacio de trabajo correspondiente:
   - `ADMIN` $\rightarrow$ `/admin`
   - `EMPRESA_B2B` $\rightarrow$ `/company`
-  - `CENTRO_ACOPIO` / `ALMACEN` $\rightarrow$ `/centro`
+  - `CENTRO_ACOPIO` $\rightarrow$ `/centro`
   - `HOGAR` $\rightarrow$ `/hogar`
   - `RECOLECTOR` $\rightarrow$ `/recolector`
   - `TIENDA` $\rightarrow$ `/tienda`

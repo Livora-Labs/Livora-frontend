@@ -6,11 +6,14 @@ import { useAuth } from "@/context/AuthContext";
 import { Shell, PageHead } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { api, updateProfile, changePassword } from "@/lib/api";
-import { MapPin, KeyRound, Copy, ExternalLink, ShieldAlert, Trash2 } from "lucide-react";
+import { MapPin, KeyRound, Copy, ExternalLink, ShieldAlert, Trash2, Sun, Moon } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function PerfilPage() {
   const router = useRouter();
   const { token, logout, user } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   // Profile Data States
   const [profile, setProfile] = useState<any>(null);
@@ -174,36 +177,36 @@ export default function PerfilPage() {
       />
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "50px 0", color: "#94A3B8" }}>Cargando datos de perfil...</div>
+        <div style={{ textAlign: "center", padding: "50px 0", color: "var(--muted)" }}>Cargando datos de perfil...</div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 40 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginBottom: 40 }}>
           {/* Columna Izquierda: Datos Personales e Impacto */}
           <div style={{ display: "grid", gap: 24 }}>
             {/* Datos Personales */}
             <section className="card" style={{ padding: 24 }}>
               <div className="section-title" style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Datos Personales</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Datos Personales</h2>
               </div>
               <form onSubmit={handleUpdateProfile} style={{ display: "grid", gap: 16 }}>
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Nombre Completo</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Nombre Completo</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ej. Juan Pérez"
-                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Correo Electrónico</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Correo Electrónico</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <input
                       type="email"
                       value={profile?.email || ""}
                       disabled
-                      style={{ flex: 1, background: "rgba(30, 41, 59, 0.5)", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#94A3B8", fontSize: 14, cursor: "not-allowed" }}
+                      style={{ flex: 1, background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--muted)", fontSize: 14, cursor: "not-allowed" }}
                     />
                     <span style={{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid #10B981", color: "#10B981", padding: "4px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
                       Verificado
@@ -212,24 +215,24 @@ export default function PerfilPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Teléfono / Celular</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Teléfono / Celular</label>
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Ej. +51 987654321"
-                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Dirección Fiscal / Operativa</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Dirección Fiscal / Operativa</label>
                   <input
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Calle, Número, Distrito, Ciudad"
-                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
                   />
                 </div>
 
@@ -242,25 +245,25 @@ export default function PerfilPage() {
             {/* Billetera Stellar */}
             <section className="card" style={{ padding: 24 }}>
               <div className="section-title" style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Billetera Digital Livora</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Billetera Digital Livora</h2>
               </div>
               <div style={{ display: "grid", gap: 12 }}>
-                <p style={{ fontSize: 13, color: "#94A3B8", lineHeight: 1.5 }}>
+                <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.5 }}>
                   Tu monedero custodial en Stellar. Las claves privadas están cifradas de forma segura. Autorizas a Livora a firmar transacciones con tu delegación de firma.
                 </p>
                 <div>
-                  <label style={{ display: "block", fontSize: 11, color: "#94A3B8", marginBottom: 6 }}>Dirección Pública (Clave Pública)</label>
+                  <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 6 }}>Dirección Pública (Clave Pública)</label>
                   <div style={{ display: "flex", gap: 10 }}>
                     <input
                       type="text"
                       value={profile?.walletAddress || "No generada"}
                       readOnly
-                      style={{ flex: 1, background: "rgba(30, 41, 59, 0.3)", border: "1px solid #1E293B", borderRadius: 10, padding: 10, color: "#F8FAFC", fontFamily: "monospace", fontSize: 12 }}
+                      style={{ flex: 1, background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 10, color: "var(--text)", fontFamily: "monospace", fontSize: 12 }}
                     />
                     <button
                       type="button"
                       onClick={handleCopyWallet}
-                      style={{ background: "#1E293B", border: "1px solid #334155", color: "#F8FAFC", padding: 10, borderRadius: 10, cursor: "pointer" }}
+                      style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--text)", padding: 10, borderRadius: 10, cursor: "pointer" }}
                     >
                       <Copy size={16} />
                     </button>
@@ -270,18 +273,21 @@ export default function PerfilPage() {
                 {profile?.walletAddress && (
                   <>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginTop: 16 }}>
-                      <span style={{ fontSize: 11, color: "#94A3B8" }}>Código QR de tu Dirección Pública</span>
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${profile.walletAddress}&color=ffffff&bgcolor=0a192f`}
-                        alt="QR Wallet Address"
-                        style={{ border: "1px solid #1E293B", borderRadius: 12, padding: 8, background: "#0A192F" }}
-                      />
+                      <span style={{ fontSize: 11, color: "var(--muted)" }}>Código QR de tu Dirección Pública</span>
+                      <div style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 10, background: theme === "dark" ? "#0e1a17" : "#ffffff", boxShadow: "var(--card-shadow)" }}>
+                        <QRCodeSVG
+                          value={profile.walletAddress}
+                          size={130}
+                          bgColor={theme === "dark" ? "#0e1a17" : "#ffffff"}
+                          fgColor={theme === "dark" ? "#f2f7f5" : "#0f172a"}
+                        />
+                      </div>
                     </div>
                     <a
                       href={`https://stellar.expert/explorer/testnet/account/${profile.walletAddress}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: "#10B981", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", fontWeight: 600, width: "fit-content", margin: "10px auto 0" }}
+                      style={{ color: "var(--green)", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", fontWeight: 600, width: "fit-content", margin: "10px auto 0" }}
                     >
                       <span>Ver en el explorador digital</span>
                       <ExternalLink size={14} />
@@ -297,28 +303,28 @@ export default function PerfilPage() {
             {/* Seguridad (Contraseña) */}
             <section className="card" style={{ padding: 24 }}>
               <div className="section-title" style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Seguridad y Contraseña</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Seguridad y Contraseña</h2>
               </div>
               <form onSubmit={handleChangePassword} style={{ display: "grid", gap: 16 }}>
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Nueva Contraseña</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Nueva Contraseña</label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolos"
-                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Confirmar Nueva Contraseña</label>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Confirmar Nueva Contraseña</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repite la contraseña exactamente"
-                    style={{ width: "100%", background: "#0A192F", border: "1px solid #1E293B", borderRadius: 10, padding: 12, color: "#F8FAFC", fontSize: 14 }}
+                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
                   />
                 </div>
 
@@ -328,31 +334,90 @@ export default function PerfilPage() {
               </form>
             </section>
 
+            {/* Preferencia de Interfaz y Tema */}
+            <section className="card" style={{ padding: 24 }}>
+              <div className="section-title" style={{ marginBottom: 16 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}>
+                  {theme === "dark" ? <Moon size={20} style={{ color: "var(--green)" }} /> : <Sun size={20} style={{ color: "var(--amber)" }} />}
+                  <span>Preferencia de Interfaz y Tema</span>
+                </h2>
+              </div>
+              <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16, lineHeight: 1.5 }}>
+                Personaliza la apariencia visual del portal. Puedes alternar entre Modo Oscuro y Modo Claro con alto contraste WCAG AA.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    padding: "14px 16px",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: 14,
+                    border: theme === "dark" ? "2px solid var(--green)" : "1px solid var(--line)",
+                    background: theme === "dark" ? "var(--panel2)" : "transparent",
+                    color: theme === "dark" ? "var(--green)" : "var(--muted)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Moon size={18} />
+                  <span>Modo Oscuro</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    padding: "14px 16px",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: 14,
+                    border: theme === "light" ? "2px solid var(--green)" : "1px solid var(--line)",
+                    background: theme === "light" ? "var(--panel2)" : "transparent",
+                    color: theme === "light" ? "var(--green)" : "var(--muted)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Sun size={18} />
+                  <span>Modo Claro</span>
+                </button>
+              </div>
+            </section>
+
             {/* Preferencias y Consentimientos (Privacidad) */}
             <section className="card" style={{ padding: 24 }}>
               <div className="section-title" style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "#F8FAFC" }}>Consentimientos y Privacidad</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Consentimientos y Privacidad</h2>
               </div>
               <div style={{ display: "grid", gap: 16 }}>
-                <div style={{ display: "grid", gap: 6, padding: 12, background: "#0A192F", borderRadius: 10, border: "1px solid #1E293B" }}>
+                <div style={{ display: "grid", gap: 6, padding: 14, background: "var(--panel2)", borderRadius: 10, border: "1px solid var(--line)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                    <span style={{ color: "#94A3B8" }}>Términos y Condiciones:</span>
-                    <strong style={{ color: "#10B981" }}>Aceptado v{profile?.termsVersion || "2.0.0"}</strong>
+                    <span style={{ color: "var(--muted)" }}>Términos y Condiciones:</span>
+                    <strong style={{ color: "var(--green)" }}>Aceptado v{profile?.termsVersion || "2.0.0"}</strong>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                    <span style={{ color: "#94A3B8" }}>Política de Privacidad (Ley N.° 29733):</span>
-                    <strong style={{ color: "#10B981" }}>Aceptado v{profile?.privacyVersion || "2.0.0"}</strong>
+                    <span style={{ color: "var(--muted)" }}>Política de Privacidad (Ley N.° 29733):</span>
+                    <strong style={{ color: "var(--green)" }}>Aceptado v{profile?.privacyVersion || "2.0.0"}</strong>
                   </div>
                 </div>
 
-                <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 13, color: "#F8FAFC" }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 13, color: "var(--text)" }}>
                   <input
                     type="checkbox"
                     checked={marketingAccepted}
                     onChange={(e) => setMarketingAccepted(e.target.checked)}
-                    style={{ marginTop: 3, accentColor: "#10B981" }}
+                    style={{ marginTop: 3, accentColor: "var(--green)" }}
                   />
-                  <span style={{ lineHeight: 1.4, color: "#94A3B8" }}>
+                  <span style={{ lineHeight: 1.4, color: "var(--muted)" }}>
                     Autorizo el envío de publicidad y promociones sobre tiendas asociadas y beneficios comerciales de la plataforma de reciclaje (Opcional, regulado por la Ley N.° 29733).
                   </span>
                 </label>
@@ -362,7 +427,7 @@ export default function PerfilPage() {
                   onClick={handleUpdateProfile}
                   disabled={updatingProfile}
                   className="btn"
-                  style={{ width: "100%", padding: 10, background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10B981" }}
+                  style={{ width: "100%", padding: 10, background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "var(--green)" }}
                 >
                   Guardar Preferencias de Privacidad
                 </button>
@@ -377,7 +442,7 @@ export default function PerfilPage() {
                   <span>Zona de Peligro</span>
                 </h2>
               </div>
-              <p style={{ fontSize: 12, color: "#94A3B8", lineHeight: 1.5, marginBottom: 16 }}>
+              <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginBottom: 16 }}>
                 Eliminar tu cuenta implica la anonimización de tus datos y la desactivación irreversible de tu billetera Stellar. Conforme al derecho de cancelación ARCO (Ley N.° 29733).
               </p>
               <button
@@ -413,8 +478,8 @@ export default function PerfilPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 25, 47, 0.85)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15, 23, 42, 0.75)",
+            backdropFilter: "blur(6px)",
             display: "grid",
             placeItems: "center",
             zIndex: 100,
@@ -423,8 +488,9 @@ export default function PerfilPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
+              boxShadow: "var(--card-shadow)",
               borderRadius: 20,
               padding: 24,
               maxWidth: 460,
@@ -435,12 +501,12 @@ export default function PerfilPage() {
               <ShieldAlert />
               <span>Confirmar Eliminación ARCO</span>
             </h3>
-            <p style={{ color: "#F8FAFC", fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
+            <p style={{ color: "var(--text)", fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
               Esta acción es <strong>totalmente irreversible</strong>. Se destruirá la clave digital de tu monedero Stellar (pérdida permanente de EcoTokens) y se anonimizarán tus datos en la base de datos de Livora.
             </p>
-            <p style={{ color: "#94A3B8", fontSize: 12, marginBottom: 14 }}>
+            <p style={{ color: "var(--muted)", fontSize: 12, marginBottom: 14 }}>
               Para confirmar, escribe a continuación exactamente la frase: <br />
-              <strong style={{ color: "#F8FAFC" }}>ELIMINAR MI CUENTA</strong>
+              <strong style={{ color: "var(--text)" }}>ELIMINAR MI CUENTA</strong>
             </p>
 
             <input
@@ -450,11 +516,11 @@ export default function PerfilPage() {
               placeholder="Escribe aquí para confirmar..."
               style={{
                 width: "100%",
-                background: "#0A192F",
-                border: "1px solid #1E293B",
+                background: "var(--input-bg)",
+                border: "1px solid var(--line)",
                 borderRadius: 10,
                 padding: 12,
-                color: "#F8FAFC",
+                color: "var(--input-color)",
                 fontSize: 14,
                 marginBottom: 20,
                 textAlign: "center"
@@ -469,7 +535,7 @@ export default function PerfilPage() {
                   setDeleteConfirmationText("");
                 }}
                 className="btn"
-                style={{ flex: 1, padding: 12, background: "#1E293B", color: "#F8FAFC", border: "1px solid #334155" }}
+                style={{ flex: 1, padding: 12, background: "var(--panel2)", color: "var(--text)", border: "1px solid var(--line)" }}
               >
                 Cancelar
               </button>

@@ -103,8 +103,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (refreshToken) {
         setSecureCookie("livora_refresh_token", refreshToken, 30);
       }
-      localStorage.removeItem("livora_token");
-      localStorage.removeItem("livora_refresh_token");
+      localStorage.setItem("livora_token", authToken);
+      if (refreshToken) {
+        localStorage.setItem("livora_refresh_token", refreshToken);
+      }
       localStorage.setItem("livora_role", loggedUser.role);
       localStorage.setItem("livora_user", JSON.stringify(loggedUser));
 
@@ -155,8 +157,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (refreshToken) {
         setSecureCookie("livora_refresh_token", refreshToken, 30);
       }
-      localStorage.removeItem("livora_token");
-      localStorage.removeItem("livora_refresh_token");
+      localStorage.setItem("livora_token", authToken);
+      if (refreshToken) {
+        localStorage.setItem("livora_refresh_token", refreshToken);
+      }
       localStorage.setItem("livora_role", loggedUser.role);
       localStorage.setItem("livora_user", JSON.stringify(loggedUser));
 

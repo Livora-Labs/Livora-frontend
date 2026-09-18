@@ -2,18 +2,20 @@
 
 import React from "react";
 import Link from "next/link";
+import { ArrowLeft, Printer } from "lucide-react";
 import { Footer, IndecopiBookLogo } from "@/components/Footer";
 
 export default function TerminosPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg, #07110f)", color: "var(--text, #f2f7f5)", padding: "48px 20px 80px" }}>
+    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", padding: "48px 20px 80px" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
         
         {/* Navigation Breadcrumb */}
-        <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, color: "var(--muted, #8fa49d)" }}>
+        <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, color: "var(--muted)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/" style={{ color: "var(--green, #55e6a5)", textDecoration: "none" }}>
-              ← Volver al inicio
+            <Link href="/" style={{ color: "var(--green)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+              <ArrowLeft size={14} />
+              Volver al inicio
             </Link>
             <span>/</span>
             <span>Términos y Condiciones de Uso</span>
@@ -21,41 +23,45 @@ export default function TerminosPage() {
           <button
             onClick={() => window.print()}
             style={{
-              background: "#081310",
-              border: "1px solid var(--green, #55e6a5)",
-              color: "var(--green, #55e6a5)",
-              padding: "6px 12px",
+              background: "var(--panel2)",
+              border: "1px solid var(--line)",
+              color: "var(--green)",
+              padding: "6px 14px",
               borderRadius: 8,
               cursor: "pointer",
               fontWeight: 600,
               fontSize: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            🖨️ Imprimir / Descargar T&C
+            <Printer size={14} />
+            Imprimir / Descargar T&C
           </button>
         </div>
 
         <div
           className="card"
           style={{
-            background: "linear-gradient(145deg, #0e1c18, #091310)",
-            border: "1px solid var(--line, #20332d)",
+            background: "var(--panel)",
+            border: "1px solid var(--line)",
             borderRadius: 18,
             padding: "40px 36px",
-            boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
             lineHeight: 1.7,
             fontSize: 14,
-            color: "#d8e4df",
+            color: "var(--text)",
           }}
         >
-          <div style={{ borderBottom: "1px solid #1c352b", paddingBottom: 20, marginBottom: 28 }}>
-            <span className="eyebrow" style={{ color: "var(--green, #55e6a5)" }}>
+          <div style={{ borderBottom: "1px solid var(--line)", paddingBottom: 20, marginBottom: 28 }}>
+            <span className="eyebrow" style={{ color: "var(--green)" }}>
               Marco Contractual y Regulatorio
             </span>
-            <h1 style={{ fontSize: 32, margin: "8px 0 10px", color: "#f2f7f5", letterSpacing: -0.8 }}>
+            <h1 style={{ fontSize: 32, margin: "8px 0 10px", color: "var(--text)", letterSpacing: -0.8, fontWeight: 800 }}>
               Términos y Condiciones de Uso
             </h1>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--muted, #8fa49d)" }}>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
               Última actualización: 24 de agosto de 2026 | Versión: 2.0.0 (Stellar & Soroban Network)
             </p>
           </div>
@@ -92,68 +98,68 @@ export default function TerminosPage() {
                 <strong style={{ color: "#f2f7f5" }}>Tiendas Aliadas / Comercios Asociados:</strong> Establecimientos comerciales que aceptan EcoTokens como medio de canje por productos, descuentos o servicios ecológicos.
               </li>
               <li>
-                <strong style={{ color: "#f2f7f5" }}>Empresas B2B / Transformadores:</strong> Empresas compradoras de lotes consolidados y certificaciones de impacto ESG.
+                <strong style={{ color: "var(--text)" }}>Empresas B2B / Transformadores:</strong> Empresas compradoras de lotes consolidados y certificaciones de impacto ESG.
               </li>
             </ul>
           </section>
 
           {/* Section 3: Monedero Web3 y Custodia Delegada en Stellar */}
-          <section style={{ marginBottom: 28, background: "#081613", padding: "20px 22px", borderRadius: 14, border: "1px solid #1c3d30" }}>
-            <h2 style={{ fontSize: 18, color: "var(--green, #55e6a5)", marginBottom: 12 }}>
+          <section style={{ marginBottom: 28, background: "var(--panel2)", padding: "20px 22px", borderRadius: 14, border: "1px solid var(--line)" }}>
+            <h2 style={{ fontSize: 18, color: "var(--green)", marginBottom: 12 }}>
               3. Monedero Web3 y Custodia de Claves Privadas (Stellar / Soroban)
             </h2>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>3.1 Declaración de Custodia:</strong> La Plataforma implementa una infraestructura de billeteras digitales custodiales desplegadas sobre la red pública descentralizada <strong>Stellar Blockchain</strong> e interactúa mediante contratos inteligentes (Smart Contracts) en <strong>Soroban</strong>. El backend de Livora genera y custodia las claves criptográficas privadas de forma segura, cifradas con el estándar militar AES-256.
+              <strong style={{ color: "var(--text)" }}>3.1 Declaración de Custodia:</strong> La Plataforma implementa una infraestructura de billeteras digitales custodiales desplegadas sobre la red pública descentralizada <strong>Stellar Blockchain</strong> e interactúa mediante contratos inteligentes (Smart Contracts) en <strong>Soroban</strong>. El backend de Livora genera y custodia las claves criptográficas privadas de forma segura, cifradas con el estándar militar AES-256.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>3.2 Mandato de Delegación de Firma:</strong> El usuario otorga a Livora S.A.C. un mandato de delegación irrevocable para firmar transacciones on-chain en la blockchain Stellar en su nombre y representación, ejecutadas exclusivamente tras la confirmación e instrucción expresa del usuario en la interfaz gráfica (mediante la pantalla de confirmación Web3 correspondiente).
+              <strong style={{ color: "var(--text)" }}>3.2 Mandato de Delegación de Firma:</strong> El usuario otorga a Livora S.A.C. un mandato de delegación irrevocable para firmar transacciones on-chain en la blockchain Stellar en su nombre y representación, ejecutadas exclusivamente tras la confirmación e instrucción expresa del usuario en la interfaz gráfica (mediante la pantalla de confirmación Web3 correspondiente).
             </p>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: "#f2f7f5" }}>3.3 Límite de Responsabilidad de Acceso:</strong> El usuario es el único responsable de la confidencialidad de su contraseña, correo electrónico y dispositivos autorizados. Livora S.A.C. queda exenta de responsabilidad ante cualquier débito no autorizado o pérdida originada por negligencia del usuario en la custodia de sus credenciales.
+              <strong style={{ color: "var(--text)" }}>3.3 Límite de Responsabilidad de Acceso:</strong> El usuario es el único responsable de la confidencialidad de su contraseña, correo electrónico y dispositivos autorizados. Livora S.A.C. queda exenta de responsabilidad ante cualquier débito no autorizado o pérdida originada por negligencia del usuario en la custodia de sus credenciales.
             </p>
           </section>
 
           {/* Section 4: Transacciones Blockchain e Inmutabilidad */}
           <section style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 18, color: "var(--green, #55e6a5)", marginBottom: 12 }}>
+            <h2 style={{ fontSize: 18, color: "var(--green)", marginBottom: 12 }}>
               4. Transacciones Blockchain, Irreversibilidad y Naturaleza de los Tokens
             </h2>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>4.1 Irreversibilidad Absoluta:</strong> Debido a la arquitectura inmutable y descentralizada de la red Stellar, una vez que una transacción de canje o transferencia de EcoTokens es firmada y confirmada en el libro mayor distribuido (ledger), <strong>la operación no puede ser cancelada, revertida ni modificada</strong> bajo ninguna circunstancia.
+              <strong style={{ color: "var(--text)" }}>4.1 Irreversibilidad Absoluta:</strong> Debido a la arquitectura inmutable y descentralizada de la red Stellar, una vez que una transacción de canje o transferencia de EcoTokens es firmada y confirmada en el libro mayor distribuido (ledger), <strong>la operación no puede ser cancelada, revertida ni modificada</strong> bajo ninguna circunstancia.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>4.2 Naturaleza de los EcoTokens (ECO):</strong> Los EcoTokens son unidades de incentivo y recompensa digital otorgadas por actividades de reciclaje valorizable. <strong>No constituyen moneda de curso legal (fiat), valores mobiliarios, instrumentos financieros ni activos de inversión</strong>. Los EcoTokens no son reembolsables por dinero fiat ante Livora ni son transferibles en mercados financieros no autorizados.
+              <strong style={{ color: "var(--text)" }}>4.2 Naturaleza de los EcoTokens (ECO):</strong> Los EcoTokens son unidades de incentivo y recompensa digital otorgadas por actividades de reciclaje valorizable. <strong>No constituyen moneda de curso legal (fiat), valores mobiliarios, instrumentos financieros ni activos de inversión</strong>. Los EcoTokens no son reembolsables por dinero fiat ante Livora ni son transferibles en mercados financieros no autorizados.
             </p>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: "#f2f7f5" }}>4.3 Riesgo Tecnológico:</strong> El usuario asume el riesgo inherente a la tecnología blockchain, incluyendo fluctuaciones de conectividad, mantenimiento de nodos de red Stellar, congestión de validadores y eventuales retrasos técnicos ajenos al control directo de Livora.
+              <strong style={{ color: "var(--text)" }}>4.3 Riesgo Tecnológico:</strong> El usuario asume el riesgo inherente a la tecnología blockchain, incluyendo fluctuaciones de conectividad, mantenimiento de nodos de red Stellar, congestión de validadores y eventuales retrasos técnicos ajenos al control directo de Livora.
             </p>
           </section>
 
           {/* Section 5: E-commerce y Tiendas Asociadas */}
           <section style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 18, color: "var(--green, #55e6a5)", marginBottom: 12 }}>
+            <h2 style={{ fontSize: 18, color: "var(--green)", marginBottom: 12 }}>
               5. Marketplace, Tiendas Asociadas y Garantías (Indecopi)
             </h2>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>5.1 Rol de Intermediador Tecnológico:</strong> Livora actúa exclusivamente como operador de la plataforma tecnológica que facilita el canje de tokens por productos y beneficios en tiendas asociadas.
+              <strong style={{ color: "var(--text)" }}>5.1 Rol de Intermediador Tecnológico:</strong> Livora actúa exclusivamente como operador de la plataforma tecnológica que facilita el canje de tokens por productos y beneficios en tiendas asociadas.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>5.2 Responsabilidad Directa del Proveedor:</strong> Conforme al Código de Protección y Defensa del Consumidor (Ley N° 29571), la tienda asociada o comercio aliado es el <strong>único y directo responsable</strong> de la idoneidad, calidad, disponibilidad física, entrega y garantía legal de los productos o servicios canjeados.
+              <strong style={{ color: "var(--text)" }}>5.2 Responsabilidad Directa del Proveedor:</strong> Conforme al Código de Protección y Defensa del Consumidor (Ley N° 29571), la tienda asociada o comercio aliado es el <strong>único y directo responsable</strong> de la idoneidad, calidad, disponibilidad física, entrega y garantía legal de los productos o servicios canjeados.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>5.3 Políticas de Despacho y Tiempos de Entrega Estimados:</strong> La entrega física de los bienes o servicios canjeados se coordinará directamente en el establecimiento de la Tienda Aliada (recojo presencial inmediato) o bajo las condiciones de despacho a domicilio informadas por el comercio. El tiempo estimado de entrega a domicilio no superará los cinco (5) días hábiles desde la confirmación de la transacción, salvo indicación expresa de la tienda en el momento del canje.
+              <strong style={{ color: "var(--text)" }}>5.3 Políticas de Despacho y Tiempos de Entrega Estimados:</strong> La entrega física de los bienes o servicios canjeados se coordinará directamente en el establecimiento de la Tienda Aliada (recojo presencial inmediato) o bajo las condiciones de despacho a domicilio informadas por el comercio. El tiempo estimado de entrega a domicilio no superará los cinco (5) días hábiles desde la confirmación de la transacción, salvo indicación expresa de la tienda en el momento del canje.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "#f2f7f5" }}>5.4 Mecanismos de Garantías Aplicables:</strong> Todos los productos y servicios canjeados a través de la Plataforma cuentan con la garantía legal mínima establecida por la normativa peruana. Ante cualquier disconformidad con el bien o servicio, el usuario podrá ejercer la garantía directamente frente al comercio proveedor.
+              <strong style={{ color: "var(--text)" }}>5.4 Mecanismos de Garantías Aplicables:</strong> Todos los productos y servicios canjeados a través de la Plataforma cuentan con la garantía legal mínima establecida por la normativa peruana. Ante cualquier disconformidad con el bien o servicio, el usuario podrá ejercer la garantía directamente frente al comercio proveedor.
             </p>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: "#f2f7f5" }}>5.5 Derecho de Arrepentimiento (Retracto Legal):</strong> De conformidad con la regulación peruana de protección al consumidor, el usuario tiene derecho legal de arrepentirse de la transacción dentro de un plazo de siete (7) días calendario posteriores a la recepción del bien, siempre que se trate de bienes no perecibles, no presenten signos de uso y sean devueltos en su empaque original sellado. El retracto se tramitará ante la Tienda Aliada y, tras confirmarse la devolución exitosa sin penalidades, Livora procederá a la devolución de los EcoTokens correspondientes en el monedero del usuario de forma irreversible.
+              <strong style={{ color: "var(--text)" }}>5.5 Derecho de Arrepentimiento (Retracto Legal):</strong> De conformidad con la regulación peruana de protección al consumidor, el usuario tiene derecho legal de arrepentirse de la transacción dentro de un plazo de siete (7) días calendario posteriores a la recepción del bien, siempre que se trate de bienes no perecibles, no presenten signos de uso y sean devueltos en su empaque original sellado. El retracto se tramitará ante la Tienda Aliada y, tras confirmarse la devolución exitosa sin penalidades, Livora procederá a la devolución de los EcoTokens correspondientes en el monedero del usuario de forma irreversible.
             </p>
           </section>
 
-          {/* Section 6: Libro de Reclamaciones y Legislación Aplicable */}
-          <section style={{ marginBottom: 28, background: "#0c1a16", padding: "20px 22px", borderRadius: 14, border: "1px solid #204537" }}>
-            <h2 style={{ fontSize: 18, color: "var(--green, #55e6a5)", marginBottom: 12 }}>
+          {/* Section 6: Libro de Reclamaciones y Solución de Controversias */}
+          <section style={{ marginBottom: 28, background: "var(--panel2)", padding: "20px 22px", borderRadius: 14, border: "1px solid var(--line)" }}>
+            <h2 style={{ fontSize: 18, color: "var(--green)", marginBottom: 12 }}>
               6. Libro de Reclamaciones y Solución de Controversias
             </h2>
             <p style={{ margin: "0 0 14px" }}>
@@ -165,26 +171,28 @@ export default function TerminosPage() {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 12,
-                  padding: "10px 16px",
-                  background: "#081310",
-                  border: "1px solid #55e6a5",
+                  gap: 10,
+                  padding: "10px 18px",
+                  background: "var(--panel)",
+                  border: "1px solid var(--green)",
                   borderRadius: 10,
-                  color: "#55e6a5",
+                  color: "var(--green)",
                   fontWeight: 700,
                   textDecoration: "none",
+                  fontSize: 13,
                 }}
               >
-                📖 Ir al Libro de Reclamaciones Virtual
+                <IndecopiBookLogo width={28} height={18} />
+                Ir al Libro de Reclamaciones Virtual
               </Link>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: "#8fa49d" }}>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
               El plazo legal máximo para la atención de reclamaciones es de <strong>quince (15) días hábiles improrrogables</strong>. Para controversias no resueltas por las vías directas, las partes se someten a la legislación de la República del Perú y a la jurisdicción de los jueces y tribunales del Distrito Judicial de Lima.
             </p>
           </section>
 
           {/* Footer inside card */}
-          <div style={{ borderTop: "1px solid #1c352b", paddingTop: 20, textAlign: "center", fontSize: 12, color: "#8fa49d" }}>
+          <div style={{ borderTop: "1px solid var(--line)", paddingTop: 20, textAlign: "center", fontSize: 12, color: "var(--muted)" }}>
             Livora S.A.C. — RUC: 20608912345 — Lima, Perú &copy; 2026. Todos los derechos reservados.
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { KeyRound, RefreshCw, ArrowRight } from "lucide-react";
+import { LivoraFullLogo } from "@/components/LivoraLogo";
 
 function VerifyAccountForm() {
   const searchParams = useSearchParams();
@@ -46,7 +47,9 @@ function VerifyAccountForm() {
           router.push("/company");
         } else if (loggedUser.role === "CENTRO_ACOPIO") {
           router.push("/centro");
-        } else if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(loggedUser.role)) {
+        } else if (loggedUser.role === "TIENDA") {
+          router.push("/store");
+        } else if (["HOGAR", "RECOLECTOR"].includes(loggedUser.role)) {
           logout();
           showToast(
             "Acceso no disponible en Web",
@@ -81,18 +84,18 @@ function VerifyAccountForm() {
   };
 
   return (
-    <div className="login-card" style={{ maxWidth: 460 }}>
-      <span className="eyebrow" style={{ color: "#10B981" }}>Verificación de Seguridad</span>
-      <h2 style={{ fontSize: 26, fontWeight: 800, margin: "6px 0 16px" }}>
+    <div className="login-card" style={{ maxWidth: 460, background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 16, padding: "32px 36px" }}>
+      <span className="eyebrow" style={{ color: "var(--green)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Verificación de Seguridad</span>
+      <h2 style={{ fontSize: 26, fontWeight: 800, margin: "6px 0 16px", color: "var(--text)" }}>
         Verifica tu cuenta
       </h2>
-      <p style={{ color: "#94A3B8", fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
-        Hemos enviado un código numérico de 6 dígitos a <strong style={{ color: "#F8FAFC" }}>{email}</strong>. Por favor, ingrésalo a continuación.
+      <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
+        Hemos enviado un código numérico de 6 dígitos a <strong style={{ color: "var(--text)" }}>{email}</strong>. Por favor, ingrésalo a continuación.
       </p>
 
       <form onSubmit={handleSubmit}>
         <div className="field" style={{ marginBottom: 20 }}>
-          <label style={{ display: "block", fontSize: 12, color: "#94A3B8", marginBottom: 6 }}>Código OTP de 6 dígitos</label>
+          <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 500 }}>Código OTP de 6 dígitos</label>
           <input
             type="text"
             maxLength={6}
@@ -102,14 +105,15 @@ function VerifyAccountForm() {
             style={{
               width: "100%",
               padding: 12,
-              background: "#0A192F",
-              border: "1px solid #1E293B",
+              background: "var(--panel2)",
+              border: "1px solid var(--line)",
               borderRadius: 10,
-              color: "#F8FAFC",
+              color: "var(--text)",
               fontSize: 24,
               textAlign: "center",
               letterSpacing: 8,
               outline: "none",
+              boxSizing: "border-box",
             }}
             required
           />
@@ -120,20 +124,21 @@ function VerifyAccountForm() {
           disabled={loading || code.length !== 6}
           style={{
             width: "100%",
-            background: "linear-gradient(135deg, #10B981, #059669)",
-            color: "#0A192F",
+            background: "var(--green)",
+            color: "#06110d",
             border: "none",
             padding: 14,
-            borderRadius: 12,
+            borderRadius: 10,
             fontSize: 15,
             fontWeight: 800,
-            cursor: "pointer",
+            cursor: loading || code.length !== 6 ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
             marginTop: 10,
-            opacity: code.length === 6 ? 1 : 0.6,
+            opacity: code.length === 6 && !loading ? 1 : 0.6,
+            transition: "opacity 0.2s ease",
           }}
         >
           <span>{loading ? "Verificando..." : "Confirmar Código"}</span>
@@ -149,7 +154,7 @@ function VerifyAccountForm() {
             style={{
               background: "none",
               border: "none",
-              color: "#06B6D4",
+              color: "var(--green)",
               cursor: "pointer",
               fontWeight: 600,
               display: "inline-flex",
@@ -161,8 +166,8 @@ function VerifyAccountForm() {
             Reenviar código de verificación
           </button>
         ) : (
-          <span style={{ color: "#94A3B8" }}>
-            Reenviar código en <strong style={{ color: "#06B6D4" }}>{cooldown}s</strong>
+          <span style={{ color: "var(--muted)" }}>
+            Reenviar código en <strong style={{ color: "var(--green)" }}>{cooldown}s</strong>
           </span>
         )}
       </div>
@@ -172,43 +177,28 @@ function VerifyAccountForm() {
 
 export default function VerifyAccountPage() {
   return (
-    <div className="login" style={{ minHeight: "100vh", background: "#0A192F", color: "#F8FAFC" }}>
+    <div className="login" style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)" }}>
       <ToastContainer />
-      <section className="login-art" style={{ background: "radial-gradient(circle at 70% 30%, rgba(16, 185, 129, 0.2), transparent 40%), #0A192F" }}>
+      <section className="login-art" style={{ background: "radial-gradient(circle at 70% 30%, rgba(16, 185, 129, 0.08), transparent 50%), var(--bg)" }}>
         <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #10B981, #059669)",
-              display: "grid",
-              placeItems: "center",
-              fontWeight: 900,
-              color: "#0A192F",
-              fontSize: 20,
-            }}
-          >
-            L
-          </div>
-          <strong style={{ fontSize: 22, color: "#F8FAFC" }}>Livora</strong>
+          <LivoraFullLogo width={160} height={44} />
         </div>
 
         <div>
-          <span className="eyebrow" style={{ color: "#06B6D4" }}>Seguridad de Nivel Producción</span>
-          <h1 style={{ fontSize: 46, fontWeight: 900, letterSpacing: "-1.5px", margin: "12px 0" }}>
-            Verificación de <em style={{ color: "#10B981", fontStyle: "normal" }}>Identidad.</em>
+          <span className="eyebrow" style={{ color: "var(--green)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Seguridad de Nivel Producción</span>
+          <h1 style={{ fontSize: 46, fontWeight: 900, letterSpacing: "-1.5px", margin: "12px 0", color: "var(--text)" }}>
+            Verificación de <em style={{ color: "var(--green)", fontStyle: "normal" }}>Identidad.</em>
           </h1>
-          <p style={{ color: "#94A3B8", fontSize: 16, lineHeight: 1.6 }}>
+          <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.6 }}>
             Valida tu correo electrónico mediante el código transaccional de un solo uso para activar tu billetera y comenzar a operar de forma segura en Stellar.
           </p>
         </div>
 
-        <small className="muted" style={{ color: "#94A3B8" }}>Protección Anti-Spam · Criptografía SHA-256 · Livora Core</small>
+        <small className="muted" style={{ color: "var(--muted)" }}>Protección Anti-Spam · Criptografía SHA-256 · Livora Core</small>
       </section>
 
-      <section className="login-form" style={{ background: "#0D1117" }}>
-        <Suspense fallback={<div style={{ color: "#94A3B8" }}>Cargando formulario...</div>}>
+      <section className="login-form" style={{ background: "var(--panel)", borderLeft: "1px solid var(--line)" }}>
+        <Suspense fallback={<div style={{ color: "var(--muted)" }}>Cargando formulario...</div>}>
           <VerifyAccountForm />
         </Suspense>
       </section>

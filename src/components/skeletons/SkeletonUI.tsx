@@ -23,7 +23,7 @@ export function Skeleton({
         width,
         height,
         borderRadius,
-        background: "linear-gradient(90deg, #0A192F 25%, #1E293B 50%, #0A192F 75%)",
+        background: "linear-gradient(90deg, var(--panel2, #f1f5f9) 25%, var(--line, #e2e8f0) 50%, var(--panel2, #f1f5f9) 75%)",
         backgroundSize: "200% 100%",
         animation: "shimmer 1.5s infinite",
         ...style,
@@ -58,8 +58,8 @@ export function KpiSkeleton({ count = 3 }: { count?: number }) {
         <div
           key={i}
           style={{
-            background: "#112240",
-            border: "1px solid #1E293B",
+            background: "var(--panel, #ffffff)",
+            border: "1px solid var(--line, #e2e8f0)",
             borderRadius: 16,
             padding: 20,
             display: "grid",
@@ -82,8 +82,8 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
   return (
     <div
       style={{
-        background: "#112240",
-        border: "1px solid #1E293B",
+        background: "var(--panel, #ffffff)",
+        border: "1px solid var(--line, #e2e8f0)",
         borderRadius: 16,
         padding: 20,
         width: "100%",
@@ -119,8 +119,8 @@ export function CardSkeleton({ count = 3 }: { count?: number }) {
         <div
           key={i}
           style={{
-            background: "#0A192F",
-            border: "1px solid #1E293B",
+            background: "var(--panel, #ffffff)",
+            border: "1px solid var(--line, #e2e8f0)",
             borderRadius: 12,
             padding: 16,
             display: "flex",

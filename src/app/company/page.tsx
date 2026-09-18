@@ -6,7 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 import { PageHead, Kpi } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { fetchCertificates, fetchIncomingB2bTransfers, receiveB2bTransfer, fetchSales } from "@/lib/api";
-import { ShieldCheck, Award, RefreshCw, CheckCircle2, ExternalLink, Hash } from "lucide-react";
+import { ShieldCheck, Award, RefreshCw, CheckCircle2, ExternalLink, Hash, Truck, ShoppingCart } from "lucide-react";
+import { Web3ConfirmModal } from "@/components/Web3ConfirmModal";
+import { TableSkeleton, CardSkeleton } from "@/components/skeletons/SkeletonUI";
+import { ErrorState, EmptyState } from "@/components/StateFeedback";
 
 const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 
@@ -35,10 +38,13 @@ export default function B2bCompanyPage() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const [selectedCert, setSelectedCert] = useState<any>(null);
+  const [web3PendingTransfer, setWeb3PendingTransfer] = useState<any>(null);
 
   const {
     data: certificates = [],
     isLoading: loadingCerts,
+    isError: isErrorCerts,
+    error: errorCerts,
     isRefetching: refetchingCerts,
     refetch: refetchCerts,
   } = useQuery({
@@ -50,6 +56,8 @@ export default function B2bCompanyPage() {
   const {
     data: incomingTransfers = [],
     isLoading: loadingIncoming,
+    isError: isErrorIncoming,
+    error: errorIncoming,
     isRefetching: refetchingIncoming,
     refetch: refetchIncoming,
   } = useQuery({
@@ -61,10 +69,12 @@ export default function B2bCompanyPage() {
   const {
     data: purchasesHistory = [],
     isLoading: loadingPurchases,
+    isError: isErrorPurchases,
+    error: errorPurchases,
     refetch: refetchPurchases,
   } = useQuery({
     queryKey: ["sales"],
-    queryFn: () => fetchSales().catch(() => []),
+    queryFn: fetchSales,
     enabled: Boolean(token),
   });
 
@@ -146,8 +156,8 @@ export default function B2bCompanyPage() {
 
       {/* KPI Cards */}
       <div
-        className="grid kpis"
-        style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 24 }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 kpis"
+        style={{ marginBottom: 24 }}
       >
         <Kpi
           label="MATERIAL RECUPERADO"
@@ -183,21 +193,22 @@ export default function B2bCompanyPage() {
             <span className="live">{incomingTransfers.length} en camino</span>
           </div>
 
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "20px 0", color: "#94A3B8" }}>
-              Cargando envíos...
-            </div>
+          {loadingIncoming ? (
+            <CardSkeleton count={2} />
+          ) : isErrorIncoming ? (
+            <ErrorState
+              title="Error al cargar despachos B2B"
+              message={(errorIncoming as any)?.response?.data?.message || (errorIncoming as any)?.message || "No se pudo sincronizar la lista de despachos industriales."}
+              onRetry={refetchIncoming}
+            />
           ) : incomingTransfers.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px 0",
-                color: "#94A3B8",
-                fontSize: 13,
-              }}
-            >
-              No tienes ningún envío de material en tránsito en este momento.
-            </div>
+            <EmptyState
+              icon={Truck}
+              title="Sin envíos en tránsito"
+              description="No tienes ningún envío de material industrial en camino actualmente."
+              actionHref="/company/purchases"
+              actionLabel="Ver historial de adquisiciones"
+            />
           ) : (
             <div style={{ display: "grid", gap: 14 }}>
               {incomingTransfers.map((t: any) => {
@@ -210,8 +221,8 @@ export default function B2bCompanyPage() {
                   <div
                     key={t.id}
                     style={{
-                      background: "#0A192F",
-                      border: "1px solid #1E293B",
+                      background: "var(--bg, #f8fafc)",
+                      border: "1px solid var(--line, #e2e8f0)",
                       borderRadius: 12,
                       padding: 16,
                     }}
@@ -236,27 +247,27 @@ export default function B2bCompanyPage() {
                           <span className="status IN_TRANSIT" style={{ fontSize: 9 }}>
                             EN TRÁNSITO
                           </span>
-                          <strong style={{ color: "#F8FAFC", fontSize: 13 }}>
+                          <strong style={{ color: "var(--fg, #0f172a)", fontSize: 13 }}>
                             {totalW.toFixed(1)} kg totales
                           </strong>
                         </div>
-                        <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 4 }}>
+                        <div style={{ fontSize: 12, color: "var(--muted, #64748b)", marginBottom: 4 }}>
                           Despachado por:{" "}
-                          <span style={{ color: "#F8FAFC" }}>
+                          <span style={{ color: "var(--fg, #0f172a)", fontWeight: 600 }}>
                             {t.center?.email?.split("@")[0]?.toUpperCase() || "Acopio"}
                           </span>
                         </div>
                         {/* Desglose de materiales */}
                         {mats &&
                           Object.entries(mats).map(([mat, kg]) => (
-                            <div key={mat} style={{ fontSize: 11, color: "#94A3B8" }}>
-                              <span style={{ color: "#CBD5E1" }}>{mat}:</span>{" "}
-                              <strong style={{ color: "#10B981" }}>
+                            <div key={mat} style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
+                              <span style={{ color: "var(--fg, #0f172a)" }}>{mat}:</span>{" "}
+                              <strong style={{ color: "#059669" }}>
                                 {Number(kg).toFixed(1)} kg
                               </strong>
                             </div>
                           ))}
-                        <div style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
                           {new Date(t.createdAt).toLocaleDateString("es-PE", {
                             day: "2-digit",
                             month: "short",
@@ -265,7 +276,7 @@ export default function B2bCompanyPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => receiveMutation.mutate(t.id)}
+                        onClick={() => setWeb3PendingTransfer(t)}
                         disabled={isReceiving}
                         className="btn primary"
                         style={{
@@ -293,21 +304,22 @@ export default function B2bCompanyPage() {
           <div className="section-title">
             <h2>Últimas Adquisiciones</h2>
           </div>
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "20px 0", color: "#94A3B8" }}>
-              Cargando compras...
-            </div>
+          {loadingPurchases ? (
+            <CardSkeleton count={2} />
+          ) : isErrorPurchases ? (
+            <ErrorState
+              title="Error al cargar historial de compras"
+              message={(errorPurchases as any)?.response?.data?.message || (errorPurchases as any)?.message || "No se pudo sincronizar el historial de adquisiciones."}
+              onRetry={refetchPurchases}
+            />
           ) : purchasesHistory.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px 0",
-                color: "#94A3B8",
-                fontSize: 13,
-              }}
-            >
-              No has realizado compras de material aún.
-            </div>
+            <EmptyState
+              icon={ShoppingCart}
+              title="Sin adquisiciones recientes"
+              description="Tu empresa aún no registra compras de materiales industriales reciclados."
+              actionHref="/company/purchases"
+              actionLabel="Explorar catálogo de lotes"
+            />
           ) : (
             <div style={{ display: "grid", gap: 12 }}>
               {purchasesHistory.slice(0, 4).map((p: any) => {
@@ -316,8 +328,8 @@ export default function B2bCompanyPage() {
                   <div
                     key={p.id}
                     style={{
-                      background: "#0A192F",
-                      border: "1px solid #1E293B",
+                      background: "var(--bg, #f8fafc)",
+                      border: "1px solid var(--line, #e2e8f0)",
                       borderRadius: 12,
                       padding: 12,
                     }}
@@ -331,14 +343,19 @@ export default function B2bCompanyPage() {
                     >
                       <div>
                         <div
-                          style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 13,
+                            marginBottom: 4,
+                            color: "var(--fg, #0f172a)",
+                          }}
                         >
                           {totalKgFromMaterials(mats).toFixed(1)} kg
                         </div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>
+                        <div style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
                           {formatMaterials(mats)}
                         </div>
-                        <div style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
                           Origen:{" "}
                           {p.center?.email?.split("@")[0]?.toUpperCase() || "Acopio"} ·{" "}
                           {new Date(p.createdAt).toLocaleDateString("es-PE")}
@@ -368,14 +385,22 @@ export default function B2bCompanyPage() {
           </h2>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "30px 0", color: "#94A3B8" }}>
-            Cargando certificados...
-          </div>
+        {loadingCerts ? (
+          <TableSkeleton rows={4} columns={7} />
+        ) : isErrorCerts ? (
+          <ErrorState
+            title="Error al cargar certificados verdes"
+            message={(errorCerts as any)?.response?.data?.message || (errorCerts as any)?.message || "No se pudo sincronizar el registro de certificados ESG."}
+            onRetry={refetchCerts}
+          />
         ) : certificates.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "30px 0", color: "#94A3B8" }}>
-            No se han emitido certificados para tu cuenta todavía.
-          </div>
+          <EmptyState
+            icon={Award}
+            title="Sin certificados verdes emitidos"
+            description="Los certificados se emitirán de forma automática on-chain al confirmar la recepción de tus lotes adquiridos."
+            actionHref="/company/purchases"
+            actionLabel="Gestionar adquisiciones"
+          />
         ) : (
           <div className="table-wrap">
             <table className="table">
@@ -489,7 +514,7 @@ export default function B2bCompanyPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10,25,47,0.9)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(10px)",
             display: "grid",
             placeItems: "center",
@@ -499,46 +524,47 @@ export default function B2bCompanyPage() {
         >
           <div
             style={{
-              background: "#112240",
-              border: "1px solid #1E293B",
+              background: "var(--panel, #ffffff)",
+              border: "1px solid var(--line, #cbd5e1)",
               borderRadius: 24,
-              padding: 30,
+              padding: 28,
               maxWidth: 520,
               width: "100%",
-              boxShadow: "0 0 60px rgba(16,185,129,0.2)",
-              borderTop: "5px solid #10B981",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25)",
+              borderTop: "5px solid #059669",
               maxHeight: "90vh",
               overflowY: "auto",
             }}
           >
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ textAlign: "center", marginBottom: 18 }}>
               <div
                 style={{
                   width: 64,
                   height: 64,
                   borderRadius: "50%",
-                  background: "rgba(16,185,129,0.12)",
+                  background: "rgba(16, 185, 129, 0.12)",
                   display: "grid",
                   placeItems: "center",
                   margin: "0 auto 14px",
-                  border: "2px solid rgba(16,185,129,0.4)",
-                  boxShadow: "0 0 20px rgba(16,185,129,0.2)",
+                  border: "2px solid rgba(16, 185, 129, 0.4)",
+                  boxShadow: "0 0 20px rgba(16, 185, 129, 0.2)",
                 }}
               >
-                <Award size={32} style={{ color: "#10B981" }} />
+                <Award size={32} style={{ color: "#059669" }} />
               </div>
               <h3
                 style={{
                   fontSize: 18,
-                  fontWeight: 800,
+                  fontWeight: 900,
                   margin: "0 0 4px",
-                  color: "#F8FAFC",
+                  color: "var(--fg, #0f172a)",
+                  letterSpacing: "0.03em",
                 }}
               >
                 CERTIFICADO DE IMPACTO ESG
               </h3>
               <span
-                style={{ fontSize: 10, color: "#64748B", fontFamily: "monospace" }}
+                style={{ fontSize: 11, color: "var(--muted, #64748b)", fontFamily: "monospace" }}
               >
                 ID: {selectedCert.id}
               </span>
@@ -547,8 +573,8 @@ export default function B2bCompanyPage() {
             <hr
               style={{
                 border: "none",
-                borderTop: "1px solid #1E293B",
-                margin: "16px 0",
+                borderTop: "1px solid var(--line, #e2e8f0)",
+                margin: "14px 0",
               }}
             />
 
@@ -557,15 +583,16 @@ export default function B2bCompanyPage() {
                 display: "grid",
                 gap: 10,
                 fontSize: 13,
-                background: "#0A192F",
+                background: "var(--bg, #f8fafc)",
+                border: "1px solid var(--line, #e2e8f0)",
                 padding: 18,
                 borderRadius: 14,
-                marginBottom: 20,
+                marginBottom: 18,
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#94A3B8" }}>Material Recuperado</span>
-                <strong style={{ color: "#10B981" }}>
+                <span style={{ color: "var(--muted, #64748b)" }}>Material Recuperado</span>
+                <strong style={{ color: "#059669" }}>
                   {selectedCert.esgImpact?.recycledKg?.toFixed(1)} kg de{" "}
                   {selectedCert.esgImpact?.recycledMaterial}
                 </strong>
@@ -579,29 +606,31 @@ export default function B2bCompanyPage() {
                         display: "flex",
                         justifyContent: "space-between",
                         paddingLeft: 12,
-                        borderLeft: "2px solid #1E293B",
+                        borderLeft: "2px solid var(--line, #cbd5e1)",
                       }}
                     >
-                      <span style={{ color: "#64748B" }}>{m}</span>
-                      <span style={{ color: "#CBD5E1" }}>{Number(kg).toFixed(1)} kg</span>
+                      <span style={{ color: "var(--muted, #64748b)" }}>{m}</span>
+                      <span style={{ color: "var(--fg, #0f172a)", fontWeight: 600 }}>
+                        {Number(kg).toFixed(1)} kg
+                      </span>
                     </div>
                   )
                 )}
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#94A3B8" }}>Emisiones de CO₂ Evitadas</span>
-                <strong style={{ color: "var(--blue)" }}>
+                <span style={{ color: "var(--muted, #64748b)" }}>Emisiones de CO₂ Evitadas</span>
+                <strong style={{ color: "#2563eb" }}>
                   {selectedCert.esgImpact?.co2SavedKg?.toFixed(1)} kg CO₂
                 </strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#94A3B8" }}>Consumo de Agua Ahorrado</span>
-                <strong style={{ color: "var(--blue)" }}>
+                <span style={{ color: "var(--muted, #64748b)" }}>Consumo de Agua Ahorrado</span>
+                <strong style={{ color: "#0284c7" }}>
                   {selectedCert.esgImpact?.waterSavedLiters?.toFixed(0)} L H₂O
                 </strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#94A3B8" }}>Fecha de Emisión</span>
-                <strong>
+                <span style={{ color: "var(--muted, #64748b)" }}>Fecha de Emisión</span>
+                <strong style={{ color: "var(--fg, #0f172a)" }}>
                   {new Date(selectedCert.createdAt).toLocaleDateString("es-PE", {
                     day: "2-digit",
                     month: "short",
@@ -612,15 +641,22 @@ export default function B2bCompanyPage() {
             </div>
 
             {/* Evidencias Blockchain */}
-            <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
+            <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
               {/* IPFS */}
-              <div style={{ background: "#0A192F", borderRadius: 12, padding: 14 }}>
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#64748B",
-                    fontWeight: 700,
-                    marginBottom: 8,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
+                    marginBottom: 6,
                     display: "flex",
                     alignItems: "center",
                     gap: 4,
@@ -634,9 +670,9 @@ export default function B2bCompanyPage() {
                       style={{
                         fontFamily: "monospace",
                         fontSize: 11,
-                        color: "#06B6D4",
+                        color: "#0369a1",
                         wordBreak: "break-all",
-                        marginBottom: 10,
+                        marginBottom: 8,
                       }}
                     >
                       {selectedCert.ipfsHash}
@@ -645,63 +681,75 @@ export default function B2bCompanyPage() {
                       href={ipfsLink(selectedCert.ipfsHash)}
                       target="_blank"
                       rel="noreferrer"
-                      className="btn"
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 6,
                         fontSize: 12,
                         padding: "8px 14px",
-                        background: "rgba(6,182,212,0.1)",
-                        border: "1px solid #06B6D4",
-                        color: "#06B6D4",
+                        background: "#f0f9ff",
+                        border: "1px solid #bae6fd",
+                        color: "#0284c7",
                         borderRadius: 8,
                         textDecoration: "none",
+                        fontWeight: 700,
                       }}
                     >
                       <ExternalLink size={12} /> Ver metadata en IPFS
                     </a>
                   </div>
                 ) : (
-                  <div style={{ color: "#475569", fontSize: 12 }}>
+                  <div style={{ color: "var(--muted, #64748b)", fontSize: 12 }}>
                     CID IPFS no disponible
                   </div>
                 )}
               </div>
 
               {/* Stellar */}
-              <div style={{ background: "#0A192F", borderRadius: 12, padding: 14 }}>
+              <div
+                style={{
+                  background: "var(--bg, #f8fafc)",
+                  border: "1px solid var(--line, #e2e8f0)",
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#64748B",
-                    fontWeight: 700,
-                    marginBottom: 8,
+                    color: "var(--muted, #64748b)",
+                    fontWeight: 800,
+                    marginBottom: 6,
                   }}
                 >
                   ⬡ RED STELLAR TESTNET
                 </div>
-                <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 10 }}>
-                  Este certificado está anclado en la red Stellar Testnet. Puedes
-                  verificar la actividad del contrato o buscar el hash en el
-                  explorador.
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "var(--muted, #64748b)",
+                    marginBottom: 10,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Este certificado está anclado en la red Stellar Testnet con firma criptográfica delegada.
                 </div>
                 <a
                   href="https://stellar.expert/explorer/testnet"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 6,
                     fontSize: 12,
                     padding: "8px 14px",
-                    background: "rgba(59,130,246,0.1)",
-                    border: "1px solid #3B82F6",
-                    color: "#3B82F6",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    color: "#2563eb",
                     borderRadius: 8,
                     textDecoration: "none",
+                    fontWeight: 700,
                   }}
                 >
                   <ExternalLink size={12} /> Abrir Stellar Expert
@@ -711,16 +759,16 @@ export default function B2bCompanyPage() {
 
             <button
               onClick={() => setSelectedCert(null)}
-              className="btn"
               style={{
                 width: "100%",
                 padding: 12,
-                background: "#1E293B",
-                border: "none",
-                color: "#F8FAFC",
+                background: "var(--bg, #f1f5f9)",
+                border: "1px solid var(--line, #cbd5e1)",
+                color: "var(--fg, #0f172a)",
                 borderRadius: 12,
                 cursor: "pointer",
                 fontWeight: 700,
+                fontSize: 13,
               }}
             >
               Cerrar Certificado
@@ -728,6 +776,24 @@ export default function B2bCompanyPage() {
           </div>
         </div>
       )}
+
+      <Web3ConfirmModal
+        isOpen={Boolean(web3PendingTransfer)}
+        title="Confirmar Recepción y Certificado ESG"
+        tokenAmount={web3PendingTransfer ? totalKgFromMaterials(web3PendingTransfer.materials as any).toFixed(1) : "0"}
+        tokenSymbol="KG RECICLADO"
+        destinationName={web3PendingTransfer?.center?.email?.split("@")[0]?.toUpperCase() || "Centro de Acopio"}
+        actionDescription="Emisión de Certificado ESG Notarizado en Stellar Blockchain"
+        warningText="Al confirmar, autorizas a Livora a emitir y firmar el certificado de impacto ambiental en la blockchain Stellar. Esta acción es inmutable."
+        isLoading={receiveMutation.isPending}
+        onConfirm={() => {
+          if (web3PendingTransfer) {
+            receiveMutation.mutate(web3PendingTransfer.id);
+            setWeb3PendingTransfer(null);
+          }
+        }}
+        onCancel={() => setWeb3PendingTransfer(null)}
+      />
     </>
   );
 }

@@ -85,6 +85,9 @@ export interface Batch {
   consolidatedBatchId?: string;
   ipfsCid?: string;
   txHash?: string;
+  stellarTxHash?: string;
+  usefulWeightKg?: number;
+  wasteWeightKg?: number;
   hasDiscrepancy?: boolean;
   discrepancyNote?: string;
   totalWeightKg?: number;
@@ -96,9 +99,9 @@ export interface Batch {
   disputedAt?: string;
   createdAt: string;
   updatedAt: string;
-  collector: Pick<User, "id" | "email">;
-  destinationCenter?: Pick<User, "id" | "email">;
-  requests: CollectionRequest[];
+  collector: Pick<User, "id" | "email"> & { name?: string };
+  destinationCenter?: Pick<User, "id" | "email"> & { name?: string };
+  requests?: CollectionRequest[];
   /** Legacy local-only field kept for backward compat with WebSocket patching */
   trace?: { ipfsCid: string; txHash: string; jobId: string; processedAt: string };
 }
@@ -167,6 +170,9 @@ export interface Certificate {
   createdAt: string;
   saleId: string;
   txHash: string;
+  stellarTxHash?: string;
+  sorobanTxHash?: string;
+  buyer?: Pick<User, "id" | "email"> & { name?: string };
 }
 
 export interface InventoryItem {

@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { queryClient } from "@/lib/queryClient";
+import { getSecureCookie } from "@/lib/cookies";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
@@ -9,22 +10,41 @@ let socketInstance: Socket | null = null;
  * Inicializa o retorna la instancia singleton de Socket.IO con opciones
  * de reconexión con backoff exponencial e invalidación reactiva de caché.
  */
-export function getSocket(token?: string): Socket {
+export function getSocket(token?: string): Socket | null {
   const activeToken =
-    token || (typeof window !== "undefined" ? localStorage.getItem("livora_token") : "");
+    token ||
+    (typeof window !== "undefined"
+      ? getSecureCookie("livora_token") || localStorage.getItem("livora_token")
+      : "");
+
+  if (!activeToken) {
+    if (socketInstance) {
+      socketInstance.disconnect();
+      socketInstance = null;
+    }
+    return null;
+  }
 
   if (!socketInstance) {
     socketInstance = io(API_URL, {
-      query: { token: activeToken || "" },
-      auth: { token: activeToken || "" },
+      withCredentials: true,
+      query: { token: activeToken },
+      auth: { token: activeToken },
       autoConnect: true,
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
       reconnectionDelayMax: 5000,
       randomizationFactor: 0.5,
       timeout: 10000,
+    });
+
+    socketInstance.on("connect_error", (err: any) => {
+      // Manejar silenciosamente para evitar desbordar consola en reconexiones transitorias
+      if (process.env.NODE_ENV === "development") {
+        // Log discreto si se requiere
+      }
     });
 
     // ─────────────────────────────────────────────────────────────

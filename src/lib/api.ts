@@ -305,6 +305,21 @@ export async function fetchBatches(params?: any) {
   return res.data?.data ?? res.data;
 }
 
+export async function fetchBatchesPaginated(params?: any) {
+  const res = await api.get("/batches", { params });
+  return {
+    data: (res.data?.data ?? (Array.isArray(res.data) ? res.data : [])) as any[],
+    meta: res.data?.meta ?? {
+      total: Array.isArray(res.data) ? res.data.length : 0,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 15,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false,
+    },
+  };
+}
+
 export async function fetchBatchById(id: string) {
   const res = await api.get(`/batches/${id}`);
   return res.data;
@@ -318,8 +333,17 @@ export async function updateBatchCenterAndTransit(batchId: string, destinationCe
   return res.data;
 }
 
-export async function receiveBatch(batchId: string, materialsActual: Record<string, number>) {
-  const res = await api.post(`/batches/${batchId}/receive`, { materialsActual });
+export async function receiveBatch(
+  batchId: string,
+  materialsActual: Record<string, number>,
+  usefulWeightKg?: number,
+  wasteWeightKg?: number,
+) {
+  const res = await api.post(`/batches/${batchId}/receive`, {
+    materialsActual,
+    usefulWeightKg,
+    wasteWeightKg,
+  });
   return res.data;
 }
 
@@ -424,7 +448,41 @@ export async function fetchB2bCompanies() {
   return res.data;
 }
 
-export async function createB2bTransfer(data: { materials: { material: string; weightKg: number }[]; buyerId: string }) {
+export async function fetchCenterPools() {
+  const res = await api.get("/b2b-transfers/pools");
+  return res.data;
+}
+
+export async function createB2bPurchaseRequest(data: {
+  centerId: string;
+  materials: { material: string; weightKg: number }[];
+  notes?: string;
+}) {
+  const res = await api.post("/b2b-transfers/request", data);
+  return res.data;
+}
+
+export async function acceptB2bTransfer(
+  id: string,
+  data: {
+    actualMaterials: { material: string; weightKg: number }[];
+    notes?: string;
+  }
+) {
+  const res = await api.patch(`/b2b-transfers/${id}/accept`, data);
+  return res.data;
+}
+
+export async function fetchB2bTransfers(params?: {
+  status?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const res = await api.get("/b2b-transfers", { params });
+  return res.data;
+}
+
+export async function createB2bTransfer(data: { materials: { material: string; weightKg: number }[]; buyerId: string; notes?: string }) {
   const res = await api.post("/b2b-transfers", data);
   return res.data;
 }
@@ -456,6 +514,59 @@ export async function fetchStoreSettlements(params?: { page?: number; limit?: nu
 
 export async function fetchRedemptionDetails(qrCodeRef: string) {
   const res = await api.get(`/stores/redemptions/${qrCodeRef}`);
+  return res.data;
+}
+
+export async function generateStoreQr(dto: { fiatAmount: number; description?: string }) {
+  const res = await api.post("/stores/redemptions/qr", dto);
+  return res.data;
+}
+
+export async function refundStoreRedemption(id: string) {
+  const res = await api.post(`/stores/redemptions/${id}/refund`);
+  return res.data;
+}
+
+export async function requestStoreSettlement(dto: { tokenAmount: number; bankAccount: string }) {
+  const res = await api.post("/stores/settlements", dto);
+  return res.data;
+}
+
+export async function fetchStoreProfile() {
+  const res = await api.get("/stores/profile");
+  return res.data;
+}
+
+export async function updateStoreProfile(dto: {
+  businessName: string;
+  ruc: string;
+  address: string;
+  bankAccount: string;
+  logoUrl?: string;
+}) {
+  const res = await api.patch("/stores/profile", dto);
+  return res.data;
+}
+
+export async function fetchAdminSettlements(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}) {
+  const res = await api.get("/stores/settlements/admin", { params });
+  return res.data;
+}
+
+export async function payStoreSettlement(id: string, dto: { receiptUrl: string }) {
+  const res = await api.patch(`/stores/settlements/${id}/pay`, dto);
+  return res.data;
+}
+
+export async function updateStoreSettlementStatus(
+  id: string,
+  dto: { status: string; receiptUrl?: string }
+) {
+  const res = await api.patch(`/stores/settlements/${id}/status`, dto);
   return res.data;
 }
 
@@ -491,13 +602,85 @@ export async function fetchKycApplications() {
   return res.data;
 }
 
-export async function updateKycStatus(userId: string, status: "APPROVED" | "REJECTED") {
-  const res = await api.patch(`/users/${userId}/kyc-status`, { status });
+export async function updateKycStatus(
+  userId: string,
+  status: "APPROVED" | "REJECTED" | "OBSERVED",
+  observationNotes?: string,
+) {
+  const res = await api.patch(`/users/${userId}/kyc-status`, { status, observationNotes });
+  return res.data;
+}
+
+export async function fetchAdminUsers(params?: {
+  role?: string;
+  userStatus?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const res = await api.get("/admin/users", { params });
+  return res.data;
+}
+
+export async function updateAdminUserStatus(
+  userId: string,
+  data: { userStatus?: string; isActive?: boolean }
+) {
+  const res = await api.patch(`/users/${userId}/status`, data);
   return res.data;
 }
 
 export async function fetchBlockchainHealth() {
   const res = await api.get("/admin/blockchain/health");
+  return res.data;
+}
+
+// --- Technical Audit & Zero-Loss Reconciliation ---
+
+export async function fetchFinancialReconciliation() {
+  const res = await api.get("/admin/audit/reconciliation");
+  return res.data;
+}
+
+export async function fetchLedgerAudit(params?: {
+  page?: number;
+  limit?: number;
+  correlationId?: string;
+  txHash?: string;
+  search?: string;
+}) {
+  const res = await api.get("/admin/audit/ledger", { params });
+  return res.data;
+}
+
+export async function fetchQueueAudit() {
+  const res = await api.get("/admin/audit/queues");
+  return res.data;
+}
+
+export async function retryQueueJob(jobId: string) {
+  const res = await api.post(`/admin/audit/queues/retry-job/${jobId}`);
+  return res.data;
+}
+
+export async function retryOutboxEvent(eventId: string) {
+  const res = await api.post(`/admin/audit/outbox/retry-event/${eventId}`);
+  return res.data;
+}
+
+export async function fetchServerLogs(params?: {
+  level?: string;
+  correlationId?: string;
+  search?: string;
+  limit?: number;
+  skip?: number;
+}) {
+  const res = await api.get("/admin/audit/logs", { params });
+  return res.data;
+}
+
+export async function retryPaymentMint(paymentId: string) {
+  const res = await api.post(`/admin/payments/${paymentId}/retry-mint`);
   return res.data;
 }
 
@@ -568,5 +751,31 @@ export async function resolveBatchDispute(
 
 export async function rateCollection(requestId: string, dto: { rating: number; feedback?: string }) {
   const res = await api.post(`/collection-requests/${requestId}/rate`, dto);
+  return res.data;
+}
+
+// --- Admin Complaints Management (Ley 29571 / Indecopi) ---
+
+export async function fetchAdminComplaints(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  claimType?: string;
+  search?: string;
+}) {
+  const res = await api.get("/complaints", { params });
+  return res.data;
+}
+
+export async function updateAdminComplaintStatus(
+  id: string,
+  dto: { status: string; legalResponseNote?: string }
+) {
+  const res = await api.patch(`/complaints/${id}/status`, dto);
+  return res.data;
+}
+
+export async function fetchAdminComplaintByCorrelative(correlativeNumber: string) {
+  const res = await api.get(`/complaints/correlative/${correlativeNumber}`);
   return res.data;
 }
