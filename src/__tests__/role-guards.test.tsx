@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Shell } from "@/components/Shell";
@@ -13,6 +13,7 @@ vi.mock("next/navigation", () => ({
     push: mockPush,
   }),
   usePathname: () => currentPathname,
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("@/components/ToastNotification", () => ({

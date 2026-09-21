@@ -93,14 +93,14 @@ export default function StoreLiquidacionesPage() {
     e.preventDefault();
     const tokens = parseFloat(tokenAmount);
     if (!tokens || tokens < 10) {
-      showToast("Monto Inválido", "error", "El monto mínimo a liquidar es de 10 EcoTokens.");
+      showToast("Monto Inválido", "error", "El monto mínimo a liquidar es de 10 LIVOs.");
       return;
     }
     if (tokens > walletBalance) {
       showToast(
         "Saldo Insuficiente",
         "error",
-        `Tu saldo es de ${walletBalance.toFixed(1)} ECO. No puedes liquidar ${tokens} ECO.`
+        `Tu saldo es de ${walletBalance.toFixed(1)} LIVO. No puedes liquidar ${tokens} LIVO.`
       );
       return;
     }
@@ -122,7 +122,7 @@ export default function StoreLiquidacionesPage() {
       showToast(
         "Solicitud Registrada",
         "success",
-        `Se solicitó la liquidación de ${tokens} ECO (${money(tokens * 0.2)}). Nuestro equipo de tesorería procesará la transferencia.`
+        `Se solicitó la liquidación de ${tokens} LIVOs (${money(tokens * 0.2)}). Nuestro equipo de tesorería procesará la transferencia.`
       );
       setTokenAmount("100");
       loadBalance();
@@ -150,7 +150,7 @@ export default function StoreLiquidacionesPage() {
       <PageHead
         eyebrow="Tesorería Comercial"
         title="Liquidaciones a Cuenta Bancaria (FIAT)"
-        description="Convierte los EcoTokens acumulados de las compras de tus clientes en dinero de curso legal (PEN) transferido directamente a tu cuenta bancaria."
+        description="Convierte los LIVOs acumulados de las compras de tus clientes en dinero de curso legal (PEN) transferido directamente a tu cuenta bancaria."
         action={
           <button
             onClick={() => {
@@ -170,13 +170,13 @@ export default function StoreLiquidacionesPage() {
       <div className="grid kpis" style={{ marginBottom: 24 }}>
         <Kpi
           label="SALDO DISPONIBLE"
-          value={`${walletBalance.toFixed(1)} ECO`}
+          value={`${walletBalance.toFixed(1)} LIVO`}
           trend={`Equivalente a ${money(walletBalance * 0.2)}`}
           accent="var(--green)"
         />
         <Kpi
           label="TASA FIAT"
-          value="S/ 0.20 por ECO"
+          value="S/ 0.20 por LIVO"
           trend="Sin comisiones bancarias"
           accent="var(--blue)"
         />
@@ -216,7 +216,7 @@ export default function StoreLiquidacionesPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Cantidad de EcoTokens a Liquidar
+                Cantidad de LIVOs a Liquidar
               </label>
               <div style={{ display: "flex", gap: 8 }}>
                 <input
@@ -316,7 +316,7 @@ export default function StoreLiquidacionesPage() {
 
           <div style={{ fontSize: 13, color: "var(--muted, #64748b)", lineHeight: 1.6, display: "grid", gap: 10 }}>
             <p style={{ margin: 0 }}>
-              • <strong>Paridad Respaldada:</strong> Cada EcoToken recibido en tu tienda cuenta con respaldo de tesorería institucional financiado por compras de materiales ESG de empresas B2B.
+              • <strong>Paridad Respaldada:</strong> Cada LIVO recibido en tu tienda cuenta con respaldo de tesorería institucional financiado por compras de materiales ESG de empresas B2B.
             </p>
             <p style={{ margin: 0 }}>
               • <strong>Trazabilidad de Abono:</strong> Una vez efectuada la transferencia interbancaria, se adjuntará el comprobante bancario digital descargable en este panel.
@@ -350,7 +350,7 @@ export default function StoreLiquidacionesPage() {
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--line, #cbd5e1)" }}>
                   <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>Fecha de Solicitud</th>
-                  <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>Tokens Canjeados</th>
+                  <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>LIVOs Canjeados</th>
                   <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>Importe Soles (PEN)</th>
                   <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>Cuenta Bancaria</th>
                   <th style={{ padding: "10px 12px", color: "var(--muted, #64748b)" }}>Estado</th>
@@ -364,7 +364,7 @@ export default function StoreLiquidacionesPage() {
                       {formatDate(s.createdAt)}
                     </td>
                     <td style={{ padding: "12px", fontWeight: 700, color: "var(--text, #0f172a)" }}>
-                      {Number(s.tokenAmount || 0).toFixed(1)} ECO
+                      {Number(s.tokenAmount || 0).toFixed(1)} LIVO
                     </td>
                     <td style={{ padding: "12px", fontWeight: 800, color: "var(--green)" }}>
                       {money(Number(s.fiatAmount || Number(s.tokenAmount) * 0.2))}

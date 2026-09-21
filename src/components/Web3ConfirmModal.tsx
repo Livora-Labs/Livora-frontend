@@ -22,10 +22,10 @@ export function Web3ConfirmModal({
   isOpen,
   title = "Confirmar Transacción Blockchain",
   tokenAmount,
-  tokenSymbol = "ECO",
+  tokenSymbol = "LIVO",
   destinationName,
   destinationAddress,
-  actionDescription = "Canje de EcoTokens en Comercio Aliado",
+  actionDescription = "Canje de LIVOs en Comercio Aliado",
   concept,
   warningText = "Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar. Esta acción es irreversible.",
   isLoading = false,
@@ -155,7 +155,7 @@ export function Web3ConfirmModal({
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ color: "#94A3B8" }}>Comisión de Red:</span>
-              <span style={{ color: "#10B981", fontWeight: 600 }}>0.00 ECO (Cubierto por Livora)</span>
+              <span style={{ color: "#10B981", fontWeight: 600 }}>0.00 LIVO (Cubierto por Livora)</span>
             </div>
           </div>
         </div>

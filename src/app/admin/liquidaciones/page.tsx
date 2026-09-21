@@ -190,7 +190,7 @@ export default function AdminLiquidacionesPage() {
       <PageHead
         eyebrow="Tesorería y Finanzas"
         title="Liquidaciones a Tiendas y Comercios Aliados"
-        description="Supervisión, aprobación y ejecución de transferencias bancarias en moneda nacional (PEN) para los comercios que aceptan EcoTokens."
+        description="Supervisión, aprobación y ejecución de transferencias bancarias en moneda nacional (PEN) para los comercios que aceptan LIVOs."
         action={
           <button
             onClick={loadSettlements}
@@ -213,7 +213,7 @@ export default function AdminLiquidacionesPage() {
         />
         <Kpi
           label="TOKENS POR RETIRAR"
-          value={`${totalPendingTokens.toFixed(1)} ECO`}
+          value={`${totalPendingTokens.toFixed(1)} LIVO`}
           trend={`Equivalente a ${money(totalPendingTokens * 0.2)}`}
           accent="var(--blue)"
         />
@@ -341,7 +341,7 @@ export default function AdminLiquidacionesPage() {
                       </span>
                     </td>
                     <td style={{ padding: "12px", fontWeight: 700, color: "var(--text, #0f172a)" }}>
-                      {Number(s.tokenAmount || 0).toFixed(1)} ECO
+                      {Number(s.tokenAmount || 0).toFixed(1)} LIVO
                     </td>
                     <td style={{ padding: "12px", fontWeight: 800, color: "var(--green)" }}>
                       {money(Number(s.fiatAmount || Number(s.tokenAmount) * 0.2))}
@@ -496,7 +496,7 @@ export default function AdminLiquidacionesPage() {
                     <strong>Cuenta de Abono:</strong> {selectedSettlement.bankAccount || selectedSettlement.store?.bankAccount}
                   </div>
                   <div>
-                    <strong>Tokens a Quemar:</strong> {Number(selectedSettlement.tokenAmount || 0).toFixed(1)} ECO
+                    <strong>LIVOs a Quemar:</strong> {Number(selectedSettlement.tokenAmount || 0).toFixed(1)} LIVO
                   </div>
                   <div>
                     <strong>Monto a Transferir:</strong>{" "}

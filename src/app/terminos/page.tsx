@@ -86,7 +86,7 @@ export default function TerminosPage() {
             </h2>
             <ul style={{ paddingLeft: 20, margin: 0, display: "grid", gap: 10 }}>
               <li>
-                <strong style={{ color: "#f2f7f5" }}>Generadores / Hogares Ciudadanos:</strong> Usuarios que clasifican, registran y entregan material reciclable valorizable (plástico PET, cartón, metales, etc.), recibiendo tokens de recompensa (EcoTokens) tras la validación física en los centros de acopio autorizados.
+                <strong style={{ color: "#f2f7f5" }}>Generadores / Hogares Ciudadanos:</strong> Usuarios que clasifican, registran y entregan material reciclable valorizable (plástico PET, cartón, metales, etc.), recibiendo tokens de recompensa (LIVOs) tras la validación física en los centros de acopio autorizados.
               </li>
               <li>
                 <strong style={{ color: "#f2f7f5" }}>Recolectores Urbanos:</strong> Operadores logísticos independientes que recogen el material reciclable en las rutas domiciliarias asignadas y lo transportan hacia los centros de acopio.
@@ -95,7 +95,7 @@ export default function TerminosPage() {
                 <strong style={{ color: "#f2f7f5" }}>Centros de Acopio Autorizados:</strong> Instalaciones industriales que reciben, pesan, clasifican, consolidan y emiten lotes de material reciclado, liquidando recompensas a recolectores y ciudadanos.
               </li>
               <li>
-                <strong style={{ color: "#f2f7f5" }}>Tiendas Aliadas / Comercios Asociados:</strong> Establecimientos comerciales que aceptan EcoTokens como medio de canje por productos, descuentos o servicios ecológicos.
+                <strong style={{ color: "#f2f7f5" }}>Tiendas Aliadas / Comercios Asociados:</strong> Establecimientos comerciales que aceptan LIVOs como medio de canje por productos, descuentos o servicios ecológicos.
               </li>
               <li>
                 <strong style={{ color: "var(--text)" }}>Empresas B2B / Transformadores:</strong> Empresas compradoras de lotes consolidados y certificaciones de impacto ESG.
@@ -125,10 +125,10 @@ export default function TerminosPage() {
               4. Transacciones Blockchain, Irreversibilidad y Naturaleza de los Tokens
             </h2>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "var(--text)" }}>4.1 Irreversibilidad Absoluta:</strong> Debido a la arquitectura inmutable y descentralizada de la red Stellar, una vez que una transacción de canje o transferencia de EcoTokens es firmada y confirmada en el libro mayor distribuido (ledger), <strong>la operación no puede ser cancelada, revertida ni modificada</strong> bajo ninguna circunstancia.
+              <strong style={{ color: "var(--text)" }}>4.1 Irreversibilidad Absoluta:</strong> Debido a la arquitectura inmutable y descentralizada de la red Stellar, una vez que una transacción de canje o transferencia de LIVOs es firmada y confirmada en el libro mayor distribuido (ledger), <strong>la operación no puede ser cancelada, revertida ni modificada</strong> bajo ninguna circunstancia.
             </p>
             <p style={{ margin: "0 0 12px" }}>
-              <strong style={{ color: "var(--text)" }}>4.2 Naturaleza de los EcoTokens (ECO):</strong> Los EcoTokens son unidades de incentivo y recompensa digital otorgadas por actividades de reciclaje valorizable. <strong>No constituyen moneda de curso legal (fiat), valores mobiliarios, instrumentos financieros ni activos de inversión</strong>. Los EcoTokens no son reembolsables por dinero fiat ante Livora ni son transferibles en mercados financieros no autorizados.
+              <strong style={{ color: "var(--text)" }}>4.2 Naturaleza de los Tokens LIVOs (LIVO):</strong> Los tokens LIVOs son unidades de incentivo y recompensa digital otorgadas por actividades de reciclaje valorizable. <strong>No constituyen moneda de curso legal (fiat), valores mobiliarios, instrumentos financieros ni activos de inversión</strong>. Los LIVOs no son reembolsables por dinero fiat ante Livora ni son transferibles en mercados financieros no autorizados.
             </p>
             <p style={{ margin: 0 }}>
               <strong style={{ color: "var(--text)" }}>4.3 Riesgo Tecnológico:</strong> El usuario asume el riesgo inherente a la tecnología blockchain, incluyendo fluctuaciones de conectividad, mantenimiento de nodos de red Stellar, congestión de validadores y eventuales retrasos técnicos ajenos al control directo de Livora.
@@ -153,7 +153,7 @@ export default function TerminosPage() {
               <strong style={{ color: "var(--text)" }}>5.4 Mecanismos de Garantías Aplicables:</strong> Todos los productos y servicios canjeados a través de la Plataforma cuentan con la garantía legal mínima establecida por la normativa peruana. Ante cualquier disconformidad con el bien o servicio, el usuario podrá ejercer la garantía directamente frente al comercio proveedor.
             </p>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: "var(--text)" }}>5.5 Derecho de Arrepentimiento (Retracto Legal):</strong> De conformidad con la regulación peruana de protección al consumidor, el usuario tiene derecho legal de arrepentirse de la transacción dentro de un plazo de siete (7) días calendario posteriores a la recepción del bien, siempre que se trate de bienes no perecibles, no presenten signos de uso y sean devueltos en su empaque original sellado. El retracto se tramitará ante la Tienda Aliada y, tras confirmarse la devolución exitosa sin penalidades, Livora procederá a la devolución de los EcoTokens correspondientes en el monedero del usuario de forma irreversible.
+              <strong style={{ color: "var(--text)" }}>5.5 Derecho de Arrepentimiento (Retracto Legal):</strong> De conformidad con la regulación peruana de protección al consumidor, el usuario tiene derecho legal de arrepentirse de la transacción dentro de un plazo de siete (7) días calendario posteriores a la recepción del bien, siempre que se trate de bienes no perecibles, no presenten signos de uso y sean devueltos en su empaque original sellado. El retracto se tramitará ante la Tienda Aliada y, tras confirmarse la devolución exitosa sin penalidades, Livora procederá a la devolución de los LIVOs correspondientes en el monedero del usuario de forma irreversible.
             </p>
           </section>
 

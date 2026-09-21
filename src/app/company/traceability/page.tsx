@@ -382,7 +382,7 @@ export default function CompanyTraceabilityPage() {
               </div>
 
               <p style={{ fontSize: 12, color: "var(--muted, #64748b)", margin: "12px 0 0 0", lineHeight: 1.5 }}>
-                Cada kilogramo suministrado en esta compra proviene de recolecciones urbanas georreferenciadas. La retribución económica fue liquidada de manera directa en tokens ECO al recolector en el momento del pesaje.
+                Cada kilogramo suministrado en esta compra proviene de recolecciones urbanas georreferenciadas. La retribución económica fue liquidada de manera directa en tokens LIVO al recolector en el momento del pesaje.
               </p>
             </div>
 

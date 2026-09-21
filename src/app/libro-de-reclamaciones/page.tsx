@@ -497,7 +497,7 @@ export default function LibroDeReclamacionesPage() {
                   </div>
 
                   <div className="field">
-                    <label htmlFor="amount">Monto Reclamado (Opcional - S/. o ECO)</label>
+                    <label htmlFor="amount">Monto Reclamado (Opcional - S/. o LIVO)</label>
                     <input
                       id="amount"
                       type="number"
@@ -513,7 +513,7 @@ export default function LibroDeReclamacionesPage() {
                     <textarea
                       id="goodDescription"
                       {...register("goodDescription")}
-                      placeholder="Ej. Canje de 50 EcoTokens por producto en tienda aliada / Servicio de recolección domiciliaria de botellas PET"
+                      placeholder="Ej. Canje de 50 LIVOs por producto en tienda aliada / Servicio de recolección domiciliaria de botellas PET"
                       rows={3}
                       style={{ width: "100%", padding: 12, background: "#0c1915", border: "1px solid var(--line)", borderRadius: 10, color: "white", resize: "vertical" }}
                     />

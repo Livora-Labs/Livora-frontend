@@ -70,7 +70,7 @@ export default function CookiesPage() {
                   <span style={{ fontSize: 11, fontWeight: 700, color: "var(--green)", background: "rgba(16, 185, 129, 0.12)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: 10, textTransform: "uppercase" }}>Siempre Activas</span>
                 </div>
                 <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--muted)" }}>
-                  Estas variables son obligatorias para posibilitar la navegación segura, mantener la autenticación del usuario y permitir la ejecución técnica de transacciones Web3 de EcoTokens. Si se bloquean, la Plataforma no podrá funcionar correctamente.
+                  Estas variables son obligatorias para posibilitar la navegación segura, mantener la autenticación del usuario y permitir la ejecución técnica de transacciones Web3 de LIVOs. Si se bloquean, la Plataforma no podrá funcionar correctamente.
                 </p>
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, textAlign: "left" }}>

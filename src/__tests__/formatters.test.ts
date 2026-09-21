@@ -9,20 +9,20 @@ import {
 describe("Formatters Unit Tests", () => {
   describe("formatEcoTokens", () => {
     it("formatea números enteros y decimales correctamente", () => {
-      expect(formatEcoTokens(15)).toBe("15.00 ECO");
-      expect(formatEcoTokens(23.456)).toBe("23.46 ECO");
-      expect(formatEcoTokens("10.5")).toBe("10.50 ECO");
+      expect(formatEcoTokens(15)).toBe("15.00 LIVO");
+      expect(formatEcoTokens(23.456)).toBe("23.46 LIVO");
+      expect(formatEcoTokens("10.5")).toBe("10.50 LIVO");
     });
 
     it("maneja valores nulos o no numéricos de forma defensiva", () => {
-      expect(formatEcoTokens(null)).toBe("0.00 ECO");
-      expect(formatEcoTokens(undefined)).toBe("0.00 ECO");
-      expect(formatEcoTokens("abc")).toBe("0.00 ECO");
+      expect(formatEcoTokens(null)).toBe("0.00 LIVO");
+      expect(formatEcoTokens(undefined)).toBe("0.00 LIVO");
+      expect(formatEcoTokens("abc")).toBe("0.00 LIVO");
     });
   });
 
   describe("formatFiatPEN", () => {
-    it("convierte EcoTokens a Soles con la tasa por defecto (3.75)", () => {
+    it("convierte LIVOs a Soles con la tasa por defecto (3.75)", () => {
       expect(formatFiatPEN(10)).toBe("S/ 37.50 PEN");
       expect(formatFiatPEN("20")).toBe("S/ 75.00 PEN");
     });

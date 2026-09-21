@@ -22,7 +22,7 @@ describe("Financial Distribution & Rates Engine (Cross-Repo Logic)", () => {
       collectorSharePenn,
       livoraTreasuryPenn,
       requiredEscrowEco,
-      hogarEcoTokens: hogarSharePenn, // 1 PEN = 1 ECO
+      hogarLivos: hogarSharePenn, // 1 PEN = 1 LIVO
     };
   };
 
@@ -37,7 +37,7 @@ describe("Financial Distribution & Rates Engine (Cross-Repo Logic)", () => {
     expect(split.collectorSharePenn).toBe(6.00); // 50% de 12
     expect(split.livoraTreasuryPenn).toBe(1.20); // 10% de 12
     expect(split.requiredEscrowEco).toBe(6.00);
-    expect(split.hogarEcoTokens).toBe(4.80);
+    expect(split.hogarLivos).toBe(4.80);
   });
 
   it("debe garantizar que la suma de partes sea igual al 100% del valor bruto", () => {
@@ -51,16 +51,16 @@ describe("Financial Distribution & Rates Engine (Cross-Repo Logic)", () => {
   });
 
   it("debe bloquear la orden si el saldo del recolector es menor al Escrow requerido", () => {
-    const collectorBalance = 5.00; // 5 ECO
-    const requiredEscrow = 6.00; // 6 ECO
+    const collectorBalance = 5.00; // 5 LIVO
+    const requiredEscrow = 6.00; // 6 LIVO
 
     const canAccept = collectorBalance >= requiredEscrow;
     expect(canAccept).toBe(false);
   });
 
   it("debe autorizar la orden si el saldo del recolector cubre el Escrow requerido", () => {
-    const collectorBalance = 20.00; // 20 ECO
-    const requiredEscrow = 6.00; // 6 ECO
+    const collectorBalance = 20.00; // 20 LIVO
+    const requiredEscrow = 6.00; // 6 LIVO
 
     const canAccept = collectorBalance >= requiredEscrow;
     expect(canAccept).toBe(true);

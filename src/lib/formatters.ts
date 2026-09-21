@@ -3,16 +3,18 @@
  */
 
 /**
- * Formatea una cantidad numérica a formato de EcoTokens con decimales fijos
+ * Formatea una cantidad numérica a formato de LIVOs con decimales fijos
  */
-export function formatEcoTokens(amount: number | string | undefined | null): string {
+export function formatLivos(amount: number | string | undefined | null): string {
   const num = typeof amount === "string" ? parseFloat(amount) : Number(amount);
-  if (isNaN(num)) return "0.00 ECO";
-  return `${num.toFixed(2)} ECO`;
+  if (isNaN(num)) return "0.00 LIVO";
+  return `${num.toFixed(2)} LIVO`;
 }
 
+export const formatEcoTokens = formatLivos;
+
 /**
- * Convierte un balance de EcoTokens a su valor aproximado en Soles Peruanos (PEN)
+ * Convierte un balance de LIVOs a su valor aproximado en Soles Peruanos (PEN)
  */
 export function formatFiatPEN(amount: number | string | undefined | null, rate: number = 3.75): string {
   const num = typeof amount === "string" ? parseFloat(amount) : Number(amount);

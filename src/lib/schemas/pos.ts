@@ -22,14 +22,14 @@ export const storeProfileSchema = z.object({
 export type StoreProfileFormData = z.infer<typeof storeProfileSchema>;
 
 /**
- * Esquema de validación para cobro POS de EcoTokens
+ * Esquema de validación para cobro POS de LIVOs
  */
 export const posChargeSchema = z.object({
   chargeAmount: z
     .string()
     .min(1, "El monto a cobrar es obligatorio")
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-      message: "El monto a cobrar debe ser mayor a 0 EcoTokens",
+      message: "El monto a cobrar debe ser mayor a 0 LIVO",
     }),
   concept: z.string().max(120, "El concepto no puede exceder 120 caracteres").optional(),
 });

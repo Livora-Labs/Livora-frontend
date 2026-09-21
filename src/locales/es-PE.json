@@ -15,8 +15,8 @@
   "web3": {
     "confirmTitle": "Confirmar Transacción Blockchain",
     "delegationNotice": "Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar. Esta acción es irreversible.",
-    "networkFee": "0.00 ECO (Cubierto por Livora)",
-    "currency": "ECO"
+    "networkFee": "0.00 LIVO (Cubierto por Livora)",
+    "currency": "LIVO"
   },
   "complaintBook": {
     "title": "Libro de Reclamaciones Virtual",

@@ -89,7 +89,7 @@ export default function PrivacidadPage() {
                 <strong style={{ color: "var(--text)" }}>Datos de Geolocalización (GPS):</strong> Ubicación geográfica precisa del dispositivo móvil para coordinar rutas de recolección domiciliaria en tiempo real y localizar centros de acopio y comercios aliados cercanos.
               </li>
               <li>
-                <strong style={{ color: "var(--text)" }}>Datos de Trazabilidad y Blockchain:</strong> Historial de pesajes de residuos valorizables, transacciones de transferencia y canje de EcoTokens, y dirección pública de billetera en la red Stellar.
+                <strong style={{ color: "var(--text)" }}>Datos de Trazabilidad y Blockchain:</strong> Historial de pesajes de residuos valorizables, transacciones de transferencia y canje de LIVOs, y dirección pública de billetera en la red Stellar.
               </li>
               <li>
                 <strong style={{ color: "var(--text)" }}>Datos de Auditoría Digital y Navegación:</strong> Dirección IP, tipo de navegador (User-Agent), registros de fecha/hora de aceptación de términos y versiones de consentimiento para auditoría legal.
@@ -108,7 +108,7 @@ export default function PrivacidadPage() {
             <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "grid", gap: 8 }}>
               <li>Autenticación de usuarios y validación de seguridad mediante códigos de verificación de un solo uso (OTP vía correo electrónico).</li>
               <li>Gestión y trazabilidad logística de recojo, pesaje, consolidación y certificación de materiales reciclables.</li>
-              <li>Generación, custodia y firma delegada de transacciones on-chain de EcoTokens en la red Stellar.</li>
+              <li>Generación, custodia y firma delegada de transacciones on-chain de LIVOs en la red Stellar.</li>
               <li>Gestión del Libro de Reclamaciones Virtual y atención de quejas y reclamos conforme a la Ley N° 29571.</li>
             </ul>
             <p style={{ margin: "0 0 10px" }}>

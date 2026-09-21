@@ -2130,7 +2130,7 @@ export default function CentroAcopioPage() {
               }}
             >
               Generando manifiesto IPFS, registrando transacción en la red Stellar y
-              liquidando EcoTokens al recolector...
+              liquidando LIVOs al recolector...
             </p>
             <div
               style={{
@@ -3208,8 +3208,8 @@ export default function CentroAcopioPage() {
         tokenSymbol="KG MATERIAL"
         destinationName={selectedBatch?.collector?.email || "Recolector Registrado"}
         destinationAddress={selectedBatch?.collector?.id}
-        actionDescription="Notarización de Lote en Stellar y Liquidación de EcoTokens"
-        warningText="Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar y liquidar los EcoTokens correspondientes. Esta acción es irreversible."
+        actionDescription="Notarización de Lote en Stellar y Liquidación de LIVOs"
+        warningText="Al confirmar, autorizas a Livora a firmar la transacción en la blockchain Stellar y liquidar los LIVOs correspondientes. Esta acción es irreversible."
         isLoading={receiveMutation.isPending}
         onConfirm={handleExecuteWeighing}
         onCancel={() => setIsScaleWeb3ModalOpen(false)}

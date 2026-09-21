@@ -247,7 +247,7 @@ export function Shell({
           <span className="eyebrow">{eyebrowText}</span>
           <div className="top-actions" style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "5px 12px", borderRadius: 12 }}>
-              <span style={{ fontSize: 12, color: "#10B981", fontWeight: 700 }}>{balance} ECO</span>
+              <span style={{ fontSize: 12, color: "#10B981", fontWeight: 700 }}>{balance} LIVO</span>
             </div>
             {isFetching > 0 ? (
               <span

@@ -177,7 +177,7 @@ export function AcopioSubastasPanel({ centerId }: AcopioSubastasPanelProps) {
                             <CheckCircle2 className="w-3.5 h-3.5" /> Oferta enviada: S/ {myBid.totalEstimatedPenn.toFixed(2)} PEN
                           </span>
                           <span className="text-[11px] text-[#8fa49d] block">
-                            Hogar gana: {myBid.totalEstimatedEco.toFixed(2)} ECO
+                            Hogar gana: {myBid.totalEstimatedEco.toFixed(2)} LIVO
                           </span>
                         </div>
                         <button

@@ -67,7 +67,7 @@ export default function StorePosPage() {
         showToast(
           "¡Pago Recibido!",
           "success",
-          `El cliente pagó exitosamente ${payload.tokenAmount || ""} EcoTokens (${money(Number(fiatAmount) || 0)}).`
+          `El cliente pagó exitosamente ${payload.tokenAmount || ""} LIVOs (${money(Number(fiatAmount) || 0)}).`
         );
         loadRecent();
       }
@@ -115,7 +115,7 @@ export default function StorePosPage() {
     setDescription("");
   };
 
-  // Fixed conversion estimate: 1 EcoToken = S/ 0.20
+  // Fixed conversion estimate: 1 LIVO = S/ 0.20
   const estimatedEcoTokens = Math.max(0, (parseFloat(fiatAmount) || 0) / 0.2).toFixed(1);
 
   return (
@@ -123,7 +123,7 @@ export default function StorePosPage() {
       <ToastContainer />
       <PageHead
         eyebrow="Punto de Venta Oficial (POS)"
-        title="Terminal de Cobro con EcoTokens"
+        title="Terminal de Cobro con LIVOs"
         description="Genera códigos QR dinámicos para que tus clientes paguen en caja con su saldo acumulado de reciclaje."
         action={
           <div style={{ display: "flex", gap: 10 }}>
@@ -156,7 +156,7 @@ export default function StorePosPage() {
         />
         <Kpi
           label="TASA DE CONVERSIÓN"
-          value="1 ECO = S/ 0.20"
+          value="1 LIVO = S/ 0.20"
           trend="Paridad oficial garantizada"
           accent="var(--blue)"
         />
@@ -234,7 +234,7 @@ export default function StorePosPage() {
                 <div style={{ fontSize: 12, color: "var(--muted, #64748b)", marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
                   <Coins size={13} style={{ color: "var(--green)" }} />
                   <span>
-                    El cliente pagará aproximadamente: <strong>{estimatedEcoTokens} EcoTokens</strong>
+                    El cliente pagará aproximadamente: <strong>{estimatedEcoTokens} LIVOs</strong>
                   </span>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function StorePosPage() {
                 ¡Pago Confirmado!
               </h2>
               <p style={{ margin: 0, fontSize: 14, color: "var(--text, #0f172a)", maxWidth: 320 }}>
-                Se han acreditado <strong>{paymentReceived.tokenAmount || estimatedEcoTokens} EcoTokens</strong> a tu saldo comercial.
+                Se han acreditado <strong>{paymentReceived.tokenAmount || estimatedEcoTokens} LIVOs</strong> a tu saldo comercial.
               </p>
               <div style={{ padding: "8px 16px", background: "var(--panel2, #f8fafc)", borderRadius: 10, border: "1px solid var(--line, #e2e8f0)", fontSize: 13 }}>
                 Importe: <strong>{money(parseFloat(fiatAmount) || 0)}</strong>
@@ -386,7 +386,7 @@ export default function StorePosPage() {
                   {money(parseFloat(fiatAmount) || 0)}
                 </div>
                 <div style={{ fontSize: 13, color: "var(--muted, #64748b)", marginTop: 2 }}>
-                  Equivalente a: <strong style={{ color: "var(--green)" }}>{qrData.tokenAmount || estimatedEcoTokens} EcoTokens</strong>
+                  Equivalente a: <strong style={{ color: "var(--green)" }}>{qrData.tokenAmount || estimatedEcoTokens} LIVOs</strong>
                 </div>
                 {description && (
                   <div style={{ fontSize: 12, color: "var(--muted, #64748b)", marginTop: 4 }}>

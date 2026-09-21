@@ -79,7 +79,7 @@ export default function StoreCanjesPage() {
       showToast(
         "Canje Anulado con Éxito",
         "success",
-        `Se devolvieron los ${refundTarget.tokenAmount} EcoTokens al monedero del cliente.`
+        `Se devolvieron los ${refundTarget.tokenAmount} LIVOs al monedero del cliente.`
       );
       setRefundTarget(null);
       loadRedemptions();
@@ -144,8 +144,8 @@ export default function StoreCanjesPage() {
           accent="var(--blue)"
         />
         <Kpi
-          label="ECOTOKENS COBRADOS"
-          value={`${totalEcoTokens.toFixed(1)} ECO`}
+          label="LIVOS COBRADOS"
+          value={`${totalEcoTokens.toFixed(1)} LIVO`}
           trend="En billetera comercial"
           accent="var(--green)"
         />
@@ -241,7 +241,7 @@ export default function StoreCanjesPage() {
             description={
               search || statusFilter !== "ALL"
                 ? "Ninguna transacción coincide con los filtros aplicados."
-                : "Aún no se han procesado pagos con EcoTokens en este comercio."
+                : "Aún no se han procesado pagos con LIVOs en este comercio."
             }
           />
         ) : (
@@ -283,7 +283,7 @@ export default function StoreCanjesPage() {
                         </span>
                       </td>
                       <td style={{ padding: "12px", fontWeight: 700, color: "var(--green)" }}>
-                        +{Number(r.tokenAmount || 0).toFixed(1)} ECO
+                        +{Number(r.tokenAmount || 0).toFixed(1)} LIVO
                       </td>
                       <td style={{ padding: "12px", fontWeight: 700, color: "var(--text, #0f172a)" }}>
                         {money(Number(r.fiatAmount || Number(r.tokenAmount || 0) * 0.2))}
@@ -412,7 +412,7 @@ export default function StoreCanjesPage() {
             </div>
 
             <p style={{ fontSize: 13, color: "var(--muted, #64748b)", margin: "0 0 16px 0", lineHeight: 1.5 }}>
-              Esta acción reembolsará <strong>{refundTarget.tokenAmount} EcoTokens</strong> ({money(Number(refundTarget.fiatAmount || Number(refundTarget.tokenAmount) * 0.2))}) al monedero del cliente y deducirá los tokens de tu saldo comercial.
+              Esta acción reembolsará <strong>{refundTarget.tokenAmount} LIVOs</strong> ({money(Number(refundTarget.fiatAmount || Number(refundTarget.tokenAmount) * 0.2))}) al monedero del cliente y deducirá los tokens de tu saldo comercial.
             </p>
 
             <div style={{ display: "flex", gap: 10 }}>

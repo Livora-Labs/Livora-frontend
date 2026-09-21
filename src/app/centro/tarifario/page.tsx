@@ -57,7 +57,7 @@ export default function CentroTarifarioPage() {
             • <strong>Transparencia hacia Recolectores:</strong> Los valores guardados en este panel se reflejan automáticamente en la aplicación móvil de los recolectores al momento de iniciar un lote hacia este centro.
           </p>
           <p style={{ margin: 0 }}>
-            • <strong>Liquidación en Báscula:</strong> Al confirmar el pesaje industrial, la plataforma calcula el monto a transferir en tokens ECO multiplicando los kilogramos netos recibidos por el precio unitario fijado en este tarifario.
+            • <strong>Liquidación en Báscula:</strong> Al confirmar el pesaje industrial, la plataforma calcula el monto a transferir en tokens LIVO multiplicando los kilogramos netos recibidos por el precio unitario fijado en este tarifario.
           </p>
           <p style={{ margin: 0 }}>
             • <strong>Inmutabilidad On-Chain:</strong> Una vez emitida la orden de pago y firmada en la red Stellar, el valor de liquidación queda registrado en el pasaporte digital del lote sin posibilidad de alteración posterior.

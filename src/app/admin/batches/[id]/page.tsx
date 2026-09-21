@@ -148,7 +148,7 @@ export default function Detail() {
     {
       num: 4,
       name: "Liquidación Contable Dual",
-      desc: "Acreditación de tokens ECO y pago fiat en soles",
+      desc: "Acreditación de tokens LIVO y pago fiat en soles",
       done: Boolean(batch.fiatSettled) || isNotarized,
       active: !batch.fiatSettled && isWeighed,
       details: batch.fiatSettled ? `Liquidado en soles (${batch.fiatSettledAt ? date(batch.fiatSettledAt) : "Confirmado"})` : "Pendiente de pago físico",

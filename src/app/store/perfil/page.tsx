@@ -303,10 +303,10 @@ export default function StorePerfilPage() {
 
           <div style={{ fontSize: 13, color: "var(--muted, #64748b)", lineHeight: 1.6, display: "grid", gap: 10 }}>
             <p style={{ margin: 0 }}>
-              • <strong>Atracción de Clientes Ecológicos:</strong> Miles de ciudadanos y familias de tu distrito acumulan EcoTokens por reciclar y buscan comercios cercanos donde canjearlos por productos y servicios reales.
+              • <strong>Atracción de Clientes Ecológicos:</strong> Miles de ciudadanos y familias de tu distrito acumulan LIVOs por reciclar y buscan comercios cercanos donde canjearlos por productos y servicios reales.
             </p>
             <p style={{ margin: 0 }}>
-              • <strong>Liquidación Garantizada a Tu Banco:</strong> No asumes riesgo de tipo de cambio ni comisiones abusivas de pasarela. Los EcoTokens se liquidan 1:1 a S/ 0.20 por token mediante transferencia bancaria regular.
+              • <strong>Liquidación Garantizada a Tu Banco:</strong> No asumes riesgo de tipo de cambio ni comisiones abusivas de pasarela. Los LIVOs se liquidan 1:1 a S/ 0.20 por LIVO mediante transferencia bancaria regular.
             </p>
             <p style={{ margin: 0 }}>
               • <strong>Distintivo Comercial Sostenible:</strong> Tu establecimiento aparece en el mapa georreferenciado de la aplicación móvil de Livora como punto de canje oficial.

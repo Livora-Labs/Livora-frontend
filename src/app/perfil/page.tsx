@@ -502,7 +502,7 @@ export default function PerfilPage() {
               <span>Confirmar Eliminación ARCO</span>
             </h3>
             <p style={{ color: "var(--text)", fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
-              Esta acción es <strong>totalmente irreversible</strong>. Se destruirá la clave digital de tu monedero Stellar (pérdida permanente de EcoTokens) y se anonimizarán tus datos en la base de datos de Livora.
+              Esta acción es <strong>totalmente irreversible</strong>. Se destruirá la clave digital de tu monedero Stellar (pérdida permanente de LIVOs) y se anonimizarán tus datos en la base de datos de Livora.
             </p>
             <p style={{ color: "var(--muted)", fontSize: 12, marginBottom: 14 }}>
               Para confirmar, escribe a continuación exactamente la frase: <br />
