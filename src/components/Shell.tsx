@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/components/ToastNotification";
 import { LivoraLogo, LivoraBrand } from "@/components/LivoraLogo";
 import { TopLoadingBar } from "@/components/TopLoadingBar";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useIsFetching } from "@tanstack/react-query";
 import { getSecureCookie } from "@/lib/cookies";
 
@@ -246,9 +247,12 @@ export function Shell({
         <header className="topbar">
           <span className="eyebrow">{eyebrowText}</span>
           <div className="top-actions" style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "5px 12px", borderRadius: 12 }}>
-              <span style={{ fontSize: 12, color: "#10B981", fontWeight: 700 }}>{balance} LIVO</span>
-            </div>
+            {role !== "centro" && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "5px 12px", borderRadius: 12 }}>
+                <span style={{ fontSize: 12, color: "#10B981", fontWeight: 700 }}>{balance} LIVO</span>
+              </div>
+            )}
+            <NotificationBell />
             {isFetching > 0 ? (
               <span
                 className="live"

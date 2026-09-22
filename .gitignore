@@ -3,3 +3,7 @@ node_modules
 npm-debug.log*
 
 tsconfig.tsbuildinfo
+
+next_build.tar.gz
+dist.tar.gz
+*.tar.gz
