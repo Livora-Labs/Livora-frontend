@@ -157,6 +157,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <a
+                  href="/downloads/livora-app.apk"
+                  download="livora-app.apk"
+                  style={{ color: "var(--green)", textDecoration: "none", transition: "color 0.2s", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
+                  className="hover-green"
+                >
+                  Descargar App Android (.APK v1.0.13)
+                </a>
+              </li>
+              <li>
                 <Link href="/libro-de-reclamaciones/seguimiento" style={{ color: "var(--green)", textDecoration: "none", transition: "color 0.2s", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }} className="hover-green">
                   <Search size={14} /> Consultar Seguimiento de Reclamo
                 </Link>

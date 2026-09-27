@@ -25,6 +25,8 @@ import {
   Scale,
   Sparkles,
   ExternalLink,
+  Smartphone,
+  Download,
 } from "lucide-react";
 import { LivoraFullLogo } from "@/components/LivoraLogo";
 
@@ -183,6 +185,35 @@ export default function LoginPage() {
                   Hash inmutable en IPFS con validez de cumplimiento.
                 </p>
               </div>
+            </div>
+
+            {/* Hogar & Recolector Mobile App Download Card */}
+            <div className="mt-7 bg-gradient-to-r from-emerald-950/70 via-[#0a1e17] to-teal-950/70 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 backdrop-blur-md shadow-xl shadow-black/40">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                  <Smartphone className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-semibold text-white">App Móvil Hogares y Recolectores</h4>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                      v1.0.13
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-200/70 mt-0.5 leading-snug">
+                    Solicita recojos en tu puerta, acumula recompensas LIVO y canjea con QR en comercios.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/downloads/livora-app.apk"
+                download="livora-app.apk"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 transition-all shadow-md shadow-emerald-950/50 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Download className="w-4 h-4" />
+                <span>Descargar APK</span>
+                <span className="text-[10px] opacity-75 font-normal">(85 MB)</span>
+              </a>
             </div>
           </div>
 

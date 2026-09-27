@@ -59,6 +59,30 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/descargar",
+        destination: "/downloads/livora-app.apk",
+        permanent: false,
+      },
+      {
+        source: "/download",
+        destination: "/downloads/livora-app.apk",
+        permanent: false,
+      },
+      {
+        source: "/app",
+        destination: "/downloads/livora-app.apk",
+        permanent: false,
+      },
+      {
+        source: "/app-release.apk",
+        destination: "/downloads/livora-app.apk",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
