@@ -109,7 +109,7 @@ function RestablecerContrasenaForm() {
           Tu nueva contraseña ya se encuentra activa. Ya puedes cerrar esta pestaña y volver a la aplicación móvil o iniciar sesión en la plataforma web.
         </p>
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/login")}
           style={{
             width: "100%",
             background: "var(--green)",
