@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { PageHead, Status } from "@/components/Shell";
-import { fetchKycApplications, updateKycStatus, fetchAdminUsers, updateAdminUserStatus } from "@/lib/api";
+import { fetchKycApplications, updateKycStatus, fetchAdminUsers, updateAdminUserStatus, adminRegularizePassword } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { Users, ShieldCheck, RefreshCw, Search, Filter } from "lucide-react";
+import { Users, ShieldCheck, RefreshCw, Search, Filter, KeyRound, Mail, Lock, Eye, EyeOff, X, Sparkles } from "lucide-react";
 
 const date = (value: string) =>
   new Intl.DateTimeFormat("es-PE", {
@@ -82,6 +82,72 @@ export default function Page() {
     hasNextPage: false,
     hasPrevPage: false,
   });
+
+  // --- Estado para Modal de Regularización de Contraseña ---
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState<any | null>(null);
+  const [regularizeMode, setRegularizeMode] = useState<"email" | "manual">("email");
+  const [adminNewPassword, setAdminNewPassword] = useState("");
+  const [showAdminNewPassword, setShowAdminNewPassword] = useState(false);
+  const [regularizingLoading, setRegularizingLoading] = useState(false);
+
+  // Generador de contraseña aleatoria segura
+  const generateRandomPassword = () => {
+    const uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lowers = "abcdefghijkmnpqrstuvwxyz";
+    const numbers = "23456789";
+    const symbols = "!@#$%*?";
+    const all = uppers + lowers + numbers + symbols;
+
+    let res = "";
+    res += uppers[Math.floor(Math.random() * uppers.length)];
+    res += lowers[Math.floor(Math.random() * lowers.length)];
+    res += numbers[Math.floor(Math.random() * numbers.length)];
+    res += symbols[Math.floor(Math.random() * symbols.length)];
+    for (let i = 0; i < 8; i++) {
+      res += all[Math.floor(Math.random() * all.length)];
+    }
+    setAdminNewPassword(res);
+  };
+
+  const handleRegularizePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserForPassword) return;
+
+    if (regularizeMode === "manual") {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+\-=\[\]\\/])[A-Za-z\d!@#$%^&*(),.?":{}|<>_+\-=\[\]\\/]{8,}$/;
+      if (!passwordRegex.test(adminNewPassword)) {
+        showToast(
+          "Contraseña débil",
+          "error",
+          "Debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales.",
+        );
+        return;
+      }
+    }
+
+    setRegularizingLoading(true);
+    try {
+      const payload =
+        regularizeMode === "manual"
+          ? { newPassword: adminNewPassword }
+          : { sendResetEmail: true };
+      const res = await adminRegularizePassword(selectedUserForPassword.id, payload);
+      showToast(
+        "Operación exitosa",
+        "success",
+        res.message || "Contraseña regularizada con éxito.",
+      );
+      setSelectedUserForPassword(null);
+      setAdminNewPassword("");
+    } catch (err: any) {
+      const errMsg =
+        err?.response?.data?.message || err.message || "Error al regularizar contraseña";
+      showToast("Error", "error", Array.isArray(errMsg) ? errMsg.join(", ") : errMsg);
+    } finally {
+      setRegularizingLoading(false);
+    }
+  };
 
   // --- Estado para Auditoría KYC ---
   const [items, setItems] = useState<any[]>([]);
@@ -441,32 +507,54 @@ export default function Page() {
                           {date(u.createdAt)}
                         </td>
                         <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                          {u.role === "ADMIN" ? (
-                            <span
-                              style={{
-                                fontSize: 11,
-                                color: "var(--muted)",
-                                padding: "4px 8px",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              Administrador
-                            </span>
-                          ) : (
+                          <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
                             <button
                               type="button"
-                              onClick={() => handleToggleUserActive(u)}
-                              className="btn ghost"
+                              onClick={() => {
+                                setSelectedUserForPassword(u);
+                                setRegularizeMode("email");
+                                setAdminNewPassword("");
+                              }}
+                              className="btn secondary"
                               style={{
                                 fontSize: 11,
                                 padding: "4px 8px",
-                                color: u.isActive ? "#F43F5E" : "var(--green)",
-                                borderColor: u.isActive ? "rgba(244,63,94,0.3)" : "rgba(5,150,105,0.3)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
                               }}
+                              title="Regularizar contraseña del usuario"
                             >
-                              {u.isActive ? "Suspender" : "Reactivar"}
+                              <KeyRound size={12} color="var(--green)" />
+                              <span>Contraseña</span>
                             </button>
-                          )}
+                            {u.role === "ADMIN" ? (
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  color: "var(--muted)",
+                                  padding: "4px 8px",
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                Admin
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleToggleUserActive(u)}
+                                className="btn ghost"
+                                style={{
+                                  fontSize: 11,
+                                  padding: "4px 8px",
+                                  color: u.isActive ? "#F43F5E" : "var(--green)",
+                                  borderColor: u.isActive ? "rgba(244,63,94,0.3)" : "rgba(5,150,105,0.3)",
+                                }}
+                              >
+                                {u.isActive ? "Suspender" : "Reactivar"}
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -940,6 +1028,343 @@ export default function Page() {
                 {submitting ? "Guardando..." : modalAction === "OBSERVED" ? "Confirmar observación" : "Confirmar rechazo"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Regularización de Contraseña de Usuario */}
+      {selectedUserForPassword && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !regularizingLoading) {
+              setSelectedUserForPassword(null);
+            }
+          }}
+        >
+          <div
+            className="card"
+            style={{
+              width: "100%",
+              maxWidth: 500,
+              background: "var(--panel)",
+              borderRadius: 16,
+              border: "1px solid var(--line)",
+              padding: 24,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              position: "relative",
+            }}
+          >
+            {/* Header del Modal */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: 16,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "rgba(16, 185, 129, 0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--green)",
+                  }}
+                >
+                  <KeyRound size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "var(--text)" }}>
+                    Regularizar Contraseña
+                  </h3>
+                  <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                    Gestión de credenciales administrativas
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUserForPassword(null)}
+                disabled={regularizingLoading}
+                aria-label="Cerrar modal"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--muted)",
+                  cursor: "pointer",
+                  padding: 4,
+                  display: "flex",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Ficha del Usuario */}
+            <div
+              style={{
+                padding: "10px 14px",
+                background: "var(--panel2)",
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                marginBottom: 16,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                fontSize: 12,
+              }}
+            >
+              <div>
+                <strong style={{ color: "var(--text)", display: "block" }}>
+                  {selectedUserForPassword.name || "Sin nombre registrado"}
+                </strong>
+                <span style={{ color: "var(--muted)" }}>{selectedUserForPassword.email}</span>
+              </div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "3px 8px",
+                  borderRadius: 6,
+                  background: "rgba(16, 185, 129, 0.1)",
+                  color: "var(--green)",
+                }}
+              >
+                {selectedUserForPassword.role}
+              </span>
+            </div>
+
+            {/* Selector de Modo (Tabs) */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 8,
+                marginBottom: 20,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setRegularizeMode("email")}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  border: regularizeMode === "email" ? "2px solid var(--green)" : "1px solid var(--line)",
+                  background: regularizeMode === "email" ? "rgba(16, 185, 129, 0.1)" : "transparent",
+                  color: regularizeMode === "email" ? "var(--green)" : "var(--muted)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <Mail size={14} />
+                <span>Enviar Correo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRegularizeMode("manual")}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  border: regularizeMode === "manual" ? "2px solid var(--green)" : "1px solid var(--line)",
+                  background: regularizeMode === "manual" ? "rgba(16, 185, 129, 0.1)" : "transparent",
+                  color: regularizeMode === "manual" ? "var(--green)" : "var(--muted)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <Lock size={14} />
+                <span>Asignar Manualmente</span>
+              </button>
+            </div>
+
+            {/* Contenido según el modo */}
+            <form onSubmit={handleRegularizePassword}>
+              {regularizeMode === "email" ? (
+                <div>
+                  <div
+                    style={{
+                      padding: 14,
+                      background: "rgba(16, 185, 129, 0.05)",
+                      borderRadius: 10,
+                      border: "1px solid rgba(16, 185, 129, 0.2)",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: "var(--text)" }}>
+                      Se generará un token único con 1 hora de vigencia y se despachará un correo oficial de recuperación a <strong>{selectedUserForPassword.email}</strong>.
+                    </p>
+                    <p style={{ margin: "8px 0 0", fontSize: 12, lineHeight: 1.5, color: "var(--muted)" }}>
+                      El usuario abrirá el enlace en su navegador para registrar su nueva contraseña. Al finalizar, el sistema le informará que ya puede cerrar esa pestaña y regresar a la aplicación o iniciar sesión en la web.
+                    </p>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      disabled={regularizingLoading}
+                      onClick={() => setSelectedUserForPassword(null)}
+                      style={{ padding: "10px 16px", fontSize: 13 }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={regularizingLoading}
+                      style={{
+                        background: "var(--green)",
+                        color: "#06110d",
+                        border: "none",
+                        padding: "10px 18px",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        cursor: regularizingLoading ? "not-allowed" : "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        opacity: regularizingLoading ? 0.7 : 1,
+                      }}
+                    >
+                      <Mail size={15} />
+                      <span>{regularizingLoading ? "Enviando correo..." : "Enviar Correo de Recuperación"}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>
+                        Nueva Contraseña:
+                      </label>
+                      <button
+                        type="button"
+                        onClick={generateRandomPassword}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "var(--green)",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Sparkles size={12} />
+                        <span>Generar segura</span>
+                      </button>
+                    </div>
+
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type={showAdminNewPassword ? "text" : "password"}
+                        value={adminNewPassword}
+                        onChange={(e) => setAdminNewPassword(e.target.value)}
+                        placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, símbolos)"
+                        required
+                        style={{
+                          width: "100%",
+                          background: "var(--input-bg)",
+                          border: "1px solid var(--line)",
+                          borderRadius: 10,
+                          color: "var(--input-color)",
+                          padding: "10px 40px 10px 12px",
+                          fontSize: 13,
+                          outline: "none",
+                          fontFamily: showAdminNewPassword ? "monospace" : "inherit",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminNewPassword(!showAdminNewPassword)}
+                        aria-label="Alternar visibilidad"
+                        style={{
+                          position: "absolute",
+                          right: 10,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          background: "transparent",
+                          border: "none",
+                          color: "var(--muted)",
+                          cursor: "pointer",
+                          padding: 4,
+                          display: "flex",
+                        }}
+                      >
+                        {showAdminNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <span style={{ display: "block", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>
+                      Asigna esta clave y comunícasela al usuario por un canal seguro (teléfono, en persona).
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      disabled={regularizingLoading}
+                      onClick={() => setSelectedUserForPassword(null)}
+                      style={{ padding: "10px 16px", fontSize: 13 }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={regularizingLoading || !adminNewPassword}
+                      style={{
+                        background: "var(--green)",
+                        color: "#06110d",
+                        border: "none",
+                        padding: "10px 18px",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        cursor: regularizingLoading || !adminNewPassword ? "not-allowed" : "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        opacity: regularizingLoading || !adminNewPassword ? 0.6 : 1,
+                      }}
+                    >
+                      <Lock size={15} />
+                      <span>{regularizingLoading ? "Guardando..." : "Asignar Contraseña"}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </form>
           </div>
         </div>
       )}

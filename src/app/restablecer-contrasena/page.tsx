@@ -51,9 +51,6 @@ function RestablecerContrasenaForm() {
       await api.post("/auth/reset-password", { token, password });
       setSuccess(true);
       showToast("Contraseña restablecida", "success", "Tu contraseña ha sido actualizada correctamente.");
-      setTimeout(() => {
-        router.push("/");
-      }, 3000);
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || "Error al restablecer la contraseña.";
       showToast("Error de restablecimiento", "error", Array.isArray(errMsg) ? errMsg.join(", ") : errMsg);
@@ -90,12 +87,49 @@ function RestablecerContrasenaForm() {
 
   if (success) {
     return (
-      <div style={{ textAlign: "center" }}>
-        <CheckCircle2 size={48} color="var(--green)" style={{ margin: "0 auto 16px" }} />
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: "6px 0 12px", color: "var(--text)" }}>¡Contraseña actualizada!</h2>
-        <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.5, marginBottom: 20 }}>
-          Tu contraseña ha sido restablecida con éxito. Serás redirigido al inicio de sesión en unos segundos...
+      <div style={{ textAlign: "center", padding: "12px 0" }}>
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            background: "rgba(16, 185, 129, 0.12)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+          }}
+        >
+          <CheckCircle2 size={36} color="var(--green)" />
+        </div>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: "6px 0 12px", color: "var(--text)" }}>
+          ¡Contraseña actualizada con éxito!
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+          Tu nueva contraseña ya se encuentra activa. Ya puedes cerrar esta pestaña y volver a la aplicación móvil o iniciar sesión en la plataforma web.
         </p>
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            width: "100%",
+            background: "var(--green)",
+            color: "#06110d",
+            border: "none",
+            padding: "14px 20px",
+            borderRadius: 10,
+            fontSize: 14,
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            boxShadow: "0 4px 14px rgba(16, 185, 129, 0.25)",
+          }}
+        >
+          <span>Iniciar sesión en la web</span>
+          <ArrowRight size={16} />
+        </button>
       </div>
     );
   }

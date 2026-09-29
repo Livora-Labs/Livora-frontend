@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Shell, PageHead } from "@/components/Shell";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { api, updateProfile, changePassword } from "@/lib/api";
-import { MapPin, KeyRound, Copy, ExternalLink, ShieldAlert, Trash2, Sun, Moon } from "lucide-react";
+import { MapPin, KeyRound, Copy, ExternalLink, ShieldAlert, Trash2, Sun, Moon, Eye, EyeOff, Lock } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -29,8 +29,12 @@ export default function PerfilPage() {
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // Password change states
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   // Danger zone / Delete states
@@ -115,8 +119,18 @@ export default function PerfilPage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentPassword) {
+      showToast("Campo requerido", "error", "Debes ingresar tu contraseña actual.");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       showToast("Error de validación", "error", "Las contraseñas no coinciden.");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      showToast("Contraseña idéntica", "error", "La nueva contraseña debe ser diferente a la contraseña actual.");
       return;
     }
 
@@ -129,8 +143,9 @@ export default function PerfilPage() {
 
     setUpdatingPassword(true);
     try {
-      await changePassword({ newPassword });
+      await changePassword({ currentPassword, newPassword });
       showToast("Contraseña cambiada", "success", "Tu contraseña se ha cambiado correctamente.");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
@@ -303,33 +318,81 @@ export default function PerfilPage() {
             {/* Seguridad (Contraseña) */}
             <section className="card" style={{ padding: 24 }}>
               <div className="section-title" style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Seguridad y Contraseña</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}>
+                  <KeyRound size={20} color="var(--green)" />
+                  <span>Seguridad y Contraseña</span>
+                </h2>
               </div>
               <form onSubmit={handleChangePassword} style={{ display: "grid", gap: 16 }}>
                 <div>
+                  <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Contraseña Actual</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showCurrentPassword ? "text" : "password"}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Ingresa tu contraseña actual"
+                      required
+                      style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px 42px 12px 12px", color: "var(--input-color)", fontSize: 14 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      aria-label="Alternar visibilidad"
+                      style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", padding: 4, display: "flex" }}
+                    >
+                      {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
                   <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Nueva Contraseña</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolos"
-                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
-                  />
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolos"
+                      required
+                      style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px 42px 12px 12px", color: "var(--input-color)", fontSize: 14 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      aria-label="Alternar visibilidad"
+                      style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", padding: 4, display: "flex" }}
+                    >
+                      {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Confirmar Nueva Contraseña</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repite la contraseña exactamente"
-                    style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 12, color: "var(--input-color)", fontSize: 14 }}
-                  />
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repite la nueva contraseña"
+                      required
+                      style={{ width: "100%", background: "var(--input-bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px 42px 12px 12px", color: "var(--input-color)", fontSize: 14 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label="Alternar visibilidad"
+                      style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", padding: 4, display: "flex" }}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
-                <button type="submit" disabled={updatingPassword} className="btn secondary" style={{ width: "100%", padding: 12 }}>
-                  {updatingPassword ? "Cambiando contraseña..." : "Actualizar Contraseña"}
+                <button type="submit" disabled={updatingPassword} className="btn secondary" style={{ width: "100%", padding: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Lock size={16} />
+                  <span>{updatingPassword ? "Cambiando contraseña..." : "Actualizar Contraseña"}</span>
                 </button>
               </form>
             </section>

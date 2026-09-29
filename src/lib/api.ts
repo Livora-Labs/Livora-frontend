@@ -592,8 +592,16 @@ export async function updateProfile(data: {
   return res.data;
 }
 
-export async function changePassword(data: { newPassword: string }) {
+export async function changePassword(data: { newPassword: string; currentPassword?: string }) {
   const res = await api.patch("/users/me/password", data);
+  return res.data;
+}
+
+export async function adminRegularizePassword(
+  userId: string,
+  data: { newPassword?: string; sendResetEmail?: boolean }
+) {
+  const res = await api.patch(`/admin/users/${userId}/password`, data);
   return res.data;
 }
 

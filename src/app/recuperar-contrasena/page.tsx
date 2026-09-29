@@ -104,11 +104,11 @@ export default function RecuperarContrasenaPage() {
           <div style={{ textAlign: "center" }}>
             <span style={{ color: "var(--green)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>Correo enviado</span>
             <h2 style={{ fontSize: 24, fontWeight: 800, margin: "6px 0 16px", color: "var(--text)" }}>Revisa tu bandeja</h2>
-            <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
               Si la dirección <strong style={{ color: "var(--text)" }}>{email}</strong> está registrada en Livora, recibirás un enlace de recuperación de contraseña válido por 1 hora.
             </p>
-            <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 8, padding: 14, fontSize: 12, color: "var(--muted)", textAlign: "left", marginBottom: 20, lineHeight: 1.5 }}>
-              Si no encuentras el mensaje en unos minutos, revisa tu carpeta de correo no deseado o spam.
+            <div style={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10, padding: 14, fontSize: 12.5, color: "var(--muted)", textAlign: "left", marginBottom: 20, lineHeight: 1.5 }}>
+              Haz clic en el enlace desde tu navegador para definir tu nueva contraseña. Al concluir la actualización, se te indicará que ya puedes cerrar la pestaña y volver a la aplicación móvil o iniciar sesión en la web.
             </div>
           </div>
         )}
