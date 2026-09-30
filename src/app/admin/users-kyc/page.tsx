@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { PageHead, Status } from "@/components/Shell";
 import { fetchKycApplications, updateKycStatus, fetchAdminUsers, updateAdminUserStatus, adminRegularizePassword } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { Users, ShieldCheck, RefreshCw, Search, Filter, KeyRound, Mail, Lock, Eye, EyeOff, X, Sparkles } from "lucide-react";
+import { Users, ShieldCheck, RefreshCw, Search, Filter, KeyRound, Mail, Lock, Eye, EyeOff, X, Sparkles, Building2, ExternalLink, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
 
 const date = (value: string) =>
   new Intl.DateTimeFormat("es-PE", {
@@ -14,6 +14,109 @@ const date = (value: string) =>
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+
+function KycStatusBadge({ status }: { status?: string }) {
+  switch (status) {
+    case "APPROVED":
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 10,
+            fontWeight: 700,
+            padding: "3px 8px",
+            borderRadius: 6,
+            background: "rgba(16, 185, 129, 0.12)",
+            color: "#10B981",
+            border: "1px solid rgba(16, 185, 129, 0.25)",
+          }}
+        >
+          <ShieldCheck size={11} />
+          VERIFICADO
+        </span>
+      );
+    case "PENDING":
+    case "IN_REVIEW":
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 10,
+            fontWeight: 700,
+            padding: "3px 8px",
+            borderRadius: 6,
+            background: "rgba(245, 158, 11, 0.12)",
+            color: "#F59E0B",
+            border: "1px solid rgba(245, 158, 11, 0.25)",
+          }}
+        >
+          <AlertTriangle size={11} />
+          PENDIENTE
+        </span>
+      );
+    case "OBSERVED":
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 10,
+            fontWeight: 700,
+            padding: "3px 8px",
+            borderRadius: 6,
+            background: "rgba(249, 115, 22, 0.12)",
+            color: "#F97316",
+            border: "1px solid rgba(249, 115, 22, 0.25)",
+          }}
+        >
+          OBSERVADO
+        </span>
+      );
+    case "REJECTED":
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 10,
+            fontWeight: 700,
+            padding: "3px 8px",
+            borderRadius: 6,
+            background: "rgba(244, 63, 94, 0.12)",
+            color: "#F43F5E",
+            border: "1px solid rgba(244, 63, 94, 0.25)",
+          }}
+        >
+          RECHAZADO
+        </span>
+      );
+    default:
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 10,
+            fontWeight: 600,
+            padding: "3px 8px",
+            borderRadius: 6,
+            background: "rgba(148, 163, 184, 0.1)",
+            color: "var(--muted, #94a3b8)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+          }}
+        >
+          NO PRESENTADO
+        </span>
+      );
+  }
+}
 
 function KycSkeleton() {
   return (
@@ -82,6 +185,11 @@ export default function Page() {
     hasNextPage: false,
     hasPrevPage: false,
   });
+
+  // --- Estado para Modal de Auditoría KYC Directa desde Directorio ---
+  const [selectedUserForKyc, setSelectedUserForKyc] = useState<any | null>(null);
+  const [userKycObservation, setUserKycObservation] = useState("");
+  const [userKycSubmitting, setUserKycSubmitting] = useState(false);
 
   // --- Estado para Modal de Regularización de Contraseña ---
   const [selectedUserForPassword, setSelectedUserForPassword] = useState<any | null>(null);
@@ -154,6 +262,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [kycSearch, setKycSearch] = useState("");
   const [kycStatusFilter, setKycStatusFilter] = useState("ALL");
+  const [kycRoleFilter, setKycRoleFilter] = useState("ALL");
   const [kycPage, setKycPage] = useState(1);
   const kycPageSize = 8;
 
@@ -165,12 +274,18 @@ export default function Page() {
         k.user?.email?.toLowerCase().includes(q) ||
         k.user?.name?.toLowerCase().includes(q) ||
         k.fullName?.toLowerCase().includes(q) ||
-        k.documentNumber?.toLowerCase().includes(q);
+        k.documentNumber?.toLowerCase().includes(q) ||
+        k.businessName?.toLowerCase().includes(q) ||
+        k.taxIdRuc?.toLowerCase().includes(q) ||
+        k.user?.storeProfile?.businessName?.toLowerCase().includes(q) ||
+        k.user?.storeProfile?.ruc?.toLowerCase().includes(q);
       const matchStatus =
         kycStatusFilter === "ALL" || k.status === kycStatusFilter;
-      return matchSearch && matchStatus;
+      const matchRole =
+        kycRoleFilter === "ALL" || k.user?.role === kycRoleFilter;
+      return matchSearch && matchStatus && matchRole;
     });
-  }, [items, kycSearch, kycStatusFilter]);
+  }, [items, kycSearch, kycStatusFilter, kycRoleFilter]);
 
   const kycTotalPages = Math.ceil(filteredKycItems.length / kycPageSize) || 1;
   const paginatedKycItems = useMemo(() => {
@@ -262,7 +377,7 @@ export default function Page() {
       );
       setModalOpen(false);
       setSelectedKyc(null);
-      loadKyc();
+      await Promise.all([loadKyc(), loadUsers(userPage)]);
     } catch (err: any) {
       showToast("Error al procesar expediente", "error", err.message);
     } finally {
@@ -274,9 +389,43 @@ export default function Page() {
     try {
       await updateKycStatus(kyc.userId, "APPROVED");
       showToast("Expediente KYC aprobado y cuenta activada", "success");
-      loadKyc();
+      await Promise.all([loadKyc(), loadUsers(userPage)]);
     } catch (err: any) {
       showToast("Error al aprobar expediente KYC", "error", err.message);
+    }
+  };
+
+  const handleUserKycDecision = async (status: "APPROVED" | "OBSERVED" | "REJECTED") => {
+    if (!selectedUserForKyc) return;
+    if (status === "OBSERVED" && (!userKycObservation || userKycObservation.trim().length < 5)) {
+      showToast(
+        "Observación requerida",
+        "error",
+        "Ingresa una explicación detallada de al menos 5 caracteres para que el usuario pueda subsanar sus documentos.",
+      );
+      return;
+    }
+
+    setUserKycSubmitting(true);
+    try {
+      await updateKycStatus(selectedUserForKyc.id, status, userKycObservation.trim() || undefined);
+      showToast(
+        status === "APPROVED"
+          ? (selectedUserForKyc.role === "TIENDA"
+              ? "Comercio verificado exitosamente. Ya puede operar con LIVO."
+              : "Usuario verificado exitosamente en la red.")
+          : status === "OBSERVED"
+          ? "Expediente puesto en estado OBSERVADO."
+          : "Expediente RECHAZADO formalmente.",
+        "success",
+      );
+      setSelectedUserForKyc(null);
+      setUserKycObservation("");
+      await Promise.all([loadUsers(userPage), loadKyc()]);
+    } catch (err: any) {
+      showToast("Error al procesar dictamen KYC", "error", err.message);
+    } finally {
+      setUserKycSubmitting(false);
     }
   };
 
@@ -425,7 +574,8 @@ export default function Page() {
                     <th style={{ padding: "12px 16px", fontWeight: 700 }}>Usuario</th>
                     <th style={{ padding: "12px 16px", fontWeight: 700 }}>Rol del Ecosistema</th>
                     <th style={{ padding: "12px 16px", fontWeight: 700 }}>Billetera Stellar</th>
-                    <th style={{ padding: "12px 16px", fontWeight: 700 }}>Estado Operativo</th>
+                    <th style={{ padding: "12px 16px", fontWeight: 700 }}>Estado Cuenta</th>
+                    <th style={{ padding: "12px 16px", fontWeight: 700 }}>Estado KYC</th>
                     <th style={{ padding: "12px 16px", fontWeight: 700 }}>Actividad Registrada</th>
                     <th style={{ padding: "12px 16px", fontWeight: 700 }}>Fecha Registro</th>
                     <th style={{ padding: "12px 16px", fontWeight: 700, textAlign: "right" }}>Acción</th>
@@ -434,13 +584,13 @@ export default function Page() {
                 <tbody>
                   {usersLoading ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>
+                      <td colSpan={8} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>
                         Cargando directorio de usuarios...
                       </td>
                     </tr>
                   ) : usersList.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>
+                      <td colSpan={8} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>
                         No se encontraron usuarios para los filtros seleccionados.
                       </td>
                     </tr>
@@ -495,6 +645,14 @@ export default function Page() {
                             {u.isActive ? "ACTIVO" : "SUSPENDIDO"}
                           </span>
                         </td>
+                        <td style={{ padding: "14px 16px" }}>
+                          <KycStatusBadge status={u.kycStatus || u.kycApplications?.[0]?.status} />
+                          {u.role === "TIENDA" && u.storeProfile?.businessName && (
+                            <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 4, fontWeight: 600 }}>
+                              {u.storeProfile.businessName}
+                            </div>
+                          )}
+                        </td>
                         <td style={{ padding: "14px 16px", fontSize: 11, color: "var(--muted)" }}>
                           {u._count ? (
                             <div>
@@ -508,6 +666,37 @@ export default function Page() {
                         </td>
                         <td style={{ padding: "14px 16px", textAlign: "right" }}>
                           <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                            {(u.role === "TIENDA" || u.role === "RECOLECTOR" || u.role === "HOGAR") && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUserForKyc(u);
+                                  setUserKycObservation("");
+                                }}
+                                className="btn"
+                                style={{
+                                  fontSize: 11,
+                                  padding: "4px 8px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  background: (u.kycStatus === "APPROVED" || u.kycApplications?.[0]?.status === "APPROVED")
+                                    ? "rgba(16, 185, 129, 0.1)"
+                                    : "rgba(5, 150, 105, 0.9)",
+                                  color: (u.kycStatus === "APPROVED" || u.kycApplications?.[0]?.status === "APPROVED")
+                                    ? "#10B981"
+                                    : "#ffffff",
+                                  border: (u.kycStatus === "APPROVED" || u.kycApplications?.[0]?.status === "APPROVED")
+                                    ? "1px solid rgba(16, 185, 129, 0.3)"
+                                    : "1px solid var(--green)",
+                                  fontWeight: 600,
+                                }}
+                                title="Auditar y validar expediente KYC"
+                              >
+                                <ShieldCheck size={12} />
+                                <span>{(u.kycStatus === "APPROVED" || u.kycApplications?.[0]?.status === "APPROVED") ? "Verificado" : "Validar / Auditar"}</span>
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => {
@@ -708,6 +897,30 @@ export default function Page() {
                         <option value="REJECTED">Rechazados</option>
                       </select>
                     </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <Users size={14} style={{ color: "var(--muted, #64748b)" }} />
+                      <select
+                        value={kycRoleFilter}
+                        onChange={(e) => {
+                          setKycRoleFilter(e.target.value);
+                          setKycPage(1);
+                        }}
+                        style={{
+                          padding: "5px 10px",
+                          fontSize: 12,
+                          borderRadius: 8,
+                          border: "1px solid var(--line, #cbd5e1)",
+                          background: "var(--bg, #f8fafc)",
+                          color: "var(--text, #0f172a)",
+                        }}
+                      >
+                        <option value="ALL">Todos los roles</option>
+                        <option value="TIENDA">Tiendas Comerciales</option>
+                        <option value="RECOLECTOR">Recolectores</option>
+                        <option value="HOGAR">Hogares</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
             <div className="table-wrap">
@@ -727,7 +940,7 @@ export default function Page() {
                     <tr>
                       <td colSpan={6} style={{ textAlign: "center", color: "#94A3B8", padding: 40 }}>
                         <div>
-                          {kycSearch || kycStatusFilter !== "ALL"
+                          {kycSearch || kycStatusFilter !== "ALL" || kycRoleFilter !== "ALL"
                             ? "No hay expedientes que coincidan con los filtros aplicados."
                             : "No hay expedientes KYC registrados en el sistema."}
                         </div>
@@ -781,6 +994,17 @@ export default function Page() {
                               {k.vehiclePlate && <div>Placa: <strong className="mono">{k.vehiclePlate}</strong></div>}
                               {k.associationName && <div style={{ color: "var(--muted, #94a3b8)" }}>Asoc: {k.associationName}</div>}
                             </div>
+                          ) : k.user?.role === "TIENDA" ? (
+                            <div style={{ fontSize: 11 }}>
+                              <div>Comercio: <strong>{k.businessName || k.user?.storeProfile?.businessName || "Tienda Aliada"}</strong></div>
+                              {k.taxIdRuc && <div>RUC: <strong className="mono">{k.taxIdRuc}</strong></div>}
+                              {k.bankCci && <div>CCI: <span className="mono">{k.bankCci}</span></div>}
+                              {k.user?.storeProfile?.address && (
+                                <div style={{ color: "var(--muted, #94a3b8)", marginTop: 2 }}>
+                                  Dir: {k.user.storeProfile.address}
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <div style={{ fontSize: 11, color: "var(--muted, #94a3b8)" }}>
                               {k.bankCci ? `CCI: ${k.bankCci}` : "—"}
@@ -789,38 +1013,69 @@ export default function Page() {
                         </td>
                         <td>
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            {k.documentUrl && (
-                              <a
-                                className="btn"
-                                href={k.documentUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
-                              >
-                                Frente documento
-                              </a>
-                            )}
-                            {k.documentUrlBack && (
-                              <a
-                                className="btn"
-                                href={k.documentUrlBack}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
-                              >
-                                Reverso documento
-                              </a>
-                            )}
-                            {k.selfieUrl && (
-                              <a
-                                className="btn"
-                                href={k.selfieUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
-                              >
-                                Foto de perfil / Selfie
-                              </a>
+                            {k.user?.role === "TIENDA" ? (
+                              k.documentUrl ? (
+                                <a
+                                  className="btn"
+                                  href={k.documentUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{
+                                    fontSize: 11,
+                                    padding: "4px 8px",
+                                    textAlign: "center",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    justifyContent: "center",
+                                    background: "rgba(5, 150, 105, 0.1)",
+                                    color: "var(--green)",
+                                    borderColor: "rgba(5, 150, 105, 0.3)",
+                                  }}
+                                >
+                                  <Building2 size={12} />
+                                  <span>Fachada del Local</span>
+                                  <ExternalLink size={10} />
+                                </a>
+                              ) : (
+                                <span style={{ fontSize: 11, color: "var(--muted)" }}>Sin foto de fachada</span>
+                              )
+                            ) : (
+                              <>
+                                {k.documentUrl && (
+                                  <a
+                                    className="btn"
+                                    href={k.documentUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                  >
+                                    Frente documento
+                                  </a>
+                                )}
+                                {k.documentUrlBack && (
+                                  <a
+                                    className="btn"
+                                    href={k.documentUrlBack}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                  >
+                                    Reverso documento
+                                  </a>
+                                )}
+                                {k.selfieUrl && (
+                                  <a
+                                    className="btn"
+                                    href={k.selfieUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                  >
+                                    Foto de perfil / Selfie
+                                  </a>
+                                )}
+                              </>
                             )}
                           </div>
                         </td>
@@ -1365,6 +1620,345 @@ export default function Page() {
                 </div>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Auditoría KYC Directa desde Directorio */}
+      {selectedUserForKyc && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.75)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16,
+          }}
+        >
+          <div
+            className="card"
+            style={{
+              width: "100%",
+              maxWidth: 580,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
+              borderRadius: 16,
+              boxShadow: "var(--card-shadow)",
+              padding: 24,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <ShieldCheck size={20} color="var(--green)" />
+                  <h3 style={{ margin: 0, fontSize: 18, color: "var(--text)" }}>
+                    Auditoría de Expediente KYC
+                  </h3>
+                </div>
+                <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                  Revisión regulatoria de identidad y antecedentes para la red Livora
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUserForKyc(null)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--muted)",
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Ficha Resumen del Usuario */}
+            <div
+              style={{
+                background: "var(--panel2, #f8fafc)",
+                border: "1px solid var(--line)",
+                borderRadius: 12,
+                padding: 14,
+                marginBottom: 16,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div>
+                  <strong style={{ fontSize: 14, color: "var(--text)" }}>
+                    {selectedUserForKyc.name || selectedUserForKyc.email}
+                  </strong>
+                  <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
+                    {selectedUserForKyc.email}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      background: "rgba(5, 150, 105, 0.1)",
+                      color: "var(--green)",
+                      border: "1px solid rgba(5, 150, 105, 0.2)",
+                    }}
+                  >
+                    {selectedUserForKyc.role}
+                  </span>
+                  <div style={{ marginTop: 4 }}>
+                    <KycStatusBadge status={selectedUserForKyc.kycStatus || selectedUserForKyc.kycApplications?.[0]?.status} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Datos Específicos para Tienda */}
+              {selectedUserForKyc.role === "TIENDA" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12, marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Razón Social / Nombre:</span>
+                    <strong>{selectedUserForKyc.storeProfile?.businessName || selectedUserForKyc.name || "Sin nombre registrado"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>RUC:</span>
+                    <strong className="mono">{selectedUserForKyc.storeProfile?.ruc || selectedUserForKyc.kycApplications?.[0]?.taxIdRuc || "Sin RUC"}</strong>
+                  </div>
+                  <div style={{ gridColumn: "span 2" }}>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Dirección Física Comercial:</span>
+                    <span>{selectedUserForKyc.storeProfile?.address || selectedUserForKyc.address || "Sin dirección registrada"}</span>
+                  </div>
+                  <div style={{ gridColumn: "span 2" }}>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Cuenta Interbancaria (CCI):</span>
+                    <span className="mono">{selectedUserForKyc.storeProfile?.bankAccount || selectedUserForKyc.kycApplications?.[0]?.bankCci || "Sin CCI registrado"}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Datos Específicos para Recolector */}
+              {selectedUserForKyc.role === "RECOLECTOR" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12, marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Documento DNI/CE:</span>
+                    <strong className="mono">{selectedUserForKyc.dniDocumentNumber || selectedUserForKyc.kycApplications?.[0]?.documentNumber || "No especificado"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Vehículo / Transporte:</span>
+                    <strong>{selectedUserForKyc.kycApplications?.[0]?.transportType || "Manual"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Placa de Vehículo:</span>
+                    <strong className="mono">{selectedUserForKyc.kycApplications?.[0]?.vehiclePlate || "N/A"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Asociación de Recicladores:</span>
+                    <span>{selectedUserForKyc.kycApplications?.[0]?.associationName || "Independiente"}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Datos Específicos para Hogar */}
+              {selectedUserForKyc.role === "HOGAR" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12, marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Documento de Identidad:</span>
+                    <strong className="mono">{selectedUserForKyc.dniDocumentNumber || selectedUserForKyc.kycApplications?.[0]?.documentNumber || "No especificado"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>Dirección Residencial:</span>
+                    <span>{selectedUserForKyc.address || "Sin dirección registrada"}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Documentos y Evidencia Fotográfica */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>
+                Evidencia Documental Registrada
+              </label>
+
+              {selectedUserForKyc.role === "TIENDA" && (
+                selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl ? (
+                  <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 10, background: "var(--panel2)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600 }}>Fotografía de la Fachada Comercial:</span>
+                      <a
+                        href={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn secondary"
+                        style={{ fontSize: 11, padding: "3px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                      >
+                        <ExternalLink size={11} />
+                        <span>Abrir en tamaño completo</span>
+                      </a>
+                    </div>
+                    <img
+                      src={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
+                      alt="Fachada de la tienda"
+                      style={{
+                        width: "100%",
+                        maxHeight: 220,
+                        objectFit: "cover",
+                        borderRadius: 8,
+                        border: "1px solid var(--line)",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ padding: 16, background: "var(--panel2)", borderRadius: 10, textAlign: "center", color: "var(--muted)", fontSize: 12 }}>
+                    No se ha adjuntado fotografía de fachada aún.
+                  </div>
+                )
+              )}
+
+              {selectedUserForKyc.role !== "TIENDA" && (
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {(selectedUserForKyc.dniPhotoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl) && (
+                    <a
+                      href={selectedUserForKyc.dniPhotoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn secondary"
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    >
+                      <FileText size={14} />
+                      <span>Frente del Documento</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                  {selectedUserForKyc.kycApplications?.[0]?.documentUrlBack && (
+                    <a
+                      href={selectedUserForKyc.kycApplications?.[0]?.documentUrlBack}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn secondary"
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    >
+                      <FileText size={14} />
+                      <span>Reverso del Documento</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                  {(selectedUserForKyc.profilePhotoUrl || selectedUserForKyc.kycApplications?.[0]?.selfieUrl) && (
+                    <a
+                      href={selectedUserForKyc.profilePhotoUrl || selectedUserForKyc.kycApplications?.[0]?.selfieUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn secondary"
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    >
+                      <Users size={14} />
+                      <span>Selfie / Foto de Perfil</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Campo de Observaciones / Motivo */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text)", marginBottom: 6 }}>
+                Observaciones del Auditor (requerido para Observar o Rechazar):
+              </label>
+              <textarea
+                value={userKycObservation}
+                onChange={(e) => setUserKycObservation(e.target.value)}
+                placeholder="Ingresa notas o indicaciones para el titular (ej: RUC inactivo en SUNAT, fotografía de fachada borrosa)..."
+                rows={3}
+                style={{
+                  width: "100%",
+                  background: "var(--input-bg)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 10,
+                  color: "var(--input-color)",
+                  padding: 10,
+                  fontSize: 12,
+                  outline: "none",
+                  resize: "vertical",
+                }}
+              />
+            </div>
+
+            {/* Acciones de Auditoría */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+              <button
+                type="button"
+                className="btn secondary"
+                disabled={userKycSubmitting}
+                onClick={() => setSelectedUserForKyc(null)}
+                style={{ padding: "8px 14px", fontSize: 12 }}
+              >
+                Cerrar
+              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  disabled={userKycSubmitting}
+                  onClick={() => handleUserKycDecision("REJECTED")}
+                  style={{
+                    background: "rgba(244, 63, 94, 0.1)",
+                    color: "#F43F5E",
+                    border: "1px solid rgba(244, 63, 94, 0.3)",
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: userKycSubmitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Rechazar
+                </button>
+                <button
+                  type="button"
+                  disabled={userKycSubmitting}
+                  onClick={() => handleUserKycDecision("OBSERVED")}
+                  style={{
+                    background: "rgba(245, 158, 11, 0.1)",
+                    color: "#F59E0B",
+                    border: "1px solid rgba(245, 158, 11, 0.3)",
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: userKycSubmitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Observar
+                </button>
+                <button
+                  type="button"
+                  disabled={userKycSubmitting}
+                  onClick={() => handleUserKycDecision("APPROVED")}
+                  style={{
+                    background: "var(--green, #059669)",
+                    color: "#06110d",
+                    border: "none",
+                    padding: "8px 18px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: userKycSubmitting ? "not-allowed" : "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <CheckCircle2 size={14} />
+                  <span>{userKycSubmitting ? "Procesando..." : "Aprobar y Habilitar"}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
