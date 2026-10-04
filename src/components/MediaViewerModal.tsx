@@ -105,8 +105,14 @@ export function MediaViewerModal({
 
     if (!resolvedUrl || !isOpen) {
       setBlobUrl(null);
+      setLoading(false);
+      setHasError(false);
       return;
     }
+
+    // Resetear estados al cambiar de URL o abrir
+    setLoading(true);
+    setHasError(false);
 
     // Si es del backend de Livora o del storage protegido de Supabase
     const isInternalProtected =
@@ -116,7 +122,6 @@ export function MediaViewerModal({
       (resolvedUrl.includes("/uploads") && !resolvedUrl.startsWith("http"));
 
     if (isInternalProtected) {
-      setLoading(true);
       fetchSecureBlob(resolvedUrl)
         .then((url) => {
           if (!active) return;
@@ -125,13 +130,17 @@ export function MediaViewerModal({
           setLoading(false);
           setHasError(false);
         })
-        .catch(() => {
+        .catch((err) => {
           if (!active) return;
-          // Fallback a la URL resuelta si la obtención de blob falla
+          console.warn("[MediaViewerModal] Error en fetchSecureBlob, usando fallback:", err);
+          // Intentar fallback sólo si la URL no es una firma expirada conocida
           setBlobUrl(resolvedUrl);
+          setLoading(false);
+          setHasError(false);
         });
     } else {
       setBlobUrl(resolvedUrl);
+      // Para URLs públicas directas, onLoad del <img> o <iframe> quitará el loading
     }
 
     return () => {
@@ -596,7 +605,7 @@ export function MediaViewerModal({
         )}
 
         {/* Renderizado de Imagen con Zoom y Rotación */}
-        {!hasError && !isPdf && (
+        {!hasError && !isPdf && (blobUrl || !resolvedUrl.includes("supabase.co")) && (
           <div
             style={{
               display: "flex",
@@ -624,6 +633,8 @@ export function MediaViewerModal({
                 setHasError(false);
               }}
               onError={() => {
+                // Si aún estamos en proceso de resolver el blob seguro, no declarar error de inmediato
+                if (loading && !blobUrl) return;
                 setLoading(false);
                 setHasError(true);
               }}

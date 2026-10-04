@@ -1981,6 +1981,7 @@ export default function Page() {
                         border: "1px solid var(--line)",
                         cursor: "pointer",
                         background: "rgba(0, 0, 0, 0.2)",
+                        minHeight: 140,
                         maxHeight: 220,
                         display: "flex",
                         justifyContent: "center",
@@ -1988,38 +1989,43 @@ export default function Page() {
                       }}
                       title="Haz clic para ampliar con zoom y rotación"
                     >
-                      <img
-                        src={modalThumbnailBlob || selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
-                        alt="Fachada de la tienda"
-                        style={{
-                          width: "100%",
-                          maxHeight: 220,
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.style.display = "none";
-                          const fallback = target.parentElement?.querySelector(".img-fallback") as HTMLElement;
-                          if (fallback) fallback.style.display = "flex";
-                        }}
-                      />
-                      <div
-                        className="img-fallback"
-                        style={{
-                          display: "none",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          padding: 24,
-                          gap: 8,
-                          color: "var(--muted)",
-                          fontSize: 12,
-                        }}
-                      >
-                        <AlertTriangle size={24} style={{ color: "var(--amber)" }} />
-                        <span>No se pudo previsualizar miniatura directa. Haz clic para abrir en visor seguro.</span>
-                      </div>
+                      {modalThumbnailBlob ? (
+                        <img
+                          src={modalThumbnailBlob}
+                          alt="Fachada de la tienda"
+                          style={{
+                            width: "100%",
+                            maxHeight: 220,
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 24,
+                            gap: 8,
+                            color: "var(--muted)",
+                            fontSize: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 24,
+                              height: 24,
+                              border: "2px solid rgba(5, 150, 105, 0.2)",
+                              borderTopColor: "var(--green)",
+                              borderRadius: "50%",
+                              animation: "spin 0.8s linear infinite",
+                            }}
+                          />
+                          <span>Cargando miniatura segura...</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
