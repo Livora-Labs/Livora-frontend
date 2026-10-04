@@ -542,7 +542,7 @@ export function MediaViewerModal({
               )}
 
               <a
-                href={resolvedUrl}
+                href={blobUrl || resolvedUrl}
                 target="_blank"
                 rel="noreferrer"
                 style={{

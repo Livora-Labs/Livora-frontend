@@ -191,6 +191,40 @@ export default function Page() {
   const [selectedUserForKyc, setSelectedUserForKyc] = useState<any | null>(null);
   const [userKycObservation, setUserKycObservation] = useState("");
   const [userKycSubmitting, setUserKycSubmitting] = useState(false);
+  const [modalThumbnailBlob, setModalThumbnailBlob] = useState<string | null>(null);
+
+  // Cargar miniatura autenticada mediante stream seguro en el modal de auditoría
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+    const rawUrl =
+      selectedUserForKyc?.storeProfile?.logoUrl ||
+      selectedUserForKyc?.kycApplications?.[0]?.documentUrl;
+
+    if (selectedUserForKyc && rawUrl) {
+      import("@/lib/api").then(({ fetchSecureBlob }) => {
+        fetchSecureBlob(rawUrl)
+          .then((url) => {
+            if (active) {
+              objectUrl = url;
+              setModalThumbnailBlob(url);
+            }
+          })
+          .catch(() => {
+            if (active) setModalThumbnailBlob(rawUrl);
+          });
+      });
+    } else {
+      setModalThumbnailBlob(null);
+    }
+
+    return () => {
+      active = false;
+      if (objectUrl && objectUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [selectedUserForKyc]);
 
   // --- Estado para Visor Multimedia Universal ---
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -1955,7 +1989,7 @@ export default function Page() {
                       title="Haz clic para ampliar con zoom y rotación"
                     >
                       <img
-                        src={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
+                        src={modalThumbnailBlob || selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
                         alt="Fachada de la tienda"
                         style={{
                           width: "100%",
