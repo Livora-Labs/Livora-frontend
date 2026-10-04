@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { PageHead, Status } from "@/components/Shell";
 import { fetchKycApplications, updateKycStatus, fetchAdminUsers, updateAdminUserStatus, adminRegularizePassword } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
-import { Users, ShieldCheck, RefreshCw, Search, Filter, KeyRound, Mail, Lock, Eye, EyeOff, X, Sparkles, Building2, ExternalLink, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
+import { Users, ShieldCheck, RefreshCw, Search, Filter, KeyRound, Mail, Lock, Eye, EyeOff, X, Sparkles, Building2, ExternalLink, CheckCircle2, AlertTriangle, FileText, ZoomIn } from "lucide-react";
+import { MediaViewerModal, MediaItem } from "@/components/MediaViewerModal";
 
 const date = (value: string) =>
   new Intl.DateTimeFormat("es-PE", {
@@ -190,6 +191,107 @@ export default function Page() {
   const [selectedUserForKyc, setSelectedUserForKyc] = useState<any | null>(null);
   const [userKycObservation, setUserKycObservation] = useState("");
   const [userKycSubmitting, setUserKycSubmitting] = useState(false);
+
+  // --- Estado para Visor Multimedia Universal ---
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
+  const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
+  const openMediaViewer = (mediaItems: MediaItem[], initialIdx = 0) => {
+    if (!mediaItems || mediaItems.length === 0) return;
+    setViewerItems(mediaItems);
+    setViewerInitialIndex(initialIdx);
+    setViewerOpen(true);
+  };
+
+  const getKycMediaItems = (k: any): MediaItem[] => {
+    const media: MediaItem[] = [];
+    const name = k.user?.name || k.user?.email || "Usuario";
+    if (k.user?.role === "TIENDA") {
+      if (k.documentUrl) {
+        media.push({
+          url: k.documentUrl,
+          title: `Fachada del Local Comercial`,
+          subtitle: `${name} · RUC: ${k.taxIdRuc || k.documentNumber || "No especificado"}`,
+          type: "image",
+        });
+      }
+    } else {
+      if (k.documentUrl) {
+        media.push({
+          url: k.documentUrl,
+          title: `Frente del Documento (${k.documentType || "DNI/CE"})`,
+          subtitle: `${name} · N° ${k.documentNumber || "-"}`,
+          type: k.documentUrl.toLowerCase().includes(".pdf") ? "pdf" : "image",
+        });
+      }
+      if (k.documentUrlBack) {
+        media.push({
+          url: k.documentUrlBack,
+          title: `Reverso del Documento`,
+          subtitle: `${name} · N° ${k.documentNumber || "-"}`,
+          type: k.documentUrlBack.toLowerCase().includes(".pdf") ? "pdf" : "image",
+        });
+      }
+      if (k.selfieUrl) {
+        media.push({
+          url: k.selfieUrl,
+          title: `Selfie / Foto de Perfil`,
+          subtitle: `${name} · Verificación Biométrica`,
+          type: "image",
+        });
+      }
+    }
+    return media;
+  };
+
+  const getUserKycMediaItems = (user: any): MediaItem[] => {
+    const media: MediaItem[] = [];
+    if (!user) return media;
+    const name = user.name || user.email || "Usuario";
+    const kyc = user.kycApplications?.[0];
+
+    if (user.role === "TIENDA") {
+      const facadeUrl = user.storeProfile?.logoUrl || kyc?.documentUrl;
+      if (facadeUrl) {
+        media.push({
+          url: facadeUrl,
+          title: `Fachada del Comercio`,
+          subtitle: `${name} · RUC: ${user.storeProfile?.ruc || kyc?.taxIdRuc || "-"}`,
+          type: "image",
+        });
+      }
+    } else {
+      const frontDoc = user.dniPhotoUrl || kyc?.documentUrl;
+      if (frontDoc) {
+        media.push({
+          url: frontDoc,
+          title: `Frente del Documento de Identidad`,
+          subtitle: `${name} · ${user.dniDocumentNumber || kyc?.documentNumber || "-"}`,
+          type: frontDoc.toLowerCase().includes(".pdf") ? "pdf" : "image",
+        });
+      }
+      const backDoc = kyc?.documentUrlBack;
+      if (backDoc) {
+        media.push({
+          url: backDoc,
+          title: `Reverso del Documento de Identidad`,
+          subtitle: `${name} · ${user.dniDocumentNumber || kyc?.documentNumber || "-"}`,
+          type: backDoc.toLowerCase().includes(".pdf") ? "pdf" : "image",
+        });
+      }
+      const selfie = user.profilePhotoUrl || kyc?.selfieUrl;
+      if (selfie) {
+        media.push({
+          url: selfie,
+          title: `Foto de Perfil / Selfie`,
+          subtitle: `${name} · Registro biométrico`,
+          type: "image",
+        });
+      }
+    }
+    return media;
+  };
 
   // --- Estado para Modal de Regularización de Contraseña ---
   const [selectedUserForPassword, setSelectedUserForPassword] = useState<any | null>(null);
@@ -1015,65 +1117,100 @@ export default function Page() {
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                             {k.user?.role === "TIENDA" ? (
                               k.documentUrl ? (
-                                <a
+                                <button
+                                  type="button"
+                                  onClick={() => openMediaViewer(getKycMediaItems(k), 0)}
                                   className="btn"
-                                  href={k.documentUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
                                   style={{
                                     fontSize: 11,
                                     padding: "4px 8px",
                                     textAlign: "center",
                                     display: "inline-flex",
                                     alignItems: "center",
-                                    gap: 4,
+                                    gap: 5,
                                     justifyContent: "center",
-                                    background: "rgba(5, 150, 105, 0.1)",
+                                    background: "rgba(5, 150, 105, 0.12)",
                                     color: "var(--green)",
-                                    borderColor: "rgba(5, 150, 105, 0.3)",
+                                    borderColor: "rgba(5, 150, 105, 0.35)",
+                                    cursor: "pointer",
                                   }}
                                 >
                                   <Building2 size={12} />
                                   <span>Fachada del Local</span>
-                                  <ExternalLink size={10} />
-                                </a>
+                                  <Eye size={11} />
+                                </button>
                               ) : (
                                 <span style={{ fontSize: 11, color: "var(--muted)" }}>Sin foto de fachada</span>
                               )
                             ) : (
                               <>
                                 {k.documentUrl && (
-                                  <a
+                                  <button
+                                    type="button"
+                                    onClick={() => openMediaViewer(getKycMediaItems(k), 0)}
                                     className="btn"
-                                    href={k.documentUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                    style={{
+                                      fontSize: 11,
+                                      padding: "3px 8px",
+                                      textAlign: "center",
+                                      cursor: "pointer",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 4,
+                                      justifyContent: "center",
+                                    }}
                                   >
-                                    Frente documento
-                                  </a>
+                                    <FileText size={11} />
+                                    <span>Frente documento</span>
+                                  </button>
                                 )}
                                 {k.documentUrlBack && (
-                                  <a
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const items = getKycMediaItems(k);
+                                      const idx = items.findIndex((i) => i.url === k.documentUrlBack);
+                                      openMediaViewer(items, idx >= 0 ? idx : 0);
+                                    }}
                                     className="btn"
-                                    href={k.documentUrlBack}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                    style={{
+                                      fontSize: 11,
+                                      padding: "3px 8px",
+                                      textAlign: "center",
+                                      cursor: "pointer",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 4,
+                                      justifyContent: "center",
+                                    }}
                                   >
-                                    Reverso documento
-                                  </a>
+                                    <FileText size={11} />
+                                    <span>Reverso documento</span>
+                                  </button>
                                 )}
                                 {k.selfieUrl && (
-                                  <a
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const items = getKycMediaItems(k);
+                                      const idx = items.findIndex((i) => i.url === k.selfieUrl);
+                                      openMediaViewer(items, idx >= 0 ? idx : 0);
+                                    }}
                                     className="btn"
-                                    href={k.selfieUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    style={{ fontSize: 11, padding: "3px 8px", textAlign: "center" }}
+                                    style={{
+                                      fontSize: 11,
+                                      padding: "3px 8px",
+                                      textAlign: "center",
+                                      cursor: "pointer",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 4,
+                                      justifyContent: "center",
+                                    }}
                                   >
-                                    Foto de perfil / Selfie
-                                  </a>
+                                    <Users size={11} />
+                                    <span>Foto de perfil / Selfie</span>
+                                  </button>
                                 )}
                               </>
                             )}
@@ -1788,31 +1925,68 @@ export default function Page() {
 
               {selectedUserForKyc.role === "TIENDA" && (
                 selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl ? (
-                  <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 10, background: "var(--panel2)" }}>
+                  <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 12, background: "var(--panel2)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                       <span style={{ fontSize: 12, fontWeight: 600 }}>Fotografía de la Fachada Comercial:</span>
-                      <a
-                        href={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => openMediaViewer(getUserKycMediaItems(selectedUserForKyc), 0)}
                         className="btn secondary"
-                        style={{ fontSize: 11, padding: "3px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                        style={{ fontSize: 11, padding: "4px 10px", display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" }}
                       >
-                        <ExternalLink size={11} />
-                        <span>Abrir en tamaño completo</span>
-                      </a>
+                        <ZoomIn size={12} />
+                        <span>Inspeccionar en Visor Seguro</span>
+                      </button>
                     </div>
-                    <img
-                      src={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
-                      alt="Fachada de la tienda"
+                    <div
+                      onClick={() => openMediaViewer(getUserKycMediaItems(selectedUserForKyc), 0)}
                       style={{
-                        width: "100%",
-                        maxHeight: 220,
-                        objectFit: "cover",
+                        position: "relative",
                         borderRadius: 8,
+                        overflow: "hidden",
                         border: "1px solid var(--line)",
+                        cursor: "pointer",
+                        background: "rgba(0, 0, 0, 0.2)",
+                        maxHeight: 220,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
-                    />
+                      title="Haz clic para ampliar con zoom y rotación"
+                    >
+                      <img
+                        src={selectedUserForKyc.storeProfile?.logoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
+                        alt="Fachada de la tienda"
+                        style={{
+                          width: "100%",
+                          maxHeight: 220,
+                          objectFit: "cover",
+                          display: "block",
+                        }}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = "none";
+                          const fallback = target.parentElement?.querySelector(".img-fallback") as HTMLElement;
+                          if (fallback) fallback.style.display = "flex";
+                        }}
+                      />
+                      <div
+                        className="img-fallback"
+                        style={{
+                          display: "none",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 24,
+                          gap: 8,
+                          color: "var(--muted)",
+                          fontSize: 12,
+                        }}
+                      >
+                        <AlertTriangle size={24} style={{ color: "var(--amber)" }} />
+                        <span>No se pudo previsualizar miniatura directa. Haz clic para abrir en visor seguro.</span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ padding: 16, background: "var(--panel2)", borderRadius: 10, textAlign: "center", color: "var(--muted)", fontSize: 12 }}>
@@ -1824,43 +1998,53 @@ export default function Page() {
               {selectedUserForKyc.role !== "TIENDA" && (
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   {(selectedUserForKyc.dniPhotoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl) && (
-                    <a
-                      href={selectedUserForKyc.dniPhotoUrl || selectedUserForKyc.kycApplications?.[0]?.documentUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const items = getUserKycMediaItems(selectedUserForKyc);
+                        openMediaViewer(items, 0);
+                      }}
                       className="btn secondary"
-                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}
                     >
                       <FileText size={14} />
                       <span>Frente del Documento</span>
-                      <ExternalLink size={12} />
-                    </a>
+                      <ZoomIn size={12} />
+                    </button>
                   )}
                   {selectedUserForKyc.kycApplications?.[0]?.documentUrlBack && (
-                    <a
-                      href={selectedUserForKyc.kycApplications?.[0]?.documentUrlBack}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const items = getUserKycMediaItems(selectedUserForKyc);
+                        const backUrl = selectedUserForKyc.kycApplications?.[0]?.documentUrlBack;
+                        const idx = items.findIndex((i) => i.url === backUrl);
+                        openMediaViewer(items, idx >= 0 ? idx : 0);
+                      }}
                       className="btn secondary"
-                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}
                     >
                       <FileText size={14} />
                       <span>Reverso del Documento</span>
-                      <ExternalLink size={12} />
-                    </a>
+                      <ZoomIn size={12} />
+                    </button>
                   )}
                   {(selectedUserForKyc.profilePhotoUrl || selectedUserForKyc.kycApplications?.[0]?.selfieUrl) && (
-                    <a
-                      href={selectedUserForKyc.profilePhotoUrl || selectedUserForKyc.kycApplications?.[0]?.selfieUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const items = getUserKycMediaItems(selectedUserForKyc);
+                        const selfieUrl = selectedUserForKyc.profilePhotoUrl || selectedUserForKyc.kycApplications?.[0]?.selfieUrl;
+                        const idx = items.findIndex((i) => i.url === selfieUrl);
+                        openMediaViewer(items, idx >= 0 ? idx : 0);
+                      }}
                       className="btn secondary"
-                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                      style={{ fontSize: 12, padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}
                     >
                       <Users size={14} />
                       <span>Selfie / Foto de Perfil</span>
-                      <ExternalLink size={12} />
-                    </a>
+                      <ZoomIn size={12} />
+                    </button>
                   )}
                 </div>
               )}
@@ -1962,6 +2146,14 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* Visor Multimedia Universal */}
+      <MediaViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        items={viewerItems}
+        initialIndex={viewerInitialIndex}
+      />
     </>
   );
 }

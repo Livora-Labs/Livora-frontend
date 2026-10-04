@@ -8,7 +8,8 @@ import { fetchBatchById, resolveBatchDispute } from "@/lib/api";
 import { showToast, ToastContainer } from "@/components/ToastNotification";
 import { CardSkeleton } from "@/components/skeletons/SkeletonUI";
 import { ErrorState, EmptyState } from "@/components/StateFeedback";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, Image as ImageIcon, ZoomIn, Eye } from "lucide-react";
+import { MediaViewerModal, MediaItem } from "@/components/MediaViewerModal";
 
 // Local formatting helpers to avoid importing lib/data
 const shortId = (id: string) => (id ? `${id.slice(0, 6)}…${id.slice(-4)}` : "");
@@ -26,6 +27,14 @@ export default function Detail() {
   const [resolutionChoice, setResolutionChoice] = useState<"ACCEPT_REVISION" | "REJECT_DISPUTE">("ACCEPT_REVISION");
   const [disputeNotes, setDisputeNotes] = useState("");
   const [adjustedWeights, setAdjustedWeights] = useState<Record<string, number>>({});
+
+  // Media Viewer State
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
+  const openMediaViewer = (items: MediaItem[]) => {
+    setViewerItems(items);
+    setViewerOpen(true);
+  };
 
   useEffect(() => {
     if (id) {
@@ -436,17 +445,84 @@ export default function Detail() {
                     borderRadius: 10,
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 10,
+                    alignItems: "center",
+                    gap: 12,
                   }}
                 >
-                  <div>
-                    <strong style={{ fontSize: 13, display: "block" }}>{r.description || "Recolección de reciclables"}</strong>
-                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
-                      Coordenadas GPS: {r.latitude?.toFixed(4)}, {r.longitude?.toFixed(4)}
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
-                      Hogar: {r.household?.email || `#${r.householdId?.slice(0, 6)}`}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+                    {r.photoUrl ? (
+                      <div
+                        onClick={() =>
+                          openMediaViewer([
+                            {
+                              url: r.photoUrl,
+                              title: `Evidencia de Recolección en Domicilio`,
+                              subtitle: `Hogar: ${r.household?.name || r.household?.email || "Residencial"} · GPS: ${r.latitude?.toFixed(4)}, ${r.longitude?.toFixed(4)}`,
+                              type: "image",
+                            },
+                          ])
+                        }
+                        style={{
+                          position: "relative",
+                          width: 48,
+                          height: 48,
+                          borderRadius: 8,
+                          overflow: "hidden",
+                          border: "1px solid var(--line)",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          background: "var(--panel)",
+                        }}
+                        title="Ver evidencia fotográfica en alta resolución"
+                      >
+                        <img
+                          src={r.photoUrl}
+                          alt="Evidencia recolección"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 2,
+                            right: 2,
+                            background: "rgba(0,0,0,0.6)",
+                            borderRadius: 4,
+                            padding: 2,
+                            display: "flex",
+                          }}
+                        >
+                          <ZoomIn size={10} color="#fff" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 8,
+                          background: "var(--panel)",
+                          border: "1px dashed var(--line)",
+                          display: "grid",
+                          placeItems: "center",
+                          color: "var(--muted)",
+                          flexShrink: 0,
+                        }}
+                        title="Sin foto adjunta"
+                      >
+                        <ImageIcon size={16} />
+                      </div>
+                    )}
+                    <div>
+                      <strong style={{ fontSize: 13, display: "block" }}>{r.description || "Recolección de reciclables"}</strong>
+                      <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
+                        Coordenadas GPS: {r.latitude?.toFixed(4)}, {r.longitude?.toFixed(4)}
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>
+                        Hogar: {r.household?.email || `#${r.householdId?.slice(0, 6)}`}
+                      </div>
                     </div>
                   </div>
                   <Status value={r.status} />
@@ -553,6 +629,13 @@ export default function Detail() {
           ← Volver al Explorador de Lotes
         </Link>
       </div>
+
+      {/* Visor Multimedia Universal */}
+      <MediaViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        items={viewerItems}
+      />
     </>
   );
 }

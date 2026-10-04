@@ -24,6 +24,8 @@ import {
   FileCheck,
   Eye,
 } from "lucide-react";
+import { MediaViewerModal, MediaItem } from "@/components/MediaViewerModal";
+import { MediaDropzone } from "@/components/MediaDropzone";
 
 const money = (value: number) =>
   new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(value);
@@ -55,6 +57,14 @@ export default function AdminLiquidacionesPage() {
   const [receiptUrl, setReceiptUrl] = useState<string>("");
   const [targetStatus, setTargetStatus] = useState<string>("APPROVED_PENDING_PAYMENT");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  // Media Viewer State
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
+  const openMediaViewer = (items: MediaItem[]) => {
+    setViewerItems(items);
+    setViewerOpen(true);
+  };
 
   useEffect(() => {
     loadSettlements();
@@ -358,20 +368,50 @@ export default function AdminLiquidacionesPage() {
                       </span>
                     </td>
                     <td style={{ padding: "12px", textAlign: "right" }}>
-                      <button
-                        onClick={() => handleOpenModal(s)}
-                        className="btn secondary"
-                        style={{
-                          fontSize: 11,
-                          padding: "4px 8px",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
-                        <Eye size={12} />
-                        <span>Gestionar</span>
-                      </button>
+                      <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                        {s.receiptUrl && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openMediaViewer([
+                                {
+                                  url: s.receiptUrl,
+                                  title: `Comprobante de Liquidación`,
+                                  subtitle: `${s.store?.businessName || "Tienda"} · Ref: #${s.id.slice(0, 8)}`,
+                                  type: s.receiptUrl.toLowerCase().includes(".pdf") ? "pdf" : "image",
+                                },
+                              ])
+                            }
+                            className="btn ghost"
+                            title="Ver comprobante bancario"
+                            style={{
+                              fontSize: 11,
+                              padding: "4px 8px",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <FileCheck size={13} style={{ color: "var(--green)" }} />
+                            <span>Voucher</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleOpenModal(s)}
+                          className="btn secondary"
+                          style={{
+                            fontSize: 11,
+                            padding: "4px 8px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <Eye size={12} />
+                          <span>Gestionar</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -504,6 +544,29 @@ export default function AdminLiquidacionesPage() {
                       {money(Number(selectedSettlement.fiatAmount || Number(selectedSettlement.tokenAmount) * 0.2))}
                     </span>
                   </div>
+                  {selectedSettlement.receiptUrl && (
+                    <div style={{ gridColumn: "span 2", paddingTop: 8, borderTop: "1px dashed var(--line, #e2e8f0)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 12, color: "var(--muted, #64748b)" }}>Comprobante registrado:</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openMediaViewer([
+                            {
+                              url: selectedSettlement.receiptUrl,
+                              title: `Comprobante de Pago Bancario`,
+                              subtitle: `${selectedSettlement.store?.businessName || "Tienda"} · Ref: #${selectedSettlement.id.slice(0, 8)}`,
+                              type: selectedSettlement.receiptUrl.toLowerCase().includes(".pdf") ? "pdf" : "image",
+                            },
+                          ])
+                        }
+                        className="btn secondary"
+                        style={{ fontSize: 11, padding: "3px 8px", display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer" }}
+                      >
+                        <FileCheck size={12} style={{ color: "var(--green)" }} />
+                        <span>Ver Comprobante</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -534,27 +597,35 @@ export default function AdminLiquidacionesPage() {
 
               {targetStatus === "PAID" && (
                 <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted, #64748b)", marginBottom: 6 }}>
-                    Enlace o N° de Operación del Comprobante Bancario
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ej: https://banco.com/voucher-12345.pdf o N° OP: 8947291"
+                  <MediaDropzone
+                    label="Comprobante de Transferencia Bancaria (Voucher)"
+                    description="Arrastra o selecciona el voucher bancario emitido (PDF, JPG, PNG)"
+                    purpose="receipt"
                     value={receiptUrl}
-                    onChange={(e) => setReceiptUrl(e.target.value)}
-                    required
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: 10,
-                      border: "1px solid var(--line, #cbd5e1)",
-                      background: "var(--bg, #f8fafc)",
-                      color: "var(--text, #0f172a)",
-                      fontSize: 13,
-                      boxSizing: "border-box",
-                    }}
+                    onChange={(url) => setReceiptUrl(url)}
                   />
-                  <small style={{ color: "var(--muted, #64748b)", display: "block", marginTop: 4 }}>
+                  <div style={{ marginTop: 8 }}>
+                    <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--muted, #64748b)", marginBottom: 4 }}>
+                      O ingresa N° de Operación / Enlace manual si aplica:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: N° OP: 8947291 o enlace bancario"
+                      value={receiptUrl}
+                      onChange={(e) => setReceiptUrl(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        border: "1px solid var(--line, #cbd5e1)",
+                        background: "var(--bg, #f8fafc)",
+                        color: "var(--text, #0f172a)",
+                        fontSize: 12,
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+                  <small style={{ color: "var(--muted, #64748b)", display: "block", marginTop: 6 }}>
                     Al confirmar como PAID, se retirarán los tokens de la wallet del comercio en la blockchain Stellar y se notificará por WebSockets.
                   </small>
                 </div>
@@ -590,6 +661,13 @@ export default function AdminLiquidacionesPage() {
           </div>
         </div>
       )}
+
+      {/* Visor Multimedia Universal */}
+      <MediaViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        items={viewerItems}
+      />
     </>
   );
 }

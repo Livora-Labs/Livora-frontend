@@ -19,6 +19,7 @@ import {
   AlertCircle,
   FileCheck,
 } from "lucide-react";
+import { MediaViewerModal, MediaItem } from "@/components/MediaViewerModal";
 
 const money = (value: number) =>
   new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(value);
@@ -42,6 +43,14 @@ export default function StoreLiquidacionesPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const limit = 10;
+
+  // Media Viewer State
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
+  const openMediaViewer = (items: MediaItem[]) => {
+    setViewerItems(items);
+    setViewerOpen(true);
+  };
 
   // Wallet balance
   const [walletBalance, setWalletBalance] = useState<number>(0);
@@ -382,10 +391,18 @@ export default function StoreLiquidacionesPage() {
                     </td>
                     <td style={{ padding: "12px", textAlign: "right" }}>
                       {s.receiptUrl ? (
-                        <a
-                          href={s.receiptUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openMediaViewer([
+                              {
+                                url: s.receiptUrl,
+                                title: `Voucher de Liquidación Bancaria`,
+                                subtitle: `Abono de ${money(Number(s.fiatAmount || Number(s.tokenAmount) * 0.2))} · Ref #${s.id.slice(0, 8)}`,
+                                type: s.receiptUrl.toLowerCase().includes(".pdf") ? "pdf" : "image",
+                              },
+                            ])
+                          }
                           className="btn ghost"
                           style={{
                             fontSize: 11,
@@ -393,11 +410,12 @@ export default function StoreLiquidacionesPage() {
                             display: "inline-flex",
                             alignItems: "center",
                             gap: 4,
+                            cursor: "pointer",
                           }}
                         >
                           <FileCheck size={13} style={{ color: "var(--green)" }} />
                           <span>Ver Voucher</span>
-                        </a>
+                        </button>
                       ) : (
                         <span style={{ fontSize: 11, color: "var(--muted, #64748b)" }}>
                           En procesamiento
@@ -449,6 +467,13 @@ export default function StoreLiquidacionesPage() {
           </div>
         )}
       </section>
+
+      {/* Visor Multimedia Universal */}
+      <MediaViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        items={viewerItems}
+      />
     </>
   );
 }

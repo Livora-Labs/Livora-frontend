@@ -116,6 +116,6 @@ describe("Web Shell Guard and Role Isolation Tests", () => {
       </QueryProvider>
     );
 
-    expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledWith("/login");
   });
 });

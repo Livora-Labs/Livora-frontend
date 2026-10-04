@@ -15,6 +15,7 @@ import {
   FileText,
 } from "lucide-react";
 import { TableSkeleton } from "@/components/skeletons/SkeletonUI";
+import { MediaDropzone } from "@/components/MediaDropzone";
 
 export default function StorePerfilPage() {
   const [profile, setProfile] = useState<any | null>(null);
@@ -26,6 +27,7 @@ export default function StorePerfilPage() {
   const [ruc, setRuc] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [bankAccount, setBankAccount] = useState<string>("");
+  const [logoUrl, setLogoUrl] = useState<string>("");
 
   useEffect(() => {
     loadProfile();
@@ -41,6 +43,7 @@ export default function StorePerfilPage() {
         setRuc(data.ruc || "");
         setAddress(data.address || "");
         setBankAccount(data.bankAccount || "");
+        setLogoUrl(data.logoUrl || "");
       }
     } catch (err: any) {
       // Si aún no tiene perfil creado, permitir completarlo
@@ -67,6 +70,7 @@ export default function StorePerfilPage() {
         ruc: ruc.trim(),
         address: address.trim(),
         bankAccount: bankAccount.trim(),
+        logoUrl: logoUrl.trim() || undefined,
       });
       setProfile(updated);
       showToast(
@@ -267,6 +271,17 @@ export default function StorePerfilPage() {
                   color: "var(--text, #0f172a)",
                   boxSizing: "border-box",
                 }}
+              />
+            </div>
+
+            <div>
+              <MediaDropzone
+                label="Logotipo o Fotografía de Fachada del Establecimiento"
+                description="Fotografía exterior o logo oficial para validación de presencia física (JPG, PNG)"
+                purpose="kyc"
+                accept="image/jpeg,image/png"
+                value={logoUrl}
+                onChange={(url) => setLogoUrl(url)}
               />
             </div>
 

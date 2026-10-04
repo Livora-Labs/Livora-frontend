@@ -787,3 +787,49 @@ export async function fetchAdminComplaintByCorrelative(correlativeNumber: string
   const res = await api.get(`/complaints/correlative/${correlativeNumber}`);
   return res.data;
 }
+
+// --- Uploads & Secure Media Streaming ---
+
+export async function uploadFile(
+  file: File | Blob,
+  purpose: "collection" | "kyc" | "receipt" = "collection",
+  onProgress?: (percent: number) => void
+): Promise<{ url: string; path?: string; mimeType: string; size: number }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("purpose", purpose);
+
+  const res = await api.post("/uploads", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    onUploadProgress: (progressEvent) => {
+      if (onProgress && progressEvent.total) {
+        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(percent);
+      }
+    },
+  });
+  return res.data;
+}
+
+export async function fetchSecureBlob(urlOrPath: string): Promise<string> {
+  const clean = urlOrPath.trim();
+  // Si ya es un blob local o data URI o IPFS externo, no necesita proxy
+  if (clean.startsWith("blob:") || clean.startsWith("data:") || clean.startsWith("http://") || clean.startsWith("https://")) {
+    // Si es una URL de Supabase o API propia que puede requerir proxy
+    if (!clean.includes("/uploads/secure-view") && !clean.includes("supabase.co")) {
+      return clean;
+    }
+  }
+
+  const endpoint = clean.includes("/uploads/secure-view")
+    ? clean
+    : `/uploads/secure-view?path=${encodeURIComponent(clean)}`;
+
+  const res = await api.get(endpoint, {
+    responseType: "blob",
+  });
+  return URL.createObjectURL(res.data);
+}
+
