@@ -278,7 +278,7 @@ export default function StorePerfilPage() {
               <MediaDropzone
                 label="Logotipo o Fotografía de Fachada del Establecimiento"
                 description="Fotografía exterior o logo oficial para validación de presencia física (JPG, PNG)"
-                purpose="kyc"
+                purpose="store"
                 accept="image/jpeg,image/png"
                 value={logoUrl}
                 onChange={(url) => setLogoUrl(url)}

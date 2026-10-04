@@ -24,7 +24,7 @@ export type DropzoneState =
 export interface MediaDropzoneProps {
   label?: string;
   description?: string;
-  purpose?: "collection" | "kyc" | "receipt";
+  purpose?: "collection" | "kyc" | "receipt" | "store";
   accept?: string;
   maxSizeMB?: number;
   compressImages?: boolean;

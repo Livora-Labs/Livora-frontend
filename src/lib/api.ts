@@ -792,7 +792,7 @@ export async function fetchAdminComplaintByCorrelative(correlativeNumber: string
 
 export async function uploadFile(
   file: File | Blob,
-  purpose: "collection" | "kyc" | "receipt" = "collection",
+  purpose: "collection" | "kyc" | "receipt" | "store" = "collection",
   onProgress?: (percent: number) => void
 ): Promise<{ url: string; path?: string; mimeType: string; size: number }> {
   const formData = new FormData();
