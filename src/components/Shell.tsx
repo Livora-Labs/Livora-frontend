@@ -160,15 +160,14 @@ export function Shell({
       return;
     }
 
-    if (currentRole === "TIENDA") {
-      if (pathname.startsWith("/admin") || pathname.startsWith("/company") || pathname.startsWith("/centro")) {
-        showToast(
-          "Acceso restringido",
-          "error",
-          "Acceso restringido: Redirigiendo a tu terminal POS de comercio."
-        );
-        router.push("/store");
-      }
+    if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(currentRole)) {
+      logout();
+      showToast(
+        "Acceso exclusivo en App Móvil",
+        "error",
+        "Tu cuenta de " + currentRole + " opera exclusivamente desde la aplicación móvil Livora."
+      );
+      router.push("/login");
       return;
     }
   }, [router, pathname, user, logout]);

@@ -99,15 +99,12 @@ export default function LoginPage() {
         } else if (loggedUser.role === "CENTRO_ACOPIO") {
           showToast("Acceso concedido", "success", `Bienvenido de nuevo, ${email}`);
           router.push("/centro");
-        } else if (loggedUser.role === "TIENDA") {
-          showToast("Acceso concedido", "success", `Bienvenido al Terminal POS, ${email}`);
-          router.push("/store");
-        } else if (["HOGAR", "RECOLECTOR"].includes(loggedUser.role)) {
+        } else if (["HOGAR", "RECOLECTOR", "TIENDA"].includes(loggedUser.role)) {
           logout();
           showToast(
-            "Acceso no disponible en Web",
+            "Acceso exclusivo en App Móvil",
             "error",
-            "Tu cuenta opera exclusivamente desde la app móvil Livora. Descárgala para continuar."
+            "Las cuentas de Hogar, Recolector y Tienda / Comercio operan exclusivamente desde la app móvil Livora. Descárgala para continuar."
           );
         } else {
           logout();
@@ -195,13 +192,13 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-semibold text-white">App Móvil Hogares y Recolectores</h4>
+                    <h4 className="text-sm font-semibold text-white">App Móvil Hogares, Recolectores y Comercios</h4>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                       v1.0.13
                     </span>
                   </div>
                   <p className="text-xs text-emerald-200/70 mt-0.5 leading-snug">
-                    Solicita recojos en tu puerta, acumula recompensas LIVO y canjea con QR en comercios.
+                    Recicla desde casa, gestiona recolecciones en ruta y opera cobros con QR en tu tienda.
                   </p>
                 </div>
               </div>
@@ -330,52 +327,38 @@ export default function LoginPage() {
               {/* Controles Exclusivos de Registro */}
               {isRegister && (
                 <div className="space-y-4 pt-1">
-                  {/* Selector de Rol Profesional */}
+                  {/* Selector de Rol Profesional: Exclusivo Acopio y Empresa B2B en Web */}
                   <div>
                     <label className="block text-xs font-medium text-emerald-200/80 mb-2">
-                      Tipo de Organización en Livora
+                      Tipo de Organización en Livora Web
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedRole("CENTRO_ACOPIO")}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                        className={`p-3 rounded-xl border text-left transition-all ${
                           selectedRole === "CENTRO_ACOPIO"
                             ? "bg-emerald-500/15 border-emerald-400 text-white"
                             : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
                         }`}
                       >
                         <Warehouse className="w-4 h-4 text-emerald-400 mb-1" />
-                        <div className="text-xs font-semibold">Acopio</div>
-                        <div className="text-[10px] text-emerald-200/50">Báscula</div>
+                        <div className="text-xs font-semibold">Centro de Acopio</div>
+                        <div className="text-[10px] text-emerald-200/50">Báscula y Pesaje</div>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setSelectedRole("EMPRESA_B2B")}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                        className={`p-3 rounded-xl border text-left transition-all ${
                           selectedRole === "EMPRESA_B2B"
                             ? "bg-emerald-500/15 border-emerald-400 text-white"
                             : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
                         }`}
                       >
                         <Building2 className="w-4 h-4 text-teal-400 mb-1" />
-                        <div className="text-xs font-semibold">Empresa</div>
-                        <div className="text-[10px] text-emerald-200/50">Compras</div>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedRole("TIENDA")}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
-                          selectedRole === "TIENDA"
-                            ? "bg-emerald-500/15 border-emerald-400 text-white"
-                            : "bg-[#050e0b] border-emerald-950 text-emerald-200/50 hover:border-emerald-900"
-                        }`}
-                      >
-                        <Store className="w-4 h-4 text-cyan-400 mb-1" />
-                        <div className="text-xs font-semibold">Comercio</div>
-                        <div className="text-[10px] text-emerald-200/50">Canjes POS</div>
+                        <div className="text-xs font-semibold">Empresa Transformadora</div>
+                        <div className="text-[10px] text-emerald-200/50">Compras y ESG</div>
                       </button>
                     </div>
                   </div>
