@@ -134,7 +134,7 @@ export function CertificateDetail({ certificate, admin = false }: { certificate:
               <span>Manifiesto IPFS (CID)</span>
               {ipfsHash ? (
                 <a
-                  href={`https://gateway.pinata.cloud/ipfs/${ipfsHash.replace("ipfs://", "")}`}
+                  href={`https://grupolivoralabs.com/ipfs/${ipfsHash.replace("ipfs://", "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: "var(--blue)", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
@@ -151,7 +151,7 @@ export function CertificateDetail({ certificate, admin = false }: { certificate:
             {ipfsHash && (
               <a
                 className="btn secondary"
-                href={`https://gateway.pinata.cloud/ipfs/${ipfsHash.replace("ipfs://", "")}`}
+                href={`https://grupolivoralabs.com/ipfs/${ipfsHash.replace("ipfs://", "")}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{ fontSize: 12, flex: 1, textAlign: "center", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}

@@ -35,6 +35,7 @@ export interface MediaViewerModalProps {
 }
 
 const IPFS_GATEWAYS = [
+  "https://grupolivoralabs.com/ipfs/",
   "https://gateway.pinata.cloud/ipfs/",
   "https://dweb.link/ipfs/",
 ];

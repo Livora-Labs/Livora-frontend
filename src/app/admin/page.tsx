@@ -10,12 +10,12 @@ import { ExternalLink, ShieldCheck, Hash, RefreshCw, Package, Eye, X, Award, Act
 import { TableSkeleton } from "@/components/skeletons/SkeletonUI";
 import { ErrorState, EmptyState } from "@/components/StateFeedback";
 
-const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/";
+const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://grupolivoralabs.com/ipfs/";
 
 function ipfsLink(cid: string) {
   if (!cid) return null;
   if (cid.startsWith("http://") || cid.startsWith("https://")) {
-    return cid.replace("https://ipfs.io/ipfs/", "https://gateway.pinata.cloud/ipfs/");
+    return cid.replace("https://ipfs.io/ipfs/", "https://grupolivoralabs.com/ipfs/");
   }
   const hash = cid.startsWith("ipfs://") ? cid.replace("ipfs://", "") : cid;
   const base = IPFS_GATEWAY.endsWith("/") ? IPFS_GATEWAY : `${IPFS_GATEWAY}/`;

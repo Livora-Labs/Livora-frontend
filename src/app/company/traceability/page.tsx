@@ -455,7 +455,7 @@ export default function CompanyTraceabilityPage() {
                   <span style={{ fontSize: 12, color: "var(--muted, #64748b)" }}>Manifiesto Digital IPFS CID</span>
                   {activeBatch?.ipfsCid ? (
                     <a
-                      href={`https://gateway.pinata.cloud/ipfs/${activeBatch.ipfsCid.replace(/^ipfs:\/\//, "")}`}
+                      href={`https://grupolivoralabs.com/ipfs/${activeBatch.ipfsCid.replace(/^ipfs:\/\//, "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mono"
