@@ -50,7 +50,7 @@ Base URL: `{{NEXT_PUBLIC_API_BASE_URL}}` (ej. http://localhost:3000)
 7) GET /wallets/me/balance
 - Response: `{ "balance": "150.5" }`
 
-Auth: Bearer token from Supabase session
+Auth: Bearer token from native JWT session (`/auth/login`)
 
 Notas:
 - Para demo usar los mocks proporcionados en `/mocks`.

@@ -7,7 +7,7 @@ Usuarios y roles:
 - Buyer (Empresa B2B): ver certificados ESG emitidos, historial de compras, explorar batches recibidos y descargar manifiestos.
 
 Pantallas principales (MVP):
-1. Login / Auth (Supabase)
+1. Login / Auth (Native JWT REST API)
 2. Admin Overview: KPIs (volumen, tokens, batches), últimos jobs, lista de alertas
 3. Admin Batches (OpenSea style): grid de cards con filtros
 4. Batch Detail: muestra manifiesto IPFS, lista de requests, tokens distribuidos, tx hash
@@ -21,7 +21,7 @@ Requerimientos no funcionales:
 - Soporte para websocket (socket.io) para notificaciones en tiempo real.
 
 Integraciones:
-- Supabase Auth
+- Native JWT Auth (REST API)
 - IPFS viewer (enlace al CID)
-- ethers.js para formateo de unidades (wei ↔︎ eth)
+- Stellar Soroban Explorer (enlace a tx hash)
 - socket.io-client para eventos en tiempo real

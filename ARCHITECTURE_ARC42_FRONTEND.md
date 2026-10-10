@@ -15,7 +15,7 @@
 | Versión | Fecha | Autor | Descripción de Cambios |
 | :--- | :--- | :--- | :--- |
 | 1.0.0 | Julio 2026 | Equipo Core Livora | Versión inicial de especificación y bocetos UI. |
-| 2.0.0 | Agosto 2026 | Principal Frontend Architect | Reestructuración total bajo estándar arc42, eliminación de deuda técnica histórica (EVM/Arbitrum/Supabase), integración de Red Stellar/Soroban, flujos industriales de pesaje, Libro de Reclamaciones (Indecopi Ley 29571 & Ley 32495), banner de cookies (Ley 29733) y modales de confirmación Web3. |
+| 2.0.0 | Agosto 2026 | Principal Frontend Architect | Reestructuración total bajo estándar arc42, eliminación de deuda técnica histórica (EVM/Arbitrum/Legacy BaaS), integración de Red Stellar/Soroban, flujos industriales de pesaje, Libro de Reclamaciones (Indecopi Ley 29571 & Ley 32495), banner de cookies (Ley 29733) y modales de confirmación Web3. |
 
 ---
 
@@ -616,7 +616,7 @@ graph LR
 
 Durante la auditoría estática del repositorio `Livora-frontend`, se identificaron archivos de documentación heredados de etapas tempranas de prototipado que contenían terminología técnica obsoleta y contradictoria con la arquitectura real basada en **Stellar / Soroban / NestJS**:
 
-1. **Referencias a Supabase Auth:** Documentos antiguos mencionaban a Supabase como proveedor de autenticación. En la arquitectura vigente, Livora implementa su propio servicio de autenticación JWT y verificación OTP sobre NestJS y PostgreSQL.
+1. **Referencias a BaaS / Proveedores Externos Obsoletos:** Documentos antiguos mencionaban proveedores BaaS externos como proveedor de autenticación. En la arquitectura vigente, Livora implementa su propio servicio de autenticación JWT y verificación OTP sobre NestJS y PostgreSQL.
 2. **Referencias a EVM / Arbitrum / Ethers.js / Wei:** Se encontraron menciones a `ethers.js` y conversiones de unidades `wei ↔ eth`. Livora opera exclusivamente sobre la red descentralizada **Stellar** con contratos **Soroban** y unidades de balance estándar (EcoTokens con precisión decimal).
 3. **Formatos de Hash `0x...`:** Ejemplos JSON en documentación mostraban hashes estilo Ethereum (`0x...`) en lugar de hashes de transacción Stellar estándar (alfanumérico en mayúsculas/minúsculas de 64 caracteres) o CIDs de IPFS (`bafy...` / `Qm...`).
 4. **Dependencia de Prisma en Frontend:** La documentación mencionaba modelos de Prisma; el frontend debe acoplarse estrictamente a los contratos DTO de la API REST documentados en `src/lib/types.ts`.
@@ -625,11 +625,11 @@ Durante la auditoría estática del repositorio `Livora-frontend`, se identifica
 
 | Archivo Auditado | Línea(s) | Diagnóstico de Inconsistencia | Acción Correctiva / Estado |
 | :--- | :--- | :--- | :--- |
-| `requirements.md` | L10, L24 | Referencia a "Login / Auth (Supabase)". | **Corregido conceptualmente:** El sistema utiliza autenticación nativa REST (`/auth/login`, `/auth/register`, `/auth/verify-email`) con JWT y verificación OTP. |
+| `requirements.md` | L10, L24 | Referencia a "Login / Auth (Legacy BaaS)". | **Corregido conceptualmente:** El sistema utiliza autenticación nativa REST (`/auth/login`, `/auth/register`, `/auth/verify-email`) con JWT y verificación OTP. |
 | `requirements.md` | L26 | Mención a `ethers.js para formateo de unidades (wei ↔︎ eth)`. | **Corregido conceptualmente:** Eliminada referencia a librerías EVM; los saldos se manejan como números decimales en EcoTokens sobre Stellar. |
 | `api-spec.md` | L22 | Formato de hash `"txHash": "0x..."`. | **Corregido conceptualmente:** Actualizado a formato de hash de transacción Stellar (64 caracteres hex) y enlaces a Stellar Expert. |
-| `api-spec.md` | L53 | "Auth: Bearer token from Supabase session". | **Corregido conceptualmente:** Debe especificarse token Bearer JWT emitido por `Livora-api-service`. |
-| `dev-setup.md` | L9 | Comando con `@supabase/supabase-js`, `ethers`, `@tanstack/react-query`. | **Corregido conceptualmente:** Las dependencias oficiales del proyecto son `axios`, `socket.io-client`, `qrcode.react`, `lucide-react`, `next`, `react`. |
+| `api-spec.md` | L53 | "Auth: Bearer token from external BaaS session". | **Corregido conceptualmente:** Debe especificarse token Bearer JWT emitido por `Livora-api-service`. |
+| `dev-setup.md` | L9 | Comando con librerías obsoletas y ethers. | **Corregido conceptualmente:** Las dependencias oficiales del proyecto son `axios`, `socket.io-client`, `qrcode.react`, `lucide-react`, `next`, `react`. |
 | `src/components/CertificateDetail.tsx` | L11 | Fallback de API a `process.env.NEXT_PUBLIC_API_URL` en lugar de `NEXT_PUBLIC_API_BASE_URL`. | **Recomendación de Refactor:** Unificar el consumo utilizando directamente la instancia exportada `api` desde `@/lib/api`. |
 
 ---
