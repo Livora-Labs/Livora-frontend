@@ -85,7 +85,7 @@ export default function CookiesPage() {
                     <tbody style={{ color: "var(--muted)" }}>
                       <tr style={{ borderBottom: "1px solid var(--line)" }}>
                         <td style={{ padding: "8px", fontFamily: "monospace", color: "var(--text)" }}>livora_token</td>
-                        <td style={{ padding: "8px" }}>Livora (Supabase Auth)</td>
+                        <td style={{ padding: "8px" }}>Livora (Sesión JWT Segura)</td>
                         <td style={{ padding: "8px" }}>Almacena el Token JWT de autenticación para mantener la sesión del usuario iniciada de forma segura.</td>
                         <td style={{ padding: "8px" }}>Local (Persistente hasta cierre de sesión)</td>
                       </tr>

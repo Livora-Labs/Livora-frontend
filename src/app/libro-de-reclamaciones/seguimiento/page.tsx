@@ -401,7 +401,7 @@ function SeguimientoPageContent() {
                       <AlertTriangle size={14} style={{ flexShrink: 0 }} />
                       <span>
                         El plazo legal de 15 días hábiles ha vencido. Puede comunicarse con nosotros a{" "}
-                        <a href="mailto:privacidad@livora.pe" style={{ color: "#ff9e9e" }}>privacidad@livora.pe</a>.
+                        <a href="mailto:soporte@grupolivoralabs.com" style={{ color: "#ff9e9e" }}>soporte@grupolivoralabs.com</a>.
                       </span>
                     </p>
                   )}
@@ -533,7 +533,7 @@ function SeguimientoPageContent() {
             <ul style={{ paddingLeft: 20, margin: 0 }}>
               <li>El número correlativo fue enviado automáticamente a su correo electrónico al registrar la reclamación.</li>
               <li>Tiene el formato <strong style={{ fontFamily: "monospace", color: "#55e6a5" }}>R-XXXXX-AAAA</strong> (Reclamo) o <strong style={{ fontFamily: "monospace", color: "#ffcd70" }}>Q-XXXXX-AAAA</strong> (Queja).</li>
-              <li>Si no recibió el correo, revise su carpeta de spam o contáctenos a <a href="mailto:privacidad@livora.pe" style={{ color: "#55e6a5" }}>privacidad@livora.pe</a>.</li>
+              <li>Si no recibió el correo, revise su carpeta de spam o contáctenos a <a href="mailto:soporte@grupolivoralabs.com" style={{ color: "#55e6a5" }}>soporte@grupolivoralabs.com</a>.</li>
             </ul>
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #162922" }}>
               ¿Desea registrar una nueva reclamación?{" "}

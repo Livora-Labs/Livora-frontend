@@ -29,10 +29,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://ipfs.io https://gateway.pinata.cloud https://*.stellar.org",
-      "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.stellar.org https://horizon-testnet.stellar.org https://soroban-testnet.stellar.org https://ipfs.io https://gateway.pinata.cloud https://*.sentry.io",
+      "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.stellar.org https://horizon-testnet.stellar.org https://soroban-testnet.stellar.org https://ipfs.io https://gateway.pinata.cloud https://*.sentry.io https://challenges.cloudflare.com",
+      "frame-src 'self' https://challenges.cloudflare.com",
       "font-src 'self' data:",
       "frame-ancestors 'none'",
     ].join("; "),

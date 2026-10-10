@@ -114,10 +114,9 @@ export function MediaViewerModal({
     setLoading(true);
     setHasError(false);
 
-    // Si es del backend de Livora o del storage protegido de Supabase
+    // Si es del backend de Livora o del storage protegido
     const isInternalProtected =
       resolvedUrl.includes("/uploads/secure-view") ||
-      resolvedUrl.includes("supabase.co") ||
       resolvedUrl.includes("livora-kyc-private") ||
       (resolvedUrl.includes("/uploads") && !resolvedUrl.startsWith("http"));
 
@@ -605,7 +604,7 @@ export function MediaViewerModal({
         )}
 
         {/* Renderizado de Imagen con Zoom y Rotación */}
-        {!hasError && !isPdf && (blobUrl || !resolvedUrl.includes("supabase.co")) && (
+        {!hasError && !isPdf && (
           <div
             style={{
               display: "flex",

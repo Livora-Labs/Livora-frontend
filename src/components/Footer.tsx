@@ -202,8 +202,8 @@ export function Footer() {
             </p>
             <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: "0 0 10px" }}>
               <strong style={{ color: "var(--text)" }}>Derechos ARCO:</strong> Envíe su solicitud formal a{" "}
-              <a href="mailto:privacidad@livora.pe" style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 600 }}>
-                privacidad@livora.pe
+              <a href="mailto:soporte@grupolivoralabs.com" style={{ color: "var(--green)", textDecoration: "underline", fontWeight: 600 }}>
+                soporte@grupolivoralabs.com
               </a>
             </p>
             <p style={{ fontSize: 12, lineHeight: 1.6, color: "var(--muted)", margin: 0 }}>

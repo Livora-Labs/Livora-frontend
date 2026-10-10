@@ -132,7 +132,7 @@ export default function PrivacidadPage() {
             </p>
             <div style={{ marginBottom: 16 }}>
               <a
-                href="mailto:privacidad@livora.pe"
+                href="mailto:soporte@grupolivoralabs.com"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -148,7 +148,7 @@ export default function PrivacidadPage() {
                 }}
               >
                 <Mail size={16} />
-                privacidad@livora.pe
+                soporte@grupolivoralabs.com
               </a>
             </div>
             <p style={{ margin: "0 0 12px" }}>

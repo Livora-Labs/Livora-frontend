@@ -815,10 +815,9 @@ export async function uploadFile(
 
 export async function fetchSecureBlob(urlOrPath: string): Promise<string> {
   const clean = urlOrPath.trim();
-  // Si ya es un blob local o data URI o IPFS externo, no necesita proxy
+  // Si ya es un blob local o data URI o URL pública directa sin proxy protegido
   if (clean.startsWith("blob:") || clean.startsWith("data:") || clean.startsWith("http://") || clean.startsWith("https://")) {
-    // Si es una URL de Supabase o API propia que puede requerir proxy
-    if (!clean.includes("/uploads/secure-view") && !clean.includes("supabase.co")) {
+    if (!clean.includes("/uploads/secure-view")) {
       return clean;
     }
   }
