@@ -239,7 +239,7 @@ export default function Detail() {
               <strong style={{ color: "var(--muted)" }}>IPFS CID: </strong>
               {batch.ipfsCid ? (
                 <a
-                  href={`https://ipfs.io/ipfs/${batch.ipfsCid}`}
+                  href={`${(process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/").replace(/\/$/, "")}/${batch.ipfsCid.replace(/^ipfs:\/\//, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: "var(--blue)", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}

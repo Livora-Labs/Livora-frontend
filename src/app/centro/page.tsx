@@ -50,14 +50,15 @@ interface MaterialLine {
   weightKg: number;
 }
 
-const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/";
 function ipfsLink(cid: string): string {
   if (!cid) return "#";
   if (cid.startsWith("http://") || cid.startsWith("https://")) {
-    return cid.replace("https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/");
+    return cid.replace("https://ipfs.io/ipfs/", "https://gateway.pinata.cloud/ipfs/");
   }
   const hash = cid.startsWith("ipfs://") ? cid.replace("ipfs://", "") : cid;
-  return `${IPFS_GATEWAY}${hash}`;
+  const base = IPFS_GATEWAY.endsWith("/") ? IPFS_GATEWAY : `${IPFS_GATEWAY}/`;
+  return `${base}${hash}`;
 }
 
 function TransitBatchesSkeleton() {

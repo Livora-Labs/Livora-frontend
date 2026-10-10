@@ -11,15 +11,16 @@ import { Web3ConfirmModal } from "@/components/Web3ConfirmModal";
 import { TableSkeleton, CardSkeleton } from "@/components/skeletons/SkeletonUI";
 import { ErrorState, EmptyState } from "@/components/StateFeedback";
 
-const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/";
 
 function ipfsLink(cid: string): string {
   if (!cid) return "#";
   if (cid.startsWith("http://") || cid.startsWith("https://")) {
-    return cid.replace("https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/");
+    return cid.replace("https://ipfs.io/ipfs/", "https://gateway.pinata.cloud/ipfs/");
   }
   const hash = cid.startsWith("ipfs://") ? cid.replace("ipfs://", "") : cid;
-  return `${IPFS_GATEWAY}${hash}`;
+  const base = IPFS_GATEWAY.endsWith("/") ? IPFS_GATEWAY : `${IPFS_GATEWAY}/`;
+  return `${base}${hash}`;
 }
 
 function formatMaterials(materials: Record<string, number> | null | undefined): string {
